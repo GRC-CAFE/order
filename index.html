@@ -4,21 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>周五/周六晚餐预订</title>
-    <!-- 引入 Tailwind CSS 打造精美界面 -->
+    <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
 <body class="bg-slate-50 min-h-screen pb-12">
 
     <!-- 顶部 Banner 照片 -->
-    <div class="relative h-64 w-full max-w-md mx-auto">
-        <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80" 
+    <div class="relative h-60 w-full max-w-md mx-auto">
+        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80" 
              class="w-full h-full object-cover rounded-b-3xl shadow-md" alt="晚餐美食">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent rounded-b-3xl"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-b-3xl"></div>
         <div class="absolute bottom-4 left-5 right-5 text-white">
-            <span class="bg-amber-500 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">本周招牌</span>
-            <h1 class="text-2xl font-extrabold mt-1">🍱 秘制招牌猪脚饭</h1>
-            <p class="text-slate-200 text-sm mt-0.5">每周五 / 周六限量供应，请提前预订</p>
+            <span class="bg-amber-500 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">每周美食</span>
+            <h1 class="text-2xl font-extrabold mt-1">周五汉堡 / 周六卤肉饭</h1>
+            <p class="text-slate-200 text-sm mt-0.5">RM 13.00 / 份，请提前预订</p>
         </div>
     </div>
 
@@ -50,13 +50,22 @@
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
                 </div>
 
-                <!-- 预订日期 -->
+                <!-- 预订日期（改变选项时会自动更新对应的餐点名称） -->
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">预订用餐日期 <span class="text-rose-500">*</span></label>
-                    <select id="day" required class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
-                        <option value="星期五">星期五晚餐 (Friday)</option>
-                        <option value="星期六">星期六晚餐 (Saturday)</option>
+                    <select id="day" onchange="updateMenuInfo()" required class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition font-bold text-slate-800">
+                        <option value="星期五">星期五晚餐（🍔 特制汉堡）</option>
+                        <option value="星期六">星期六晚餐（🍲 招牌卤肉饭）</option>
                     </select>
+                </div>
+
+                <!-- 当前餐点提示卡片 -->
+                <div class="bg-amber-50 border border-amber-200/60 rounded-xl p-3 flex items-center space-x-3">
+                    <div class="text-2xl" id="menuIcon">🍔</div>
+                    <div>
+                        <p class="text-xs text-amber-700 font-medium">所选餐点：</p>
+                        <p class="text-sm font-bold text-amber-900" id="menuText">特制汉堡 (RM 13.00 / 份)</p>
+                    </div>
                 </div>
 
                 <!-- 份数加减器 -->
@@ -72,7 +81,7 @@
                 <!-- 备注 -->
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">特殊备注 (可选)</label>
-                    <input type="text" id="notes" placeholder="如：少饭 / 加辣 / 不要葱" 
+                    <input type="text" id="notes" placeholder="如：少辣 / 不要葱 / 不要洋葱" 
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
                 </div>
 
@@ -100,9 +109,9 @@
             </h2>
             <p class="text-xs text-slate-500">使用任何银行 App / TNG eWallet 扫描二维码付款：</p>
             
-            <!-- 💡 确保这里 src 的文件名与你上传到 GitHub 的 DuitNow 图片名称相同 -->
+            <!-- 💡 这里已设置为 qr.jpeg -->
             <div class="relative w-56 h-56 mx-auto bg-slate-50 rounded-xl border-2 border-slate-200 p-2 flex items-center justify-center">
-                <img src="qrcode.jpeg" class="w-full h-full object-contain rounded-lg shadow-sm" alt="DuitNow 付款码">
+                <img src="qr.jpeg" class="w-full h-full object-contain rounded-lg shadow-sm" alt="DuitNow 付款码">
             </div>
 
             <!-- 动态提示转账金额 -->
@@ -140,11 +149,25 @@
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwb8DekyobGj28he2BCQhcyHtqiN_vJvC8YvTNkuM4Wr-oi8PBdJ50PCy5abuwTvcujMg/exec"; // 💡 粘贴你的 Google Apps Script URL
         // ============================================================
 
-        // 当前计算的总金额全局变量
         let currentTotalStr = "13.00";
 
-        // 页面初始化：设置复制按钮的初始文字
+        // 初始化
         document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
+
+        // 根据选择的日期更新菜单提示
+        function updateMenuInfo() {
+            const day = document.getElementById('day').value;
+            const menuIcon = document.getElementById('menuIcon');
+            const menuText = document.getElementById('menuText');
+
+            if (day === "星期五") {
+                menuIcon.innerText = "🍔";
+                menuText.innerText = "特制汉堡 (RM 13.00 / 份)";
+            } else {
+                menuIcon.innerText = "🍲";
+                menuText.innerText = "招牌卤肉饭 (RM 13.00 / 份)";
+            }
+        }
 
         // 数量加减与金额计算
         function adjustQty(amount) {
@@ -157,35 +180,31 @@
             // 计算总金额
             currentTotalStr = (current * PRICE_PER_UNIT).toFixed(2);
             
-            // 实时更新页面上所有显示金额的地方
+            // 实时更新显示
             document.getElementById('totalText').innerText = `RM ${currentTotalStr}`;
             document.getElementById('qrAmountText').innerText = `RM ${currentTotalStr}`;
             document.getElementById('copyAmountText').innerText = `复制转账金额 (${currentTotalStr})`;
         }
 
-        // 一键复制转账金额
+        // 复制金额
         function copyAmount() {
             navigator.clipboard.writeText(currentTotalStr);
             const span = document.getElementById('copyAmountText');
             const originalText = span.innerText;
             span.innerText = `✅ 已复制金额 RM ${currentTotalStr}！`;
-            setTimeout(() => {
-                span.innerText = originalText;
-            }, 2500);
+            setTimeout(() => { span.innerText = originalText; }, 2500);
         }
 
-        // 一键复制 DuitNow 手机号
+        // 复制手机号
         function copyPhone() {
             navigator.clipboard.writeText(DUITNOW_PHONE);
             const span = document.getElementById('copyPhoneText');
             const originalText = span.innerText;
             span.innerText = `✅ 已复制号码 ${DUITNOW_PHONE}！`;
-            setTimeout(() => {
-                span.innerText = originalText;
-            }, 2500);
+            setTimeout(() => { span.innerText = originalText; }, 2500);
         }
 
-        // 表单提交处理
+        // 提交订单
         async function handleOrder(event) {
             event.preventDefault();
             
@@ -199,9 +218,12 @@
             const notes = document.getElementById('notes').value || '无';
             const total = currentTotalStr;
 
-            const payload = { name, day, qty, total, notes };
+            // 根据日期决定餐点名称
+            const dishName = (day === "星期五") ? "特制汉堡" : "招牌卤肉饭";
 
-            // 1. 静默写入 Google Sheets 后台
+            const payload = { name, day, dish: dishName, qty, total, notes };
+
+            // 1. 静默写入后台 Google Sheets
             if (GOOGLE_SCRIPT_URL && !GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE")) {
                 try {
                     await fetch(GOOGLE_SCRIPT_URL, {
@@ -215,12 +237,12 @@
                 }
             }
 
-            // 2. 拼装 WhatsApp 格式化消息
+            // 2. 拼接 WhatsApp 格式化消息
             const waMessage = `🛒 *【晚餐预订订单】*%0A` +
                               `--------------------------------%0A` +
                               `👤 *名字*：${name}%0A` +
                               `📅 *用餐日期*：${day}%0A` +
-                              `🍲 *餐点*：招牌猪脚饭 x ${qty} 份%0A` +
+                              `🍲 *餐点*：${dishName} x ${qty} 份%0A` +
                               `💰 *总计*：RM ${total}%0A` +
                               `📝 *备注*：${notes}%0A` +
                               `--------------------------------%0A` +
