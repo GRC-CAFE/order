@@ -12,7 +12,6 @@
 
     <!-- 顶部 Banner 照片 -->
     <div class="relative h-64 w-full max-w-md mx-auto">
-        <!-- 💡 请将下方 src 替换为你真正的美食大图链接 -->
         <img src="https://images.unsplash.com/photo-1544025162-d76694265947?auto=format&fit=crop&w=800&q=80" 
              class="w-full h-full object-cover rounded-b-3xl shadow-md" alt="晚餐美食">
         <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-transparent to-transparent rounded-b-3xl"></div>
@@ -91,37 +90,85 @@
             </form>
         </div>
 
-        <!-- 动态金额付款 QR Code 卡片 -->
+        <!-- 动态金额 DuitNow 付款 QR Code 卡片 -->
         <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100 text-center space-y-3">
             <h2 class="text-lg font-bold text-slate-800 flex items-center justify-center space-x-2">
-                <i class="fa-solid fa-qrcode text-emerald-500"></i>
-                <span>付款二维码（已包含金额）</span>
+                <i class="fa-solid fa-qrcode text-pink-600"></i>
+                <span>DuitNow QR 付款（包含动态金额）</span>
             </h2>
-            <p class="text-xs text-slate-500">请使用银行 App / TNG 扫描下方二维码付款：</p>
+            <p class="text-xs text-slate-500">使用任何银行 App / TNG eWallet 扫描下方二维码付款：</p>
             
             <!-- 动态二维码图片容器 -->
             <div class="relative w-56 h-56 mx-auto bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 p-2 flex items-center justify-center">
-                <img id="qrImage" src="" class="w-full h-full object-contain rounded-lg shadow-sm" alt="付款 QR 码">
+                <img id="qrImage" src="" class="w-full h-full object-contain rounded-lg shadow-sm" alt="DuitNow 付款 QR 码">
             </div>
 
             <div class="bg-slate-50 p-3 rounded-xl">
-                <p class="text-xs text-slate-400">需支付金额：</p>
+                <p class="text-xs text-slate-400">应付总额：</p>
                 <p id="qrAmountText" class="text-lg font-black text-rose-600">RM 13.00</p>
             </div>
-            <p class="text-xs text-slate-400">💡 付款完成后，请点击上方绿色按钮跳转 WhatsApp 发送截图</p>
+            <p class="text-xs text-slate-400">💡 扫码后金额会自动填好，付款后点击上方按钮跳转 WhatsApp</p>
         </div>
 
         <p class="text-center text-xs text-slate-400 mt-6">提交后将自动跳转至 WhatsApp 发送订单凭证</p>
     </div>
 
     <script>
-        // ⚙️ 必填参数配置：
+        // ⚙️ 参数设置：
         const PRICE_PER_UNIT = 13; // 单价 (RM)
-        const MY_PHONE_NUMBER = "600145952975"; // 💡 换成你的 WhatsApp 电话（带国家码，不要加 + 号）
+        const MY_PHONE_NUMBER = "60145952975"; // 💡 换成你的 WhatsApp 电话（带国家码，不要加 + 号）
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwb8DekyobGj28he2BCQhcyHtqiN_vJvC8YvTNkuM4Wr-oi8PBdJ50PCy5abuwTvcujMg/exec"; // 💡 粘贴你的 Google Apps Script URL
         
-        // 💡 换成你的收款账户或账号（如果是 DuitNow / 手机号直接填号码如 0123456789）
-        const ACCOUNT_NUMBER = "0145952975"; 
+        // 💡 换成绑了 DuitNow 的手机号码（格式：601XXXXXXXX，例如 60123456789）
+        const DUITNOW_ID = "60145952975"; 
+        const MERCHANT_NAME = "DINNER ORDER"; // 收款人名称或店铺名（英文字母）
+
+        // --- DuitNow (EMVCo Standard) QR 生成引擎 ---
+        function generateDuitNowQRPayload(duitnowId, amountStr) {
+            function formatField(id, val) {
+                const len = val.length.toString().padStart(2, '0');
+                return id + len + val;
+            }
+
+            // 格式化金额 (例如 13.00)
+            const formattedAmount = parseFloat(amountStr).toFixed(2);
+
+            // 构建 DuitNow 子节点 (Tag 26)
+            // 00: Reverse Domain (my.com.paynet)
+            // 01: DuitNow Mobile Number / Account (11: Mobile Number Proxy)
+            const sub26 = formatField('00', 'my.com.paynet') + 
+                          formatField('01', duitnowId);
+
+            let payload = "";
+            payload += formatField('00', '01'); // Payload Format Indicator
+            payload += formatField('01', '12'); // Dynamic QR Code (12)
+            payload += formatField('26', sub26); // Merchant Account Info
+            payload += formatField('52', '0000'); // Merchant Category Code
+            payload += formatField('53', '458'); // Currency Code (458 = MYR)
+            payload += formatField('54', formattedAmount); // Transaction Amount
+            payload += formatField('58', 'MY'); // Country Code
+            payload += formatField('59', MERCHANT_NAME); // Merchant Name
+            payload += formatField('60', 'KUALA LUMPUR'); // Merchant City
+            payload += '6304'; // CRC16 Header
+
+            // 计算 CRC16-CCITT (FFFF)
+            function crc16(str) {
+                let crc = 0xFFFF;
+                for (let i = 0; i < str.length; i++) {
+                    crc ^= str.charCodeAt(i) << 8;
+                    for (let j = 0; j < 8; j++) {
+                        if ((crc & 0x8000) !== 0) {
+                            crc = ((crc << 1) ^ 0x1021) & 0xFFFF;
+                        } else {
+                            crc = (crc << 1) & 0xFFFF;
+                        }
+                    }
+                }
+                return crc.toString(16).toUpperCase().padStart(4, '0');
+            }
+
+            return payload + crc16(payload);
+        }
 
         function adjustQty(amount) {
             const qtyInput = document.getElementById('qty');
@@ -140,13 +187,15 @@
             document.getElementById('totalText').innerText = `RM ${total}`;
             document.getElementById('qrAmountText').innerText = `RM ${total}`;
 
-            // 2. 动态更新二维码（将金额和账号嵌入二维码生成接口）
-            const qrData = encodeURIComponent(`DuitNow Payment - Account: ${ACCOUNT_NUMBER}, Amount: RM${total}`);
-            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${qrData}`;
+            // 2. 动态生成符合标准的 DuitNow 电子支付字符串
+            const duitnowPayload = generateDuitNowQRPayload(DUITNOW_ID, total);
+            
+            // 3. 将符合标准的 DuitNow Payload 渲染成二维码
+            const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(duitnowPayload)}`;
             document.getElementById('qrImage').src = qrUrl;
         }
 
-        // 初始化运行一次，生成初始 1 份的二维码
+        // 初始化运行一次
         updateTotal();
 
         async function handleOrder(event) {
