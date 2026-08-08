@@ -453,6 +453,7 @@
             setTimeout(() => { span.innerText = originalText; }, 2500);
         }
 
+// 提交订单
         async function handleOrder(event) {
             event.preventDefault();
 
@@ -470,17 +471,32 @@
             btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>正在提交订单...</span>`;
 
             const name = document.getElementById('name').value;
-            const mainQty = document.getElementById('qty').value;
-            const dessertQty = document.getElementById('dessertQty').value;
+            const mainQty = wantMainDish ? parseInt(document.getElementById('qty').value) || 0 : 0;
+            const dessertQty = (day === "星期六" && wantDessert) ? parseInt(document.getElementById('dessertQty').value) || 0 : 0;
             const notes = document.getElementById('notes').value || '无';
             const total = currentTotal;
 
             const dishName = (day === "星期五") ? "特制汉堡" : "招牌卤肉饭";
 
-            let mainDishText = wantMainDish ? `${dishName} x ${mainQty} 份` : "未订购主餐";
-            let dessertText = (day === "星期六" && wantDessert) ? `周六限定糖水 x ${dessertQty} 份` : "未订购糖水";
+            // 组合详细的文字描述（显示在餐点详情）
+            let mainDishText = wantMainDish ? `${dishName} x ${mainQty}` : "";
+            let dessertText = (day === "星期六" && wantDessert) ? `周六糖水 x ${dessertQty}` : "";
+            
+            // 拼接订单明细文本
+            let itemsDetail = [mainDishText, dessertText].filter(Boolean).join(" + ");
+            // 汇总数量描述（例：“主餐 1 份，糖水 2 份”或单纯数字）
+            let qtySummary = `主餐:${mainQty} | 糖水:${dessertQty}`;
 
-            const payload = { name, day, dish: mainDishText, dessert: dessertText, total, notes };
+            // 包含发送到后台的数据对象
+            const payload = { 
+                timestamp: new Date().toLocaleString("zh-CN", { timeZone: "Asia/Kuala_Lumpur" }),
+                name: name, 
+                day: day, 
+                quantity: qtySummary,  // 对应 D 列 (数量)
+                items: itemsDetail,    // 菜品详情
+                total: total,          // 对应 E 列 (总金额)
+                notes: notes           // 对应 F 列 (备注)
+            };
 
             if (GOOGLE_SCRIPT_URL) {
                 try {
@@ -495,6 +511,7 @@
                 }
             }
 
+            // 拼接 WhatsApp 消息内容
             let waMessage = `🛒 *【晚餐/糖水预订订单】*%0A` +
                             `--------------------------------%0A` +
                             `👤 *名字*：${name}%0A` +
