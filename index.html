@@ -10,10 +10,10 @@
 </head>
 <body class="bg-slate-50 min-h-screen pb-12 select-none">
 
-    <!-- 顶部 Banner 轮播图区域（支持触摸滑动） -->
+    <!-- 顶部 Banner 轮播图区域（支持触摸与手势滑动） -->
     <div id="carouselContainer" class="relative h-64 w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-md cursor-grab active:cursor-grabbing">
         <!-- 动态轮播图片 -->
-        <img id="carouselImage" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80" 
+        <img id="carouselImage" src="dish1.jpeg" 
              class="w-full h-full object-cover transition-opacity duration-700 opacity-100 pointer-events-none" 
              alt="美食展示">
         
@@ -27,7 +27,7 @@
             <p id="carouselSub" class="text-slate-200 text-sm mt-0.5">主餐 RM 13.00 / 份</p>
         </div>
 
-        <!-- 轮播小圆点指示器（点击可切图） -->
+        <!-- 轮播小圆点指示器（点击可切换） -->
         <div class="absolute top-4 right-4 flex space-x-2 z-20">
             <button type="button" onclick="goToSlide(0)" id="dot0" class="w-2.5 h-2.5 rounded-full bg-white transition-all focus:outline-none"></button>
             <button type="button" onclick="goToSlide(1)" id="dot1" class="w-2.5 h-2.5 rounded-full bg-white/50 transition-all focus:outline-none"></button>
@@ -197,22 +197,22 @@
         const DUITNOW_PHONE = "0162207137";   
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwb8DekyobGj28he2BCQhcyHtqiN_vJvC8YvTNkuM4Wr-oi8PBdJ50PCy5abuwTvcujMg/exec"; 
 
-        // 3 张高清图
+        // 3 张本地照片配置（Dish1, Dish2, Dish3）
         const SLIDES = [
             {
-                image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80",
+                image: "dish1.jpg",
                 badge: "周五限定",
                 title: "🍔 特制汉堡",
                 sub: "RM 13.00 / 份"
             },
             {
-                image: "https://images.unsplash.com/photo-1541832676-9b763b0239ab?auto=format&fit=crop&w=800&q=80",
+                image: "dish2.jpeg",
                 badge: "周六限定主餐",
                 title: "🍲 招牌卤肉饭",
                 sub: "RM 13.00 / 份"
             },
             {
-                image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=800&q=80",
+                image: "dish3.jpeg",
                 badge: "周六限定糖水",
                 title: "🥣 滋润糖水",
                 sub: "RM 5.00 / 份 | 限量 20 份"
@@ -236,7 +236,7 @@
             initSwipeEvents();   // 绑定左右滑动功能
         });
 
-        // 自动轮播（改为 5000 毫秒 = 5 秒）
+        // 自动轮播（每 5000 毫秒 = 5 秒）
         function startCarousel() {
             stopCarousel();
             carouselTimer = setInterval(() => {
