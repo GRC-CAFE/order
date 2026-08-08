@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>周五/周六晚餐预订</title>
+    <title>周五/周六晚餐与糖水预订</title>
     <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
@@ -13,12 +13,12 @@
     <!-- 顶部 Banner 照片 -->
     <div class="relative h-60 w-full max-w-md mx-auto">
         <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80" 
-             class="w-full h-full object-cover rounded-b-3xl shadow-md" alt="晚餐美食">
+             class="w-full h-full object-cover rounded-b-3xl shadow-md" alt="美食与糖水">
         <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-b-3xl"></div>
         <div class="absolute bottom-4 left-5 right-5 text-white">
             <span class="bg-amber-500 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">每周美食</span>
-            <h1 class="text-2xl font-extrabold mt-1">周五汉堡 / 周六卤肉饭</h1>
-            <p class="text-slate-200 text-sm mt-0.5">主餐 RM 13.00 / 份，请提前预订</p>
+            <h1 class="text-2xl font-extrabold mt-1">周五汉堡 / 周六卤肉饭 & 糖水</h1>
+            <p class="text-slate-200 text-sm mt-0.5">主餐 RM 13.00 | 周六限定糖水 RM 3.00</p>
         </div>
     </div>
 
@@ -28,11 +28,11 @@
         <!-- 1. 表单卡片 -->
         <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100 space-y-5">
             
-            <!-- 价格与截单说明 -->
+            <!-- 截单说明 -->
             <div class="flex justify-between items-center pb-4 border-b border-slate-100">
                 <div>
-                    <span class="text-xs text-slate-400 block">主餐单价</span>
-                    <span class="text-2xl font-black text-rose-600">RM 13.00 <span class="text-xs font-normal text-slate-500">/ 份</span></span>
+                    <span class="text-xs text-slate-400 block">菜单价格</span>
+                    <span class="text-sm font-bold text-slate-800">主餐 RM 13 | 糖水 RM 3</span>
                 </div>
                 <div class="text-right">
                     <span class="text-xs text-slate-400 block">截单时间</span>
@@ -55,54 +55,63 @@
                     <label class="block text-sm font-bold text-slate-700 mb-1">预订用餐日期 <span class="text-rose-500">*</span></label>
                     <select id="day" onchange="updateMenuInfo()" required class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition font-bold text-slate-800">
                         <option value="星期五" id="optFriday">星期五晚餐（🍔 特制汉堡）</option>
-                        <option value="星期六" id="optSaturday">星期六晚餐（🍲 招牌卤肉饭）</option>
+                        <option value="星期六" id="optSaturday">星期六晚餐（🍲 卤肉饭 / 🥣 糖水）</option>
                     </select>
                 </div>
 
-                <!-- 当前餐点提示卡片 -->
-                <div class="bg-amber-50 border border-amber-200/60 rounded-xl p-3 flex items-center space-x-3">
-                    <div class="text-2xl" id="menuIcon">🍔</div>
-                    <div>
-                        <p class="text-xs text-amber-700 font-medium">所选主餐：</p>
-                        <p class="text-sm font-bold text-amber-900" id="menuText">特制汉堡 (RM 13.00 / 份)</p>
+                <!-- 主餐点选区（星期五为强制，星期六可选可不选） -->
+                <div class="bg-amber-50/60 border border-amber-200/60 rounded-xl p-4 space-y-3">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-2xl" id="menuIcon">🍔</span>
+                            <div>
+                                <p class="text-xs text-amber-700 font-medium">主餐菜单：</p>
+                                <p class="text-sm font-bold text-amber-900" id="menuText">特制汉堡 (RM 13.00 / 份)</p>
+                            </div>
+                        </div>
+                        <!-- 星期六出现勾选框，允许不选主餐 -->
+                        <label id="mainDishToggle" class="hidden text-xs font-bold text-slate-600 flex items-center cursor-pointer bg-white px-2.5 py-1.5 rounded-lg border border-amber-200">
+                            <input type="checkbox" id="wantMainDish" checked onchange="toggleMainDish()" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 mr-1.5">
+                            订购主餐
+                        </label>
+                    </div>
+
+                    <!-- 主餐数量加减器 -->
+                    <div id="mainQtyContainer" class="flex items-center justify-between pt-1">
+                        <span class="text-xs font-bold text-slate-600">主餐份数：</span>
+                        <div class="flex items-center space-x-3">
+                            <button type="button" onclick="adjustQty(-1)" class="w-10 h-10 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-lg flex items-center justify-center border border-slate-200 shadow-sm">-</button>
+                            <input type="number" id="qty" value="1" min="1" readonly class="w-16 text-center py-1.5 font-bold text-base border border-slate-200 rounded-xl bg-white shadow-inner">
+                            <button type="button" onclick="adjustQty(1)" class="w-10 h-10 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-lg flex items-center justify-center border border-slate-200 shadow-sm">+</button>
+                        </div>
                     </div>
                 </div>
 
-                <!-- 主餐份数加减器 -->
-                <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">主餐预订份数 <span class="text-rose-500">*</span></label>
-                    <div class="flex items-center space-x-3">
-                        <button type="button" onclick="adjustQty(-1)" class="w-12 h-12 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xl flex items-center justify-center border border-slate-200">-</button>
-                        <input type="number" id="qty" value="1" min="1" readonly class="w-full text-center py-3 font-bold text-lg border border-slate-200 rounded-xl bg-slate-50">
-                        <button type="button" onclick="adjustQty(1)" class="w-12 h-12 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xl flex items-center justify-center border border-slate-200">+</button>
-                    </div>
-                </div>
-
-                <!-- 🥣 星期六限定糖水附加卡片（仅选星期六时显示） -->
+                <!-- 🥣 星期六限定糖水卡片（仅选星期六时显示） -->
                 <div id="dessertSection" class="hidden bg-rose-50 border border-rose-200 rounded-xl p-4 space-y-3">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-2">
                             <span class="text-xl">🥣</span>
-                            <span class="text-sm font-bold text-rose-900">周六限定糖水（限量 20 份）</span>
+                            <span class="text-sm font-bold text-rose-900">周六限定糖水（RM 3.00 / 份）</span>
                         </div>
-                        <span class="text-xs bg-rose-200 text-rose-800 font-bold px-2 py-0.5 rounded-full">先到先得</span>
+                        <span class="text-xs bg-rose-200 text-rose-800 font-bold px-2 py-0.5 rounded-full">限量 20 份</span>
                     </div>
                     
                     <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-rose-100">
                         <label for="wantDessert" class="text-xs font-bold text-slate-700 flex items-center cursor-pointer">
                             <input type="checkbox" id="wantDessert" onchange="toggleDessertQty()" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 mr-2">
-                            加购周六特别糖水
+                            订购周六糖水
                         </label>
-                        <div class="text-xs font-black text-rose-600" id="dessertPriceText">+ RM 3.00 / 份</div>
+                        <div class="text-xs font-black text-rose-600">+ RM 3.00 / 份</div>
                     </div>
 
                     <!-- 糖水数量选择 -->
                     <div id="dessertQtyContainer" class="hidden flex items-center justify-between pt-1">
-                        <span class="text-xs font-bold text-slate-600">糖水数量：</span>
+                        <span class="text-xs font-bold text-slate-600">糖水份数：</span>
                         <div class="flex items-center space-x-2">
-                            <button type="button" onclick="adjustDessertQty(-1)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold text-sm text-slate-700">-</button>
+                            <button type="button" onclick="adjustDessertQty(-1)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold text-sm text-slate-700 shadow-sm">-</button>
                             <input type="number" id="dessertQty" value="1" min="1" max="20" readonly class="w-12 text-center text-sm font-bold bg-white border border-slate-200 rounded-lg py-1">
-                            <button type="button" onclick="adjustDessertQty(1)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold text-sm text-slate-700">+</button>
+                            <button type="button" onclick="adjustDessertQty(1)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold text-sm text-slate-700 shadow-sm">+</button>
                         </div>
                     </div>
                 </div>
@@ -110,7 +119,7 @@
                 <!-- 备注 -->
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">特殊备注 (可选)</label>
-                    <input type="text" id="notes" placeholder="如：少辣 / 不要葱 / 不要洋葱" 
+                    <input type="text" id="notes" placeholder="如：少辣 / 不要葱 / 糖水要热" 
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
                 </div>
 
@@ -139,7 +148,7 @@
             <p class="text-xs text-slate-500">使用任何银行 App / TNG eWallet 扫描二维码付款：</p>
             
             <div class="relative w-56 h-56 mx-auto bg-slate-50 rounded-xl border-2 border-slate-200 p-2 flex items-center justify-center">
-                <img src="qrcode.jpeg" class="w-full h-full object-contain rounded-lg shadow-sm" alt="DuitNow 付款码">
+                <img src="qr.jpeg" class="w-full h-full object-contain rounded-lg shadow-sm" alt="DuitNow 付款码">
             </div>
 
             <!-- 动态提示转账金额 -->
@@ -170,7 +179,7 @@
     <script>
         // ==================== 💡 必须修改的配置项 ====================
         const MAIN_DISH_PRICE = 13; // 主餐单价 RM 13.00
-        const DESSERT_PRICE = 5;    // 💡 糖水单价（若免费赠送或包含在内可改 0）
+        const DESSERT_PRICE = 3;    // 糖水单价 RM 5.00
         const MY_PHONE_NUMBER = "60145952975"; // 💡 替换为你的 WhatsApp 电话（加 60，无 + 号）
         const DUITNOW_PHONE = "0162207137";   // 💡 替换为你的 DuitNow 号码
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwb8DekyobGj28he2BCQhcyHtqiN_vJvC8YvTNkuM4Wr-oi8PBdJ50PCy5abuwTvcujMg/exec"; // 💡 粘贴你的 Google Apps Script URL
@@ -178,44 +187,61 @@
 
         let currentTotal = 13;
 
-        // 页面加载时自动执行：判断今天是否是星期六
+        // 页面加载时初始化
         window.addEventListener('DOMContentLoaded', () => {
             checkCurrentDayAndDisable();
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             updateMenuInfo();
         });
 
-        // 💡 判断日期逻辑：如果今天是星期六 (Day 6) 或星期日 (Day 0)，自动禁用星期五
+        // 判断日期：如果今天是星期六 (Day 6) 或星期日 (Day 0)，自动禁用星期五
         function checkCurrentDayAndDisable() {
-            const today = new Date().getDay(); // 0 是周日, 5 是周五, 6 是周六
+            const today = new Date().getDay();
             const optFriday = document.getElementById('optFriday');
             const daySelect = document.getElementById('day');
 
-            // 如果今天是星期六或星期天，将星期五设为不可选
             if (today === 6 || today === 0) {
                 optFriday.disabled = true;
                 optFriday.innerText = "星期五晚餐（已截止/过期）";
-                daySelect.value = "星期六"; // 自动选到星期六
+                daySelect.value = "星期六";
             }
         }
 
-        // 切换日期更新界面
+        // 切换日期更新界面状态
         function updateMenuInfo() {
             const day = document.getElementById('day').value;
             const menuIcon = document.getElementById('menuIcon');
             const menuText = document.getElementById('menuText');
             const dessertSection = document.getElementById('dessertSection');
+            const mainDishToggle = document.getElementById('mainDishToggle');
+            const wantMainDish = document.getElementById('wantMainDish');
 
             if (day === "星期五") {
                 menuIcon.innerText = "🍔";
                 menuText.innerText = "特制汉堡 (RM 13.00 / 份)";
-                dessertSection.classList.add('hidden'); // 隐藏周六糖水
+                dessertSection.classList.add('hidden');
+                mainDishToggle.classList.add('hidden');
+                wantMainDish.checked = true; // 周五必须订主餐
+                document.getElementById('mainQtyContainer').classList.remove('hidden');
                 document.getElementById('wantDessert').checked = false;
                 document.getElementById('dessertQtyContainer').classList.add('hidden');
             } else {
                 menuIcon.innerText = "🍲";
-                menuText.innerText = "招招卤肉饭 (RM 13.00 / 份)";
-                dessertSection.classList.remove('hidden'); // 显示周六糖水
+                menuText.innerText = "招牌卤肉饭 (RM 13.00 / 份)";
+                dessertSection.classList.remove('hidden');
+                mainDishToggle.classList.remove('hidden'); // 周六显示主餐勾选框
+            }
+            calculateTotal();
+        }
+
+        // 开关主餐（星期六）
+        function toggleMainDish() {
+            const wantMainDish = document.getElementById('wantMainDish').checked;
+            const container = document.getElementById('mainQtyContainer');
+            if (wantMainDish) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
             }
             calculateTotal();
         }
@@ -230,7 +256,7 @@
             calculateTotal();
         }
 
-        // 勾选/取消勾选糖水
+        // 开关糖水
         function toggleDessertQty() {
             const wantDessert = document.getElementById('wantDessert').checked;
             const container = document.getElementById('dessertQtyContainer');
@@ -248,20 +274,27 @@
             let current = parseInt(qtyInput.value) || 1;
             current += amount;
             if (current < 1) current = 1;
-            if (current > 20) current = 20; // 限制最大 20 份
+            if (current > 20) current = 20;
             qtyInput.value = current;
             calculateTotal();
         }
 
-        // 计算总金额
+        // 实时计算总金额
         function calculateTotal() {
-            const mainQty = parseInt(document.getElementById('qty').value) || 1;
             const day = document.getElementById('day').value;
+            const wantMainDish = document.getElementById('wantMainDish').checked;
+            const mainQty = parseInt(document.getElementById('qty').value) || 1;
             const wantDessert = document.getElementById('wantDessert').checked;
             const dessertQty = parseInt(document.getElementById('dessertQty').value) || 1;
 
-            let total = mainQty * MAIN_DISH_PRICE;
+            let total = 0;
 
+            // 如果勾选了主餐
+            if (wantMainDish) {
+                total += mainQty * MAIN_DISH_PRICE;
+            }
+
+            // 如果勾选了糖水（仅限周六）
             if (day === "星期六" && wantDessert) {
                 total += dessertQty * DESSERT_PRICE;
             }
@@ -294,28 +327,34 @@
         // 提交订单
         async function handleOrder(event) {
             event.preventDefault();
-            
+
+            const day = document.getElementById('day').value;
+            const wantMainDish = document.getElementById('wantMainDish').checked;
+            const wantDessert = document.getElementById('wantDessert').checked;
+
+            // 💡 校验拦截：如果两样都没选，阻止提交
+            if (!wantMainDish && !wantDessert) {
+                alert("⚠️ 请至少选择一份主餐或糖水！");
+                return;
+            }
+
             const btn = document.getElementById('submitBtn');
             btn.disabled = true;
             btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>正在提交订单...</span>`;
 
             const name = document.getElementById('name').value;
-            const day = document.getElementById('day').value;
-            const qty = document.getElementById('qty').value;
+            const mainQty = document.getElementById('qty').value;
+            const dessertQty = document.getElementById('dessertQty').value;
             const notes = document.getElementById('notes').value || '无';
             const total = currentTotal;
 
             const dishName = (day === "星期五") ? "特制汉堡" : "招牌卤肉饭";
 
-            // 糖水处理逻辑
-            const wantDessert = document.getElementById('wantDessert').checked;
-            const dessertQty = document.getElementById('dessertQty').value;
-            let dessertText = "无";
-            if (day === "星期六" && wantDessert) {
-                dessertText = `周六限量糖水 x ${dessertQty} 份`;
-            }
+            // 文本信息拼装
+            let mainDishText = wantMainDish ? `${dishName} x ${mainQty} 份` : "未订购主餐";
+            let dessertText = (day === "星期六" && wantDessert) ? `周六限定糖水 x ${dessertQty} 份` : "未订购糖水";
 
-            const payload = { name, day, dish: dishName, qty, dessert: dessertText, total, notes };
+            const payload = { name, day, dish: mainDishText, dessert: dessertText, total, notes };
 
             // 1. 静默写入后台 Google Sheets
             if (GOOGLE_SCRIPT_URL && !GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE")) {
@@ -331,15 +370,17 @@
                 }
             }
 
-            // 2. 拼接 WhatsApp 消息
-            let waMessage = `🛒 *【晚餐预订订单】*%0A` +
+            // 2. 拼接 WhatsApp 格式化消息
+            let waMessage = `🛒 *【晚餐/糖水预订订单】*%0A` +
                             `--------------------------------%0A` +
                             `👤 *名字*：${name}%0A` +
-                            `📅 *用餐日期*：${day}%0A` +
-                            `🍲 *主餐*：${dishName} x ${qty} 份%0A`;
-            
+                            `📅 *用餐日期*：${day}%0A`;
+
+            if (wantMainDish) {
+                waMessage += `🍲 *主餐*：${dishName} x ${mainQty} 份%0A`;
+            }
             if (day === "星期六" && wantDessert) {
-                waMessage += `🥣 *附加糖水*：${dessertText}%0A`;
+                waMessage += `🥣 *糖水*：周六限定糖水 x ${dessertQty} 份%0A`;
             }
 
             waMessage += `💰 *总计*：RM ${total}%0A` +
