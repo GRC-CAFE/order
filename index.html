@@ -3,37 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>周五/周六晚餐与糖水预订</title>
+    <title>GRC CAFE - 晚餐与糖水预订</title>
     <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-50 min-h-screen pb-12 select-none">
+<body class="bg-slate-100 min-h-screen pb-12 select-none">
 
-    <!-- 顶部 Banner 轮播图区域（修改为 object-contain 完整展示全图，背景填充深色） -->
-    <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-md cursor-grab active:cursor-grabbing bg-slate-900 aspect-[4/3]">
-        <!-- 动态轮播图片：使用 object-contain 保证整张海报不被裁剪 -->
-        <img id="carouselImage" src="dish1.jpeg" 
-             class="w-full h-full object-contain transition-opacity duration-500 opacity-100 pointer-events-none" 
-             alt="美食展示">
+    <!-- 顶部 Banner 沉浸式轮播图区域（修改为 aspect-square，保证高海报顶部完整显示） -->
+    <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-xl cursor-grab active:cursor-grabbing bg-slate-900 aspect-square">
+        <!-- 动态轮播图片：使用 object-top 确保海报顶部标题不被裁切 -->
+        <img id="carouselImage" src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=800&auto=format&fit=crop" 
+             class="w-full h-full object-cover object-top transition-opacity duration-500 opacity-100 pointer-events-none" 
+             alt="GRC CAFE 展示">
         
-        <!-- 顶部微弱渐变遮罩（确保文字/小圆点清晰可见） -->
-        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none"></div>
+        <!-- 氛围渐变蒙层（底部渐变加深，凸显文字） -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent pointer-events-none"></div>
         
-        <!-- 顶部标签与标题信息 -->
-        <div class="absolute bottom-3 left-4 right-4 text-white pointer-events-none">
-            <div class="flex items-center space-x-2">
-                <span id="carouselBadge" class="bg-amber-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">周五限定</span>
-                <h1 id="carouselTitle" class="text-lg font-extrabold drop-shadow">🍔 特制汉堡</h1>
+        <!-- 底部文字与标签 overlay -->
+        <div class="absolute bottom-3 left-4 right-4 text-white pointer-events-none z-10">
+            <div class="flex items-center space-x-2 mb-1">
+                <span id="carouselBadge" class="bg-amber-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow">
+                    ✨ GRC CAFE 舒适环境
+                </span>
             </div>
-            <p id="carouselSub" class="text-slate-200 text-xs mt-0.5 drop-shadow">主餐 RM 13.00 / 份</p>
+            <h1 id="carouselTitle" class="text-lg font-black tracking-wide text-white drop-shadow-md">
+                ☕ 温馨餐厅氛围
+            </h1>
+            <p id="carouselSub" class="text-amber-200/90 text-xs mt-0.5 font-medium drop-shadow">
+                优雅灯光与舒适空间，尽享惬意时光
+            </p>
         </div>
 
-        <!-- 轮播小圆点指示器（点击可切换） -->
-        <div class="absolute top-3 right-3 flex space-x-1.5 z-20">
-            <button type="button" onclick="goToSlide(0)" id="dot0" class="w-2.5 h-2.5 rounded-full bg-white transition-all focus:outline-none"></button>
-            <button type="button" onclick="goToSlide(1)" id="dot1" class="w-2.5 h-2.5 rounded-full bg-white/50 transition-all focus:outline-none"></button>
-            <button type="button" onclick="goToSlide(2)" id="dot2" class="w-2.5 h-2.5 rounded-full bg-white/50 transition-all focus:outline-none"></button>
+        <!-- 4 张图的指示点 (Dot Indicator) -->
+        <div class="absolute top-3 right-3 flex space-x-1.5 z-20 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
+            <button type="button" onclick="goToSlide(0)" id="dot0" class="w-2 h-2 rounded-full bg-amber-400 transition-all focus:outline-none"></button>
+            <button type="button" onclick="goToSlide(1)" id="dot1" class="w-2 h-2 rounded-full bg-white/40 transition-all focus:outline-none"></button>
+            <button type="button" onclick="goToSlide(2)" id="dot2" class="w-2 h-2 rounded-full bg-white/40 transition-all focus:outline-none"></button>
+            <button type="button" onclick="goToSlide(3)" id="dot3" class="w-2 h-2 rounded-full bg-white/40 transition-all focus:outline-none"></button>
         </div>
     </div>
 
@@ -46,12 +53,12 @@
             <!-- 截单说明 -->
             <div class="flex justify-between items-center pb-4 border-b border-slate-100">
                 <div>
-                    <span class="text-xs text-slate-400 block">菜单价格</span>
-                    <span class="text-sm font-bold text-slate-800">主餐 RM 13 | 糖水 RM 5</span>
+                    <span class="text-xs text-slate-400 block font-medium">菜单价格</span>
+                    <span class="text-sm font-bold text-slate-800">主餐 <span class="text-amber-600">RM 13</span> | 糖水 <span class="text-amber-600">RM 5</span></span>
                 </div>
                 <div class="text-right">
-                    <span class="text-xs text-slate-400 block">截单时间</span>
-                    <span class="text-xs font-semibold bg-slate-100 text-slate-700 px-2 py-1 rounded-md">每周四 8:00 PM</span>
+                    <span class="text-xs text-slate-400 block font-medium">截单时间</span>
+                    <span class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2.5 py-1 rounded-lg">每周四 8:00 PM</span>
                 </div>
             </div>
 
@@ -62,31 +69,31 @@
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">您的名字 / 称呼 <span class="text-rose-500">*</span></label>
                     <input type="text" id="name" required placeholder="例如：Tan / Ah Beng" 
-                           class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                           class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 transition text-sm">
                 </div>
 
                 <!-- 预订日期 -->
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">预订用餐日期 <span class="text-rose-500">*</span></label>
-                    <select id="day" onchange="updateMenuInfo()" required class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition font-bold text-slate-800">
+                    <select id="day" onchange="updateMenuInfo()" required class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition font-bold text-slate-800 text-sm">
                         <option value="星期五" id="optFriday">星期五晚餐（🍔 特制汉堡）</option>
                         <option value="星期六" id="optSaturday">星期六晚餐（🍲 卤肉饭 / 🥣 糖水）</option>
                     </select>
                 </div>
 
                 <!-- 主餐点选区 -->
-                <div class="bg-amber-50/60 border border-amber-200/60 rounded-xl p-4 space-y-3">
+                <div class="bg-amber-50/60 border border-amber-200/60 rounded-2xl p-4 space-y-3">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-2">
                             <span class="text-2xl" id="menuIcon">🍔</span>
                             <div>
                                 <p class="text-xs text-amber-700 font-medium">主餐菜单：</p>
-                                <p class="text-sm font-bold text-amber-900" id="menuText">特制汉堡 (RM 13.00 / 份)</p>
+                                <p class="text-sm font-bold text-amber-950" id="menuText">特制汉堡 (RM 13.00 / 份)</p>
                             </div>
                         </div>
                         <!-- 星期六出现勾选框 -->
                         <label id="mainDishToggle" class="hidden text-xs font-bold text-slate-600 flex items-center cursor-pointer bg-white px-2.5 py-1.5 rounded-lg border border-amber-200">
-                            <input type="checkbox" id="wantMainDish" checked onchange="toggleMainDish()" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 mr-1.5">
+                            <input type="checkbox" id="wantMainDish" checked onchange="toggleMainDish()" class="w-4 h-4 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mr-1.5">
                             订购主餐
                         </label>
                     </div>
@@ -95,15 +102,15 @@
                     <div id="mainQtyContainer" class="flex items-center justify-between pt-1">
                         <span class="text-xs font-bold text-slate-600">主餐份数：</span>
                         <div class="flex items-center space-x-3">
-                            <button type="button" onclick="adjustQty(-1)" class="w-10 h-10 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-lg flex items-center justify-center border border-slate-200 shadow-sm">-</button>
-                            <input type="number" id="qty" value="1" min="1" readonly class="w-16 text-center py-1.5 font-bold text-base border border-slate-200 rounded-xl bg-white shadow-inner">
-                            <button type="button" onclick="adjustQty(1)" class="w-10 h-10 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-lg flex items-center justify-center border border-slate-200 shadow-sm">+</button>
+                            <button type="button" onclick="adjustQty(-1)" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-lg flex items-center justify-center border border-slate-200 shadow-sm">-</button>
+                            <input type="number" id="qty" value="1" min="1" readonly class="w-14 text-center py-1 font-bold text-base border border-slate-200 rounded-xl bg-white shadow-inner">
+                            <button type="button" onclick="adjustQty(1)" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-lg flex items-center justify-center border border-slate-200 shadow-sm">+</button>
                         </div>
                     </div>
                 </div>
 
                 <!-- 🥣 星期六限定糖水卡片 -->
-                <div id="dessertSection" class="hidden bg-rose-50 border border-rose-200 rounded-xl p-4 space-y-3">
+                <div id="dessertSection" class="hidden bg-rose-50/70 border border-rose-200 rounded-2xl p-4 space-y-3">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-2">
                             <span class="text-xl">🥣</span>
@@ -112,9 +119,9 @@
                         <span class="text-xs bg-rose-200 text-rose-800 font-bold px-2 py-0.5 rounded-full">限量 20 份</span>
                     </div>
                     
-                    <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-rose-100">
+                    <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-rose-100">
                         <label for="wantDessert" class="text-xs font-bold text-slate-700 flex items-center cursor-pointer">
-                            <input type="checkbox" id="wantDessert" onchange="toggleDessertQty()" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 mr-2">
+                            <input type="checkbox" id="wantDessert" onchange="toggleDessertQty()" class="w-4 h-4 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mr-2">
                             订购周六糖水
                         </label>
                         <div class="text-xs font-black text-rose-600">+ RM 5.00 / 份</div>
@@ -135,19 +142,19 @@
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">特殊备注 (可选)</label>
                     <input type="text" id="notes" placeholder="如：少辣 / 不要葱 / 糖水要热" 
-                           class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
+                           class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 transition text-sm">
                 </div>
 
                 <!-- 总价预览与提交按钮 -->
                 <div class="pt-2">
                     <div class="flex justify-between items-center mb-3">
                         <span class="text-sm font-bold text-slate-600">预估总额：</span>
-                        <span id="totalText" class="text-xl font-extrabold text-emerald-600">RM 13.00</span>
+                        <span id="totalText" class="text-2xl font-black text-amber-600">RM 13.00</span>
                     </div>
 
                     <button type="submit" id="submitBtn" 
-                            class="w-full bg-emerald-500 hover:bg-emerald-600 active:scale-[0.99] text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-500/30 flex items-center justify-center space-x-2 transition">
-                        <i class="fa-brands fa-whatsapp text-xl"></i>
+                            class="w-full bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white font-bold py-4 rounded-xl shadow-lg flex items-center justify-center space-x-2 transition">
+                        <i class="fa-brands fa-whatsapp text-emerald-400 text-xl"></i>
                         <span>确认提交并发送至 WhatsApp</span>
                     </button>
                 </div>
@@ -185,7 +192,7 @@
                 </button>
             </div>
 
-            <p class="text-xs text-slate-400">💡 付款完成后，点击上方绿按钮跳转 WhatsApp 确认订单</p>
+            <p class="text-xs text-slate-400">💡 付款完成后，点击上方黑/绿按钮跳转 WhatsApp 确认订单</p>
         </div>
 
         <p class="text-center text-xs text-slate-400 mt-4">提交后将自动跳转至 WhatsApp 发送订单凭证</p>
@@ -197,13 +204,19 @@
         const DESSERT_PRICE = 5;    // 糖水单价 RM 5.00
         const MY_PHONE_NUMBER = "60145952975"; 
         const DUITNOW_PHONE = "0162207137";   
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6lj4CZrXCGFqm3rvK5JJMx_9ZVFxOvJ_486tCZYnOTb37CZAxTS3EJWSSESXtt2ELzA/exec"; 
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwb8DekyobGj28he2BCQhcyHtqiN_vJvC8YvTNkuM4Wr-oi8PBdJ50PCy5abuwTvcujMg/exec"; 
 
-        // 3 张本地照片配置
+        // 4 张照片配置 (第一张为餐厅氛围图，紧接着 dish1 - dish3)
         const SLIDES = [
             {
+                image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=800&auto=format&fit=crop",
+                badge: "✨ GRC CAFE 舒适环境",
+                title: "☕ 温馨餐厅氛围",
+                sub: "优雅灯光与舒适空间，尽享惬意时光"
+            },
+            {
                 image: "dish1.jpeg",
-                badge: "周五限定",
+                badge: "周五限定主餐",
                 title: "🍔 特制汉堡",
                 sub: "RM 13.00 / 份"
             },
@@ -234,17 +247,17 @@
             checkCurrentDayAndDisable();
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             updateMenuInfo();
-            startCarousel();      // 5 秒自动播放
+            startCarousel();      // 自动播放
             initSwipeEvents();   // 手势左右滑动
         });
 
-        // 自动轮播（每 5000 毫秒 = 5 秒）
+        // 自动轮播（每 4.5 秒切换）
         function startCarousel() {
             stopCarousel();
             carouselTimer = setInterval(() => {
                 slideIndex = (slideIndex + 1) % SLIDES.length;
                 showSlide(slideIndex);
-            }, 5000);
+            }, 4500);
         }
 
         function stopCarousel() {
@@ -288,8 +301,8 @@
                     const dot = document.getElementById(`dot${i}`);
                     if (dot) {
                         dot.className = (i === index) 
-                            ? "w-2.5 h-2.5 rounded-full bg-white transition-all focus:outline-none" 
-                            : "w-2.5 h-2.5 rounded-full bg-white/50 transition-all focus:outline-none";
+                            ? "w-2 h-2 rounded-full bg-amber-400 transition-all focus:outline-none" 
+                            : "w-2 h-2 rounded-full bg-white/40 transition-all focus:outline-none";
                     }
                 }
                 img.style.opacity = '1';
@@ -453,7 +466,6 @@
             setTimeout(() => { span.innerText = originalText; }, 2500);
         }
 
-// 提交订单
         async function handleOrder(event) {
             event.preventDefault();
 
@@ -471,31 +483,26 @@
             btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>正在提交订单...</span>`;
 
             const name = document.getElementById('name').value;
-            const mainQty = wantMainDish ? parseInt(document.getElementById('qty').value) || 0 : 0;
-            const dessertQty = (day === "星期六" && wantDessert) ? parseInt(document.getElementById('dessertQty').value) || 0 : 0;
+            const mainQty = wantMainDish ? parseInt(document.getElementById('qty').value) : 0;
+            const dessertQty = (day === "星期六" && wantDessert) ? parseInt(document.getElementById('dessertQty').value) : 0;
             const notes = document.getElementById('notes').value || '无';
             const total = currentTotal;
 
             const dishName = (day === "星期五") ? "特制汉堡" : "招牌卤肉饭";
 
-            // 组合详细的文字描述（显示在餐点详情）
-            let mainDishText = wantMainDish ? `${dishName} x ${mainQty}` : "";
-            let dessertText = (day === "星期六" && wantDessert) ? `周六糖水 x ${dessertQty}` : "";
-            
-            // 拼接订单明细文本
-            let itemsDetail = [mainDishText, dessertText].filter(Boolean).join(" + ");
-            // 汇总数量描述（例：“主餐 1 份，糖水 2 份”或单纯数字）
-            let qtySummary = `主餐:${mainQty} | 糖水:${dessertQty}`;
+            // 格式化写入后台的 D 列（数量字段）
+            let qtyList = [];
+            if (wantMainDish) qtyList.push(`主餐 x ${mainQty}`);
+            if (day === "星期六" && wantDessert) qtyList.push(`糖水 x ${dessertQty}`);
+            let qtySummary = qtyList.join(" | ");
 
-            // 包含发送到后台的数据对象
             const payload = { 
                 timestamp: new Date().toLocaleString("zh-CN", { timeZone: "Asia/Kuala_Lumpur" }),
                 name: name, 
                 day: day, 
-                quantity: qtySummary,  // 对应 D 列 (数量)
-                items: itemsDetail,    // 菜品详情
-                total: total,          // 对应 E 列 (总金额)
-                notes: notes           // 对应 F 列 (备注)
+                quantity: qtySummary,
+                total: total, 
+                notes: notes 
             };
 
             if (GOOGLE_SCRIPT_URL) {
@@ -511,7 +518,6 @@
                 }
             }
 
-            // 拼接 WhatsApp 消息内容
             let waMessage = `🛒 *【晚餐/糖水预订订单】*%0A` +
                             `--------------------------------%0A` +
                             `👤 *名字*：${name}%0A` +
