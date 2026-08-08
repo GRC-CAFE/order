@@ -8,30 +8,30 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 </head>
-<body class="bg-slate-50 min-h-screen pb-12">
+<body class="bg-slate-50 min-h-screen pb-12 select-none">
 
-    <!-- 顶部 Banner 轮播图区域 -->
-    <div class="relative h-64 w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-md">
+    <!-- 顶部 Banner 轮播图区域（支持触摸滑动） -->
+    <div id="carouselContainer" class="relative h-64 w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-md cursor-grab active:cursor-grabbing">
         <!-- 动态轮播图片 -->
         <img id="carouselImage" src="https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80" 
-             class="w-full h-full object-cover transition-opacity duration-700 opacity-100" 
+             class="w-full h-full object-cover transition-opacity duration-700 opacity-100 pointer-events-none" 
              alt="美食展示">
         
         <!-- 渐变遮罩 -->
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"></div>
         
         <!-- 顶部标签与标题信息 -->
-        <div class="absolute bottom-4 left-5 right-5 text-white">
+        <div class="absolute bottom-4 left-5 right-5 text-white pointer-events-none">
             <span id="carouselBadge" class="bg-amber-500 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">周五限定</span>
             <h1 id="carouselTitle" class="text-2xl font-extrabold mt-1">🍔 特制汉堡</h1>
             <p id="carouselSub" class="text-slate-200 text-sm mt-0.5">主餐 RM 13.00 / 份</p>
         </div>
 
-        <!-- 轮播小圆点指示器 -->
-        <div class="absolute top-4 right-4 flex space-x-1.5">
-            <div id="dot0" class="w-2.5 h-2.5 rounded-full bg-white transition-all"></div>
-            <div id="dot1" class="w-2.5 h-2.5 rounded-full bg-white/50 transition-all"></div>
-            <div id="dot2" class="w-2.5 h-2.5 rounded-full bg-white/50 transition-all"></div>
+        <!-- 轮播小圆点指示器（点击可切图） -->
+        <div class="absolute top-4 right-4 flex space-x-2 z-20">
+            <button type="button" onclick="goToSlide(0)" id="dot0" class="w-2.5 h-2.5 rounded-full bg-white transition-all focus:outline-none"></button>
+            <button type="button" onclick="goToSlide(1)" id="dot1" class="w-2.5 h-2.5 rounded-full bg-white/50 transition-all focus:outline-none"></button>
+            <button type="button" onclick="goToSlide(2)" id="dot2" class="w-2.5 h-2.5 rounded-full bg-white/50 transition-all focus:outline-none"></button>
         </div>
     </div>
 
@@ -197,7 +197,7 @@
         const DUITNOW_PHONE = "0162207137";   
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwb8DekyobGj28he2BCQhcyHtqiN_vJvC8YvTNkuM4Wr-oi8PBdJ50PCy5abuwTvcujMg/exec"; 
 
-        // 三张高清在线轮播图配置
+        // 3 张高清图
         const SLIDES = [
             {
                 image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=800&q=80",
@@ -222,21 +222,49 @@
 
         let currentTotal = 13;
         let slideIndex = 0;
+        let carouselTimer = null;
 
-        // 页面初始化
+        // 手势触摸变量
+        let touchStartX = 0;
+        let touchEndX = 0;
+
         window.addEventListener('DOMContentLoaded', () => {
             checkCurrentDayAndDisable();
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             updateMenuInfo();
-            startCarousel(); // 启动 3 秒自动轮播
+            startCarousel();      // 启动 5 秒轮播
+            initSwipeEvents();   // 绑定左右滑动功能
         });
 
-        // 自动轮播图片逻辑 (每 3000毫秒 = 3秒 切换一次)
+        // 自动轮播（改为 5000 毫秒 = 5 秒）
         function startCarousel() {
-            setInterval(() => {
+            stopCarousel();
+            carouselTimer = setInterval(() => {
                 slideIndex = (slideIndex + 1) % SLIDES.length;
                 showSlide(slideIndex);
-            }, 3000);
+            }, 5000);
+        }
+
+        function stopCarousel() {
+            if (carouselTimer) clearInterval(carouselTimer);
+        }
+
+        function goToSlide(index) {
+            slideIndex = index;
+            showSlide(slideIndex);
+            startCarousel(); // 手动切换后重置 5 秒倒计时
+        }
+
+        function nextSlide() {
+            slideIndex = (slideIndex + 1) % SLIDES.length;
+            showSlide(slideIndex);
+            startCarousel();
+        }
+
+        function prevSlide() {
+            slideIndex = (slideIndex - 1 + SLIDES.length) % SLIDES.length;
+            showSlide(slideIndex);
+            startCarousel();
         }
 
         function showSlide(index) {
@@ -254,16 +282,56 @@
                 title.innerText = current.title;
                 sub.innerText = current.sub;
 
-                for (let i = 0; i < 3; i++) {
+                for (let i = 0; i < SLIDES.length; i++) {
                     const dot = document.getElementById(`dot${i}`);
-                    if (i === index) {
-                        dot.className = "w-2.5 h-2.5 rounded-full bg-white transition-all";
-                    } else {
-                        dot.className = "w-2.5 h-2.5 rounded-full bg-white/50 transition-all";
+                    if (dot) {
+                        dot.className = (i === index) 
+                            ? "w-2.5 h-2.5 rounded-full bg-white transition-all focus:outline-none" 
+                            : "w-2.5 h-2.5 rounded-full bg-white/50 transition-all focus:outline-none";
                     }
                 }
                 img.style.opacity = '1';
             }, 250);
+        }
+
+        // 初始化滑动事件（同时支持手机 Touch 和电脑鼠标 Drag）
+        function initSwipeEvents() {
+            const container = document.getElementById('carouselContainer');
+
+            // 触摸事件 (手机端)
+            container.addEventListener('touchstart', (e) => {
+                touchStartX = e.changedTouches[0].screenX;
+            }, { passive: true });
+
+            container.addEventListener('touchend', (e) => {
+                touchEndX = e.changedTouches[0].screenX;
+                handleSwipe();
+            }, { passive: true });
+
+            // 鼠标事件 (电脑端调试)
+            let isDragging = false;
+            container.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                touchStartX = e.screenX;
+            });
+
+            container.addEventListener('mouseup', (e) => {
+                if (!isDragging) return;
+                isDragging = false;
+                touchEndX = e.screenX;
+                handleSwipe();
+            });
+        }
+
+        function handleSwipe() {
+            const threshold = 40; // 滑动最小判定距离 (px)
+            if (touchStartX - touchEndX > threshold) {
+                // 向左划 -> 下一张
+                nextSlide();
+            } else if (touchEndX - touchStartX > threshold) {
+                // 向右划 -> 上一张
+                prevSlide();
+            }
         }
 
         // 判断日期：如果今天是星期六 (Day 6) 或星期日 (Day 0)，自动禁用星期五
