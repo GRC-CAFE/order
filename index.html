@@ -18,7 +18,7 @@
         <div class="absolute bottom-4 left-5 right-5 text-white">
             <span class="bg-amber-500 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">每周美食</span>
             <h1 class="text-2xl font-extrabold mt-1">周五汉堡 / 周六卤肉饭</h1>
-            <p class="text-slate-200 text-sm mt-0.5">RM 13.00 / 份，请提前预订</p>
+            <p class="text-slate-200 text-sm mt-0.5">主餐 RM 13.00 / 份，请提前预订</p>
         </div>
     </div>
 
@@ -31,7 +31,7 @@
             <!-- 价格与截单说明 -->
             <div class="flex justify-between items-center pb-4 border-b border-slate-100">
                 <div>
-                    <span class="text-xs text-slate-400 block">单价</span>
+                    <span class="text-xs text-slate-400 block">主餐单价</span>
                     <span class="text-2xl font-black text-rose-600">RM 13.00 <span class="text-xs font-normal text-slate-500">/ 份</span></span>
                 </div>
                 <div class="text-right">
@@ -50,12 +50,12 @@
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500 transition">
                 </div>
 
-                <!-- 预订日期（改变选项时会自动更新对应的餐点名称） -->
+                <!-- 预订日期 -->
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">预订用餐日期 <span class="text-rose-500">*</span></label>
                     <select id="day" onchange="updateMenuInfo()" required class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-emerald-500 transition font-bold text-slate-800">
-                        <option value="星期五">星期五晚餐（🍔 特制汉堡）</option>
-                        <option value="星期六">星期六晚餐（🍲 招牌卤肉饭）</option>
+                        <option value="星期五" id="optFriday">星期五晚餐（🍔 特制汉堡）</option>
+                        <option value="星期六" id="optSaturday">星期六晚餐（🍲 招牌卤肉饭）</option>
                     </select>
                 </div>
 
@@ -63,18 +63,47 @@
                 <div class="bg-amber-50 border border-amber-200/60 rounded-xl p-3 flex items-center space-x-3">
                     <div class="text-2xl" id="menuIcon">🍔</div>
                     <div>
-                        <p class="text-xs text-amber-700 font-medium">所选餐点：</p>
+                        <p class="text-xs text-amber-700 font-medium">所选主餐：</p>
                         <p class="text-sm font-bold text-amber-900" id="menuText">特制汉堡 (RM 13.00 / 份)</p>
                     </div>
                 </div>
 
-                <!-- 份数加减器 -->
+                <!-- 主餐份数加减器 -->
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">预订份数 <span class="text-rose-500">*</span></label>
+                    <label class="block text-sm font-bold text-slate-700 mb-1">主餐预订份数 <span class="text-rose-500">*</span></label>
                     <div class="flex items-center space-x-3">
                         <button type="button" onclick="adjustQty(-1)" class="w-12 h-12 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xl flex items-center justify-center border border-slate-200">-</button>
                         <input type="number" id="qty" value="1" min="1" readonly class="w-full text-center py-3 font-bold text-lg border border-slate-200 rounded-xl bg-slate-50">
                         <button type="button" onclick="adjustQty(1)" class="w-12 h-12 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xl flex items-center justify-center border border-slate-200">+</button>
+                    </div>
+                </div>
+
+                <!-- 🥣 星期六限定糖水附加卡片（仅选星期六时显示） -->
+                <div id="dessertSection" class="hidden bg-rose-50 border border-rose-200 rounded-xl p-4 space-y-3">
+                    <div class="flex justify-between items-center">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-xl">🥣</span>
+                            <span class="text-sm font-bold text-rose-900">周六限定糖水（限量 20 份）</span>
+                        </div>
+                        <span class="text-xs bg-rose-200 text-rose-800 font-bold px-2 py-0.5 rounded-full">先到先得</span>
+                    </div>
+                    
+                    <div class="flex items-center justify-between bg-white p-3 rounded-lg border border-rose-100">
+                        <label for="wantDessert" class="text-xs font-bold text-slate-700 flex items-center cursor-pointer">
+                            <input type="checkbox" id="wantDessert" onchange="toggleDessertQty()" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 mr-2">
+                            加购周六特别糖水
+                        </label>
+                        <div class="text-xs font-black text-rose-600" id="dessertPriceText">+ RM 3.00 / 份</div>
+                    </div>
+
+                    <!-- 糖水数量选择 -->
+                    <div id="dessertQtyContainer" class="hidden flex items-center justify-between pt-1">
+                        <span class="text-xs font-bold text-slate-600">糖水数量：</span>
+                        <div class="flex items-center space-x-2">
+                            <button type="button" onclick="adjustDessertQty(-1)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold text-sm text-slate-700">-</button>
+                            <input type="number" id="dessertQty" value="1" min="1" max="20" readonly class="w-12 text-center text-sm font-bold bg-white border border-slate-200 rounded-lg py-1">
+                            <button type="button" onclick="adjustDessertQty(1)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold text-sm text-slate-700">+</button>
+                        </div>
                     </div>
                 </div>
 
@@ -109,7 +138,6 @@
             </h2>
             <p class="text-xs text-slate-500">使用任何银行 App / TNG eWallet 扫描二维码付款：</p>
             
-            <!-- 💡 这里已设置为 qr.jpeg -->
             <div class="relative w-56 h-56 mx-auto bg-slate-50 rounded-xl border-2 border-slate-200 p-2 flex items-center justify-center">
                 <img src="qrcode.jpeg" class="w-full h-full object-contain rounded-lg shadow-sm" alt="DuitNow 付款码">
             </div>
@@ -122,13 +150,11 @@
 
             <!-- 手机端辅助快捷功能 -->
             <div class="space-y-2 pt-1">
-                <!-- 一键复制金额 -->
                 <button type="button" onclick="copyAmount()" id="copyAmountBtn" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-3 rounded-xl border border-slate-200 flex items-center justify-center space-x-2 transition">
                     <i class="fa-regular fa-copy"></i>
                     <span id="copyAmountText">复制转账金额 (13.00)</span>
                 </button>
 
-                <!-- 一键复制 DuitNow 手机号 -->
                 <button type="button" onclick="copyPhone()" id="copyPhoneBtn" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-3 rounded-xl border border-slate-200 flex items-center justify-center space-x-2 transition">
                     <i class="fa-regular fa-copy"></i>
                     <span id="copyPhoneText">复制 DuitNow 手机号 (012-3456789)</span>
@@ -143,59 +169,120 @@
 
     <script>
         // ==================== 💡 必须修改的配置项 ====================
-        const PRICE_PER_UNIT = 13; // 单价 RM 13.00
-        const MY_PHONE_NUMBER = "60145952975"; // 💡 替换为你的 WhatsApp 电话（加国家码 60，不要加 + 号）
-        const DUITNOW_PHONE = "0162207137"; // 💡 替换为你的 DuitNow 绑定的手机号码
+        const MAIN_DISH_PRICE = 13; // 主餐单价 RM 13.00
+        const DESSERT_PRICE = 5;    // 💡 糖水单价（若免费赠送或包含在内可改 0）
+        const MY_PHONE_NUMBER = "60145952975"; // 💡 替换为你的 WhatsApp 电话（加 60，无 + 号）
+        const DUITNOW_PHONE = "0162207137";   // 💡 替换为你的 DuitNow 号码
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwb8DekyobGj28he2BCQhcyHtqiN_vJvC8YvTNkuM4Wr-oi8PBdJ50PCy5abuwTvcujMg/exec"; // 💡 粘贴你的 Google Apps Script URL
         // ============================================================
 
-        let currentTotalStr = "13.00";
+        let currentTotal = 13;
 
-        // 初始化
-        document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
+        // 页面加载时自动执行：判断今天是否是星期六
+        window.addEventListener('DOMContentLoaded', () => {
+            checkCurrentDayAndDisable();
+            document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
+            updateMenuInfo();
+        });
 
-        // 根据选择的日期更新菜单提示
+        // 💡 判断日期逻辑：如果今天是星期六 (Day 6) 或星期日 (Day 0)，自动禁用星期五
+        function checkCurrentDayAndDisable() {
+            const today = new Date().getDay(); // 0 是周日, 5 是周五, 6 是周六
+            const optFriday = document.getElementById('optFriday');
+            const daySelect = document.getElementById('day');
+
+            // 如果今天是星期六或星期天，将星期五设为不可选
+            if (today === 6 || today === 0) {
+                optFriday.disabled = true;
+                optFriday.innerText = "星期五晚餐（已截止/过期）";
+                daySelect.value = "星期六"; // 自动选到星期六
+            }
+        }
+
+        // 切换日期更新界面
         function updateMenuInfo() {
             const day = document.getElementById('day').value;
             const menuIcon = document.getElementById('menuIcon');
             const menuText = document.getElementById('menuText');
+            const dessertSection = document.getElementById('dessertSection');
 
             if (day === "星期五") {
                 menuIcon.innerText = "🍔";
                 menuText.innerText = "特制汉堡 (RM 13.00 / 份)";
+                dessertSection.classList.add('hidden'); // 隐藏周六糖水
+                document.getElementById('wantDessert').checked = false;
+                document.getElementById('dessertQtyContainer').classList.add('hidden');
             } else {
                 menuIcon.innerText = "🍲";
-                menuText.innerText = "招牌卤肉饭 (RM 13.00 / 份)";
+                menuText.innerText = "招招卤肉饭 (RM 13.00 / 份)";
+                dessertSection.classList.remove('hidden'); // 显示周六糖水
             }
+            calculateTotal();
         }
 
-        // 数量加减与金额计算
+        // 主餐数量加减
         function adjustQty(amount) {
             const qtyInput = document.getElementById('qty');
             let current = parseInt(qtyInput.value) || 1;
             current += amount;
             if (current < 1) current = 1;
             qtyInput.value = current;
-
-            // 计算总金额
-            currentTotalStr = (current * PRICE_PER_UNIT).toFixed(2);
-            
-            // 实时更新显示
-            document.getElementById('totalText').innerText = `RM ${currentTotalStr}`;
-            document.getElementById('qrAmountText').innerText = `RM ${currentTotalStr}`;
-            document.getElementById('copyAmountText').innerText = `复制转账金额 (${currentTotalStr})`;
+            calculateTotal();
         }
 
-        // 复制金额
+        // 勾选/取消勾选糖水
+        function toggleDessertQty() {
+            const wantDessert = document.getElementById('wantDessert').checked;
+            const container = document.getElementById('dessertQtyContainer');
+            if (wantDessert) {
+                container.classList.remove('hidden');
+            } else {
+                container.classList.add('hidden');
+            }
+            calculateTotal();
+        }
+
+        // 糖水数量加减
+        function adjustDessertQty(amount) {
+            const qtyInput = document.getElementById('dessertQty');
+            let current = parseInt(qtyInput.value) || 1;
+            current += amount;
+            if (current < 1) current = 1;
+            if (current > 20) current = 20; // 限制最大 20 份
+            qtyInput.value = current;
+            calculateTotal();
+        }
+
+        // 计算总金额
+        function calculateTotal() {
+            const mainQty = parseInt(document.getElementById('qty').value) || 1;
+            const day = document.getElementById('day').value;
+            const wantDessert = document.getElementById('wantDessert').checked;
+            const dessertQty = parseInt(document.getElementById('dessertQty').value) || 1;
+
+            let total = mainQty * MAIN_DISH_PRICE;
+
+            if (day === "星期六" && wantDessert) {
+                total += dessertQty * DESSERT_PRICE;
+            }
+
+            currentTotal = total.toFixed(2);
+
+            // 实时更新显示
+            document.getElementById('totalText').innerText = `RM ${currentTotal}`;
+            document.getElementById('qrAmountText').innerText = `RM ${currentTotal}`;
+            document.getElementById('copyAmountText').innerText = `复制转账金额 (${currentTotal})`;
+        }
+
+        // 复制金额与电话
         function copyAmount() {
-            navigator.clipboard.writeText(currentTotalStr);
+            navigator.clipboard.writeText(currentTotal);
             const span = document.getElementById('copyAmountText');
             const originalText = span.innerText;
-            span.innerText = `✅ 已复制金额 RM ${currentTotalStr}！`;
+            span.innerText = `✅ 已复制金额 RM ${currentTotal}！`;
             setTimeout(() => { span.innerText = originalText; }, 2500);
         }
 
-        // 复制手机号
         function copyPhone() {
             navigator.clipboard.writeText(DUITNOW_PHONE);
             const span = document.getElementById('copyPhoneText');
@@ -216,12 +303,19 @@
             const day = document.getElementById('day').value;
             const qty = document.getElementById('qty').value;
             const notes = document.getElementById('notes').value || '无';
-            const total = currentTotalStr;
+            const total = currentTotal;
 
-            // 根据日期决定餐点名称
             const dishName = (day === "星期五") ? "特制汉堡" : "招牌卤肉饭";
 
-            const payload = { name, day, dish: dishName, qty, total, notes };
+            // 糖水处理逻辑
+            const wantDessert = document.getElementById('wantDessert').checked;
+            const dessertQty = document.getElementById('dessertQty').value;
+            let dessertText = "无";
+            if (day === "星期六" && wantDessert) {
+                dessertText = `周六限量糖水 x ${dessertQty} 份`;
+            }
+
+            const payload = { name, day, dish: dishName, qty, dessert: dessertText, total, notes };
 
             // 1. 静默写入后台 Google Sheets
             if (GOOGLE_SCRIPT_URL && !GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE")) {
@@ -237,16 +331,21 @@
                 }
             }
 
-            // 2. 拼接 WhatsApp 格式化消息
-            const waMessage = `🛒 *【晚餐预订订单】*%0A` +
-                              `--------------------------------%0A` +
-                              `👤 *名字*：${name}%0A` +
-                              `📅 *用餐日期*：${day}%0A` +
-                              `🍲 *餐点*：${dishName} x ${qty} 份%0A` +
-                              `💰 *总计*：RM ${total}%0A` +
-                              `📝 *备注*：${notes}%0A` +
-                              `--------------------------------%0A` +
-                              `已下单，已按照 RM ${total} 完成转账/准备付款，请查收！`;
+            // 2. 拼接 WhatsApp 消息
+            let waMessage = `🛒 *【晚餐预订订单】*%0A` +
+                            `--------------------------------%0A` +
+                            `👤 *名字*：${name}%0A` +
+                            `📅 *用餐日期*：${day}%0A` +
+                            `🍲 *主餐*：${dishName} x ${qty} 份%0A`;
+            
+            if (day === "星期六" && wantDessert) {
+                waMessage += `🥣 *附加糖水*：${dessertText}%0A`;
+            }
+
+            waMessage += `💰 *总计*：RM ${total}%0A` +
+                         `📝 *备注*：${notes}%0A` +
+                         `--------------------------------%0A` +
+                         `已下单，已按照 RM ${total} 完成转账/准备付款，请查收！`;
 
             // 3. 跳转至 WhatsApp
             window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${waMessage}`;
