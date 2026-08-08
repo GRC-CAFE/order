@@ -10,25 +10,27 @@
 </head>
 <body class="bg-slate-50 min-h-screen pb-12 select-none">
 
-    <!-- 顶部 Banner 轮播图区域（支持触摸与手势滑动） -->
-    <div id="carouselContainer" class="relative h-64 w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-md cursor-grab active:cursor-grabbing">
-        <!-- 动态轮播图片 -->
+    <!-- 顶部 Banner 轮播图区域（修改为 object-contain 完整展示全图，背景填充深色） -->
+    <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-md cursor-grab active:cursor-grabbing bg-slate-900 aspect-[4/3]">
+        <!-- 动态轮播图片：使用 object-contain 保证整张海报不被裁剪 -->
         <img id="carouselImage" src="dish1.jpeg" 
-             class="w-full h-full object-cover transition-opacity duration-700 opacity-100 pointer-events-none" 
+             class="w-full h-full object-contain transition-opacity duration-500 opacity-100 pointer-events-none" 
              alt="美食展示">
         
-        <!-- 渐变遮罩 -->
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent pointer-events-none"></div>
+        <!-- 顶部微弱渐变遮罩（确保文字/小圆点清晰可见） -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/30 pointer-events-none"></div>
         
         <!-- 顶部标签与标题信息 -->
-        <div class="absolute bottom-4 left-5 right-5 text-white pointer-events-none">
-            <span id="carouselBadge" class="bg-amber-500 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">周五限定</span>
-            <h1 id="carouselTitle" class="text-2xl font-extrabold mt-1">🍔 特制汉堡</h1>
-            <p id="carouselSub" class="text-slate-200 text-sm mt-0.5">主餐 RM 13.00 / 份</p>
+        <div class="absolute bottom-3 left-4 right-4 text-white pointer-events-none">
+            <div class="flex items-center space-x-2">
+                <span id="carouselBadge" class="bg-amber-500 text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wide">周五限定</span>
+                <h1 id="carouselTitle" class="text-lg font-extrabold drop-shadow">🍔 特制汉堡</h1>
+            </div>
+            <p id="carouselSub" class="text-slate-200 text-xs mt-0.5 drop-shadow">主餐 RM 13.00 / 份</p>
         </div>
 
         <!-- 轮播小圆点指示器（点击可切换） -->
-        <div class="absolute top-4 right-4 flex space-x-2 z-20">
+        <div class="absolute top-3 right-3 flex space-x-1.5 z-20">
             <button type="button" onclick="goToSlide(0)" id="dot0" class="w-2.5 h-2.5 rounded-full bg-white transition-all focus:outline-none"></button>
             <button type="button" onclick="goToSlide(1)" id="dot1" class="w-2.5 h-2.5 rounded-full bg-white/50 transition-all focus:outline-none"></button>
             <button type="button" onclick="goToSlide(2)" id="dot2" class="w-2.5 h-2.5 rounded-full bg-white/50 transition-all focus:outline-none"></button>
@@ -36,7 +38,7 @@
     </div>
 
     <!-- 表单与付款卡片容器 -->
-    <div class="max-w-md mx-auto px-4 -mt-4 relative z-10 space-y-5">
+    <div class="max-w-md mx-auto px-4 -mt-2 relative z-10 space-y-5">
         
         <!-- 1. 表单卡片 -->
         <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100 space-y-5">
@@ -197,7 +199,7 @@
         const DUITNOW_PHONE = "0162207137";   
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwb8DekyobGj28he2BCQhcyHtqiN_vJvC8YvTNkuM4Wr-oi8PBdJ50PCy5abuwTvcujMg/exec"; 
 
-        // 3 张本地照片配置（Dish1, Dish2, Dish3）
+        // 3 张本地照片配置
         const SLIDES = [
             {
                 image: "dish1.jpg",
@@ -232,8 +234,8 @@
             checkCurrentDayAndDisable();
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             updateMenuInfo();
-            startCarousel();      // 启动 5 秒轮播
-            initSwipeEvents();   // 绑定左右滑动功能
+            startCarousel();      // 5 秒自动播放
+            initSwipeEvents();   // 手势左右滑动
         });
 
         // 自动轮播（每 5000 毫秒 = 5 秒）
@@ -252,7 +254,7 @@
         function goToSlide(index) {
             slideIndex = index;
             showSlide(slideIndex);
-            startCarousel(); // 手动切换后重置 5 秒倒计时
+            startCarousel();
         }
 
         function nextSlide() {
@@ -273,7 +275,7 @@
             const title = document.getElementById('carouselTitle');
             const sub = document.getElementById('carouselSub');
 
-            img.style.opacity = '0.3';
+            img.style.opacity = '0.2';
 
             setTimeout(() => {
                 const current = SLIDES[index];
@@ -291,14 +293,13 @@
                     }
                 }
                 img.style.opacity = '1';
-            }, 250);
+            }, 200);
         }
 
-        // 初始化滑动事件（同时支持手机 Touch 和电脑鼠标 Drag）
+        // 滑动手势绑定
         function initSwipeEvents() {
             const container = document.getElementById('carouselContainer');
 
-            // 触摸事件 (手机端)
             container.addEventListener('touchstart', (e) => {
                 touchStartX = e.changedTouches[0].screenX;
             }, { passive: true });
@@ -308,7 +309,6 @@
                 handleSwipe();
             }, { passive: true });
 
-            // 鼠标事件 (电脑端调试)
             let isDragging = false;
             container.addEventListener('mousedown', (e) => {
                 isDragging = true;
@@ -324,17 +324,15 @@
         }
 
         function handleSwipe() {
-            const threshold = 40; // 滑动最小判定距离 (px)
+            const threshold = 40;
             if (touchStartX - touchEndX > threshold) {
-                // 向左划 -> 下一张
                 nextSlide();
             } else if (touchEndX - touchStartX > threshold) {
-                // 向右划 -> 上一张
                 prevSlide();
             }
         }
 
-        // 判断日期：如果今天是星期六 (Day 6) 或星期日 (Day 0)，自动禁用星期五
+        // 日期过滤
         function checkCurrentDayAndDisable() {
             const today = new Date().getDay();
             const optFriday = document.getElementById('optFriday');
@@ -347,7 +345,7 @@
             }
         }
 
-        // 切换日期更新界面状态
+        // 切换日期更新界面
         function updateMenuInfo() {
             const day = document.getElementById('day').value;
             const menuIcon = document.getElementById('menuIcon');
@@ -374,7 +372,6 @@
             calculateTotal();
         }
 
-        // 开关主餐
         function toggleMainDish() {
             const wantMainDish = document.getElementById('wantMainDish').checked;
             const container = document.getElementById('mainQtyContainer');
@@ -386,7 +383,6 @@
             calculateTotal();
         }
 
-        // 主餐数量加减
         function adjustQty(amount) {
             const qtyInput = document.getElementById('qty');
             let current = parseInt(qtyInput.value) || 1;
@@ -396,7 +392,6 @@
             calculateTotal();
         }
 
-        // 开关糖水
         function toggleDessertQty() {
             const wantDessert = document.getElementById('wantDessert').checked;
             const container = document.getElementById('dessertQtyContainer');
@@ -408,7 +403,6 @@
             calculateTotal();
         }
 
-        // 糖水数量加减
         function adjustDessertQty(amount) {
             const qtyInput = document.getElementById('dessertQty');
             let current = parseInt(qtyInput.value) || 1;
@@ -419,7 +413,6 @@
             calculateTotal();
         }
 
-        // 实时计算总金额
         function calculateTotal() {
             const day = document.getElementById('day').value;
             const wantMainDish = document.getElementById('wantMainDish').checked;
@@ -444,7 +437,6 @@
             document.getElementById('copyAmountText').innerText = `复制转账金额 (${currentTotal})`;
         }
 
-        // 复制金额与电话
         function copyAmount() {
             navigator.clipboard.writeText(currentTotal);
             const span = document.getElementById('copyAmountText');
@@ -461,7 +453,6 @@
             setTimeout(() => { span.innerText = originalText; }, 2500);
         }
 
-        // 提交订单
         async function handleOrder(event) {
             event.preventDefault();
 
