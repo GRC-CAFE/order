@@ -10,37 +10,36 @@
 </head>
 <body class="bg-slate-100 min-h-screen pb-12 select-none">
 
-    <!-- 顶部 Banner 沉浸式轮播图区域（修改为 aspect-square，保证高海报顶部完整显示） -->
+    <!-- 顶部 Banner 轮播图区域 -->
     <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-xl cursor-grab active:cursor-grabbing bg-slate-900 aspect-square">
-        <!-- 动态轮播图片：使用 object-top 确保海报顶部标题不被裁切 -->
+        <!-- 动态轮播图片：高清无阴影遮挡 -->
         <img id="carouselImage" src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=800&auto=format&fit=crop" 
              class="w-full h-full object-cover object-top transition-opacity duration-500 opacity-100 pointer-events-none" 
              alt="GRC CAFE 展示">
         
-        <!-- 氛围渐变蒙层（底部渐变加深，凸显文字） -->
-        <div class="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent pointer-events-none"></div>
-        
-        <!-- 底部文字与标签 overlay -->
-        <div class="absolute bottom-3 left-4 right-4 text-white pointer-events-none z-10">
-            <div class="flex items-center space-x-2 mb-1">
-                <span id="carouselBadge" class="bg-amber-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow">
-                    ✨ GRC CAFE 舒适环境
-                </span>
+        <!-- 底部文字与标签 overlay（移除原渐暗蒙层，改为精美胶囊框） -->
+        <div class="absolute bottom-3 left-3 right-3 text-white pointer-events-none z-10">
+            <div class="inline-block bg-black/60 backdrop-blur-md p-3 rounded-2xl border border-white/10 shadow-lg max-w-full">
+                <div class="flex items-center space-x-2 mb-1">
+                    <span id="carouselBadge" class="bg-amber-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow">
+                        ✨ GRC CAFE 舒适环境
+                    </span>
+                </div>
+                <h1 id="carouselTitle" class="text-base font-black tracking-wide text-white drop-shadow">
+                    ☕ 温馨餐厅氛围
+                </h1>
+                <p id="carouselSub" class="text-amber-200/90 text-xs mt-0.5 font-medium drop-shadow">
+                    优雅灯光与舒适空间，尽享惬意时光
+                </p>
             </div>
-            <h1 id="carouselTitle" class="text-lg font-black tracking-wide text-white drop-shadow-md">
-                ☕ 温馨餐厅氛围
-            </h1>
-            <p id="carouselSub" class="text-amber-200/90 text-xs mt-0.5 font-medium drop-shadow">
-                优雅灯光与舒适空间，尽享惬意时光
-            </p>
         </div>
 
         <!-- 4 张图的指示点 (Dot Indicator) -->
-        <div class="absolute top-3 right-3 flex space-x-1.5 z-20 bg-black/40 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/10">
+        <div class="absolute top-3 right-3 flex space-x-1.5 z-20 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 shadow">
             <button type="button" onclick="goToSlide(0)" id="dot0" class="w-2 h-2 rounded-full bg-amber-400 transition-all focus:outline-none"></button>
-            <button type="button" onclick="goToSlide(1)" id="dot1" class="w-2 h-2 rounded-full bg-white/40 transition-all focus:outline-none"></button>
-            <button type="button" onclick="goToSlide(2)" id="dot2" class="w-2 h-2 rounded-full bg-white/40 transition-all focus:outline-none"></button>
-            <button type="button" onclick="goToSlide(3)" id="dot3" class="w-2 h-2 rounded-full bg-white/40 transition-all focus:outline-none"></button>
+            <button type="button" onclick="goToSlide(1)" id="dot1" class="w-2 h-2 rounded-full bg-white/50 transition-all focus:outline-none"></button>
+            <button type="button" onclick="goToSlide(2)" id="dot2" class="w-2 h-2 rounded-full bg-white/50 transition-all focus:outline-none"></button>
+            <button type="button" onclick="goToSlide(3)" id="dot3" class="w-2 h-2 rounded-full bg-white/50 transition-all focus:outline-none"></button>
         </div>
     </div>
 
@@ -302,7 +301,7 @@
                     if (dot) {
                         dot.className = (i === index) 
                             ? "w-2 h-2 rounded-full bg-amber-400 transition-all focus:outline-none" 
-                            : "w-2 h-2 rounded-full bg-white/40 transition-all focus:outline-none";
+                            : "w-2 h-2 rounded-full bg-white/50 transition-all focus:outline-none";
                     }
                 }
                 img.style.opacity = '1';
