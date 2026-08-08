@@ -10,15 +10,28 @@
 </head>
 <body class="bg-slate-50 min-h-screen pb-12">
 
-    <!-- 顶部 Banner 照片 -->
-    <div class="relative h-60 w-full max-w-md mx-auto">
-        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80" 
-             class="w-full h-full object-cover rounded-b-3xl shadow-md" alt="美食与糖水">
-        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent rounded-b-3xl"></div>
+    <!-- 顶部 Banner 轮播图区域 -->
+    <div class="relative h-64 w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-md">
+        <!-- 动态轮播图片 -->
+        <img id="carouselImage" src="burger.jpeg" 
+             class="w-full h-full object-cover transition-opacity duration-700 opacity-100" 
+             alt="美食展示">
+        
+        <!-- 渐变遮罩 -->
+        <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
+        
+        <!-- 顶部标签与标题信息 -->
         <div class="absolute bottom-4 left-5 right-5 text-white">
-            <span class="bg-amber-500 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">每周美食</span>
-            <h1 class="text-2xl font-extrabold mt-1">周五汉堡 / 周六卤肉饭 & 糖水</h1>
-            <p class="text-slate-200 text-sm mt-0.5">主餐 RM 13.00 | 周六限定糖水 RM 5.00</p>
+            <span id="carouselBadge" class="bg-amber-500 text-xs font-bold px-2.5 py-1 rounded-full uppercase tracking-wide">周五限定</span>
+            <h1 id="carouselTitle" class="text-2xl font-extrabold mt-1">🍔 特制汉堡</h1>
+            <p id="carouselSub" class="text-slate-200 text-sm mt-0.5">主餐 RM 13.00 / 份</p>
+        </div>
+
+        <!-- 轮播小圆点指示器 -->
+        <div class="absolute top-4 right-4 flex space-x-1.5">
+            <div id="dot0" class="w-2.5 h-2.5 rounded-full bg-white transition-all"></div>
+            <div id="dot1" class="w-2.5 h-2.5 rounded-full bg-white/50 transition-all"></div>
+            <div id="dot2" class="w-2.5 h-2.5 rounded-full bg-white/50 transition-all"></div>
         </div>
     </div>
 
@@ -59,7 +72,7 @@
                     </select>
                 </div>
 
-                <!-- 主餐点选区（星期五为强制，星期六可选可不选） -->
+                <!-- 主餐点选区 -->
                 <div class="bg-amber-50/60 border border-amber-200/60 rounded-xl p-4 space-y-3">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-2">
@@ -69,7 +82,7 @@
                                 <p class="text-sm font-bold text-amber-900" id="menuText">特制汉堡 (RM 13.00 / 份)</p>
                             </div>
                         </div>
-                        <!-- 星期六出现勾选框，允许不选主餐 -->
+                        <!-- 星期六出现勾选框 -->
                         <label id="mainDishToggle" class="hidden text-xs font-bold text-slate-600 flex items-center cursor-pointer bg-white px-2.5 py-1.5 rounded-lg border border-amber-200">
                             <input type="checkbox" id="wantMainDish" checked onchange="toggleMainDish()" class="w-4 h-4 text-emerald-600 rounded border-slate-300 focus:ring-emerald-500 mr-1.5">
                             订购主餐
@@ -87,7 +100,7 @@
                     </div>
                 </div>
 
-                <!-- 🥣 星期六限定糖水卡片（仅选星期六时显示） -->
+                <!-- 🥣 星期六限定糖水卡片 -->
                 <div id="dessertSection" class="hidden bg-rose-50 border border-rose-200 rounded-xl p-4 space-y-3">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-2">
@@ -166,7 +179,7 @@
 
                 <button type="button" onclick="copyPhone()" id="copyPhoneBtn" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-3 rounded-xl border border-slate-200 flex items-center justify-center space-x-2 transition">
                     <i class="fa-regular fa-copy"></i>
-                    <span id="copyPhoneText">复制 DuitNow 手机号 (012-3456789)</span>
+                    <span id="copyPhoneText">复制 DuitNow 手机号 (0162207137)</span>
                 </button>
             </div>
 
@@ -177,22 +190,81 @@
     </div>
 
     <script>
-        // ==================== 💡 必须修改的配置项 ====================
+        // ==================== 💡 已更新配置项 ====================
         const MAIN_DISH_PRICE = 13; // 主餐单价 RM 13.00
         const DESSERT_PRICE = 5;    // 糖水单价 RM 5.00
-        const MY_PHONE_NUMBER = "60145952975"; // 💡 替换为你的 WhatsApp 电话（加 60，无 + 号）
-        const DUITNOW_PHONE = "0162207137";   // 💡 替换为你的 DuitNow 号码
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwb8DekyobGj28he2BCQhcyHtqiN_vJvC8YvTNkuM4Wr-oi8PBdJ50PCy5abuwTvcujMg/exec"; // 💡 粘贴你的 Google Apps Script URL
+        const MY_PHONE_NUMBER = "60145952975"; 
+        const DUITNOW_PHONE = "0162207137";   
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwb8DekyobGj28he2BCQhcyHtqiN_vJvC8YvTNkuM4Wr-oi8PBdJ50PCy5abuwTvcujMg/exec"; 
+
+        // 💡 三张照片配置
+        const SLIDES = [
+            {
+                image: "burger.jpeg",
+                badge: "周五限定",
+                title: "🍔 特制汉堡",
+                sub: "RM 13.00 / 份"
+            },
+            {
+                image: "lurow.jpeg",
+                badge: "周六限定主餐",
+                title: "🍲 招牌卤肉饭",
+                sub: "RM 13.00 / 份"
+            },
+            {
+                image: "dessert.jpeg",
+                badge: "周六限定糖水",
+                title: "🥣 滋润糖水",
+                sub: "RM 5.00 / 份 | 限量 20 份"
+            }
+        ];
         // ============================================================
 
         let currentTotal = 13;
+        let slideIndex = 0;
 
-        // 页面加载时初始化
+        // 页面初始化
         window.addEventListener('DOMContentLoaded', () => {
             checkCurrentDayAndDisable();
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             updateMenuInfo();
+            startCarousel(); // 启动 3 秒自动轮播
         });
+
+        // 自动轮播图片逻辑 (每 3000毫秒 = 3秒 切换一次)
+        function startCarousel() {
+            setInterval(() => {
+                slideIndex = (slideIndex + 1) % SLIDES.length;
+                showSlide(slideIndex);
+            }, 3000);
+        }
+
+        function showSlide(index) {
+            const img = document.getElementById('carouselImage');
+            const badge = document.getElementById('carouselBadge');
+            const title = document.getElementById('carouselTitle');
+            const sub = document.getElementById('carouselSub');
+
+            img.style.opacity = '0.3';
+
+            setTimeout(() => {
+                const current = SLIDES[index];
+                img.src = current.image;
+                badge.innerText = current.badge;
+                title.innerText = current.title;
+                sub.innerText = current.sub;
+
+                for (let i = 0; i < 3; i++) {
+                    const dot = document.getElementById(`dot${i}`);
+                    if (i === index) {
+                        dot.className = "w-2.5 h-2.5 rounded-full bg-white transition-all";
+                    } else {
+                        dot.className = "w-2.5 h-2.5 rounded-full bg-white/50 transition-all";
+                    }
+                }
+                img.style.opacity = '1';
+            }, 250);
+        }
 
         // 判断日期：如果今天是星期六 (Day 6) 或星期日 (Day 0)，自动禁用星期五
         function checkCurrentDayAndDisable() {
@@ -221,7 +293,7 @@
                 menuText.innerText = "特制汉堡 (RM 13.00 / 份)";
                 dessertSection.classList.add('hidden');
                 mainDishToggle.classList.add('hidden');
-                wantMainDish.checked = true; // 周五必须订主餐
+                wantMainDish.checked = true;
                 document.getElementById('mainQtyContainer').classList.remove('hidden');
                 document.getElementById('wantDessert').checked = false;
                 document.getElementById('dessertQtyContainer').classList.add('hidden');
@@ -229,12 +301,12 @@
                 menuIcon.innerText = "🍲";
                 menuText.innerText = "招牌卤肉饭 (RM 13.00 / 份)";
                 dessertSection.classList.remove('hidden');
-                mainDishToggle.classList.remove('hidden'); // 周六显示主餐勾选框
+                mainDishToggle.classList.remove('hidden');
             }
             calculateTotal();
         }
 
-        // 开关主餐（星期六）
+        // 开关主餐
         function toggleMainDish() {
             const wantMainDish = document.getElementById('wantMainDish').checked;
             const container = document.getElementById('mainQtyContainer');
@@ -289,19 +361,16 @@
 
             let total = 0;
 
-            // 如果勾选了主餐
             if (wantMainDish) {
                 total += mainQty * MAIN_DISH_PRICE;
             }
 
-            // 如果勾选了糖水（仅限周六）
             if (day === "星期六" && wantDessert) {
                 total += dessertQty * DESSERT_PRICE;
             }
 
             currentTotal = total.toFixed(2);
 
-            // 实时更新显示
             document.getElementById('totalText').innerText = `RM ${currentTotal}`;
             document.getElementById('qrAmountText').innerText = `RM ${currentTotal}`;
             document.getElementById('copyAmountText').innerText = `复制转账金额 (${currentTotal})`;
@@ -332,7 +401,6 @@
             const wantMainDish = document.getElementById('wantMainDish').checked;
             const wantDessert = document.getElementById('wantDessert').checked;
 
-            // 💡 校验拦截：如果两样都没选，阻止提交
             if (!wantMainDish && !wantDessert) {
                 alert("⚠️ 请至少选择一份主餐或糖水！");
                 return;
@@ -350,14 +418,12 @@
 
             const dishName = (day === "星期五") ? "特制汉堡" : "招牌卤肉饭";
 
-            // 文本信息拼装
             let mainDishText = wantMainDish ? `${dishName} x ${mainQty} 份` : "未订购主餐";
             let dessertText = (day === "星期六" && wantDessert) ? `周六限定糖水 x ${dessertQty} 份` : "未订购糖水";
 
             const payload = { name, day, dish: mainDishText, dessert: dessertText, total, notes };
 
-            // 1. 静默写入后台 Google Sheets
-            if (GOOGLE_SCRIPT_URL && !GOOGLE_SCRIPT_URL.includes("YOUR_GOOGLE")) {
+            if (GOOGLE_SCRIPT_URL) {
                 try {
                     await fetch(GOOGLE_SCRIPT_URL, {
                         method: 'POST',
@@ -370,7 +436,6 @@
                 }
             }
 
-            // 2. 拼接 WhatsApp 格式化消息
             let waMessage = `🛒 *【晚餐/糖水预订订单】*%0A` +
                             `--------------------------------%0A` +
                             `👤 *名字*：${name}%0A` +
@@ -388,7 +453,6 @@
                          `--------------------------------%0A` +
                          `已下单，已按照 RM ${total} 完成转账/准备付款，请查收！`;
 
-            // 3. 跳转至 WhatsApp
             window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${waMessage}`;
         }
     </script>
