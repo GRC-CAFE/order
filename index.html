@@ -502,7 +502,7 @@
             setTimeout(() => { span.innerText = originalText; }, 2500);
         }
 
-        // ================= 提交表单逻辑 =================
+        // ================= 提交表单逻辑 (超时控制防卡死 + 新窗口跳转) =================
         async function handleOrder(event) {
             event.preventDefault();
 
@@ -516,6 +516,8 @@
             }
 
             const btn = document.getElementById('submitBtn');
+            const originalBtnText = `<i class="fa-brands fa-whatsapp text-emerald-400 text-xl"></i><span>确认提交并发送至 WhatsApp</span>`;
+            
             btn.disabled = true;
             btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>正在提交订单...</span>`;
 
@@ -526,11 +528,8 @@
             const total = currentTotal;
 
             const dishName = (day === "星期五") ? "特制汉堡" : "招牌卤肉饭";
-
-            // 格式化写入后台 D 列的字段：严格格式为 "主餐:X | 糖水:Y"
             const qtySummary = `主餐:${mainQty} | 糖水:${dessertQty}`;
 
-            // 发送到 Google Sheets
             const payload = { 
                 timestamp: new Date().toLocaleString("zh-CN", { timeZone: "Asia/Kuala_Lumpur" }),
                 name: name, 
@@ -540,20 +539,27 @@
                 notes: notes 
             };
 
+            // 1. 发送到 Google Sheets (设置 2.5 秒超时控制，避免无限卡 Loading)
             if (GOOGLE_SCRIPT_URL) {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 2500);
+
                 try {
                     await fetch(GOOGLE_SCRIPT_URL, {
                         method: 'POST',
                         mode: 'no-cors',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify(payload),
+                        signal: controller.signal
                     });
                 } catch (e) {
-                    console.log("Sheet error:", e);
+                    console.log("Sheet fetch skipped or timed out:", e);
+                } finally {
+                    clearTimeout(timeoutId);
                 }
             }
 
-            // 发送到 WhatsApp 消息文案
+            // 2. 拼接 WhatsApp 消息
             let waMessage = `🛒 *【晚餐/糖水预订订单】*%0A` +
                             `--------------------------------%0A` +
                             `👤 *名字*：${name}%0A` +
@@ -571,7 +577,14 @@
                          `--------------------------------%0A` +
                          `已下单，已按照 RM ${total} 完成转账/准备付款，请查收！`;
 
-            window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${waMessage}`;
+            const waUrl = `https://wa.me/${MY_PHONE_NUMBER}?text=${waMessage}`;
+
+            // 3. 恢复按钮状态并在新标签页/WhatsApp App 打开，解决页面卡转圈问题
+            setTimeout(() => {
+                btn.disabled = false;
+                btn.innerHTML = originalBtnText;
+                window.open(waUrl, '_blank');
+            }, 500);
         }
     </script>
 </body>
