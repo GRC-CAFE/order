@@ -25,23 +25,6 @@
              class="w-full h-auto block transition-opacity duration-500 opacity-100 pointer-events-none" 
              alt="GRC CAFE 展示">
 
-        <!-- 底部文字 overlay -->
-        <div class="absolute bottom-3 left-3 right-3 text-slate-800 pointer-events-none z-10">
-            <div class="inline-block bg-white/85 backdrop-blur-md p-3 rounded-2xl border border-white/80 shadow-md max-w-full">
-                <div class="flex items-center space-x-2 mb-0.5">
-                    <span id="carouselBadge" class="bg-amber-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-                        ✨ 家的味道 GRC CAFE
-                    </span>
-                </div>
-                <h1 id="carouselTitle" class="text-base font-black tracking-wide text-slate-800">
-                    ☕ 善用设施
-                </h1>
-                <p id="carouselSub" class="text-slate-600 text-xs mt-0.5 font-medium">
-                    避免交通拥堵，预备心轻松服侍
-                </p>
-            </div>
-        </div>
-
         <!-- 动态指示点 -->
         <div id="carouselDots" class="absolute top-3 right-3 flex space-x-1.5 z-20 bg-white/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/50 shadow-sm">
         </div>
@@ -202,30 +185,18 @@
         const ALL_SLIDES = [
             {
                 image: "cafe1.jpeg",
-                badge: "✨ 家的味道 GRC CAFE",
-                title: "☕ 善用设施",
-                sub: "避免交通拥堵，预备心轻松服侍",
                 isSaturday: false
             },
             {
                 image: "dish1.jpeg",
-                badge: "周五限定主餐",
-                title: "🍲 古早味酿豆腐",
-                sub: "RM 13.00 / 份",
                 isSaturday: false
             },
             {
                 image: "dish2.jpeg",
-                badge: "周六限定主餐",
-                title: "🍲 招牌卤肉饭",
-                sub: "RM 13.00 / 份",
                 isSaturday: true
             },
             {
                 image: "dish3.jpeg",
-                badge: "周六限定糖水",
-                title: "🥣 滋润糖水",
-                sub: "RM 5.00 / 份 | 限量 20 份",
                 isSaturday: true
             }
         ];
@@ -347,18 +318,12 @@
 
         function showSlide(index) {
             const img = document.getElementById('carouselImage');
-            const badge = document.getElementById('carouselBadge');
-            const title = document.getElementById('carouselTitle');
-            const sub = document.getElementById('carouselSub');
 
             img.style.opacity = '0.3';
 
             setTimeout(() => {
                 const current = SLIDES[index];
                 img.src = current.image;
-                badge.innerText = current.badge;
-                title.innerText = current.title;
-                sub.innerText = current.sub;
 
                 for (let i = 0; i < SLIDES.length; i++) {
                     const dot = document.getElementById(`dot${i}`);
