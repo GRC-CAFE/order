@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GRC CAFE - 晚餐与糖水预订</title>
-    <!-- 引入 Tailwind CSS -->
+    <!-- 引入 Tailwind CSS 与 FontAwesome Icon -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -18,7 +18,7 @@
 </head>
 <body class="bg-slate-100 min-h-screen pb-12 select-none">
 
-    <!-- 顶部 Banner 区域 (根据图片自动适应高度，完全无黑边) -->
+    <!-- 顶部 Banner 区域 -->
     <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-xl cursor-grab active:cursor-grabbing bg-white">
         <!-- 动态轮播图片 -->
         <img id="carouselImage" src="cafe1.jpeg" 
@@ -53,7 +53,7 @@
         <!-- 1. 表单卡片 -->
         <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100 space-y-5">
             
-            <!-- 菜单价格与截单说明 (动态联动) -->
+            <!-- 菜单价格与截单说明 -->
             <div class="flex justify-between items-center pb-4 border-b border-slate-100">
                 <div>
                     <span class="text-xs text-slate-400 block font-medium">菜单价格</span>
@@ -61,7 +61,7 @@
                 </div>
                 <div class="text-right">
                     <span class="text-xs text-slate-400 block font-medium">截单规则</span>
-                    <span class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2.5 py-1 rounded-lg">预订至 8月13号 8PM 截单</span>
+                    <span id="deadlineText" class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2.5 py-1 rounded-lg">预订至 8月13号 8PM 截单</span>
                 </div>
             </div>
 
@@ -69,7 +69,7 @@
             <form id="orderForm" onsubmit="handleOrder(event)" class="space-y-4">
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">您的名字 / 称呼 <span class="text-rose-500">*</span></label>
-                    <input type="text" id="name" required placeholder="例如：Tan / Ah Beng" 
+                    <input type="text" id="name" required placeholder="例如：Tan / Ah Beng" autocomplete="off"
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 transition text-sm">
                 </div>
 
@@ -99,9 +99,9 @@
                     <div id="mainQtyContainer" class="flex items-center justify-between pt-1">
                         <span class="text-xs font-bold text-slate-600">主餐份数：</span>
                         <div class="flex items-center space-x-3">
-                            <button type="button" onclick="adjustQty(-1)" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-lg flex items-center justify-center border border-slate-200 shadow-sm">-</button>
+                            <button type="button" onclick="adjustQty(-1)" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-lg flex items-center justify-center border border-slate-200 shadow-sm active:bg-slate-200">-</button>
                             <input type="number" id="qty" value="1" min="1" readonly class="w-14 text-center py-1 font-bold text-base border border-slate-200 rounded-xl bg-white shadow-inner">
-                            <button type="button" onclick="adjustQty(1)" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-lg flex items-center justify-center border border-slate-200 shadow-sm">+</button>
+                            <button type="button" onclick="adjustQty(1)" class="w-9 h-9 rounded-xl bg-white hover:bg-slate-100 text-slate-700 font-bold text-lg flex items-center justify-center border border-slate-200 shadow-sm active:bg-slate-200">+</button>
                         </div>
                     </div>
                 </div>
@@ -126,16 +126,16 @@
                     <div id="dessertQtyContainer" class="hidden flex items-center justify-between pt-1">
                         <span class="text-xs font-bold text-slate-600">糖水份数：</span>
                         <div class="flex items-center space-x-2">
-                            <button type="button" onclick="adjustDessertQty(-1)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold text-sm text-slate-700 shadow-sm">-</button>
+                            <button type="button" onclick="adjustDessertQty(-1)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold text-sm text-slate-700 shadow-sm active:bg-slate-100">-</button>
                             <input type="number" id="dessertQty" value="1" min="1" max="20" readonly class="w-12 text-center text-sm font-bold bg-white border border-slate-200 rounded-lg py-1">
-                            <button type="button" onclick="adjustDessertQty(1)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold text-sm text-slate-700 shadow-sm">+</button>
+                            <button type="button" onclick="adjustDessertQty(1)" class="w-8 h-8 rounded-lg bg-white border border-slate-200 font-bold text-sm text-slate-700 shadow-sm active:bg-slate-100">+</button>
                         </div>
                     </div>
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">特殊备注 (可选)</label>
-                    <input type="text" id="notes" placeholder="如：少辣 / 不要葱 / 糖水要热" 
+                    <input type="text" id="notes" placeholder="如：少辣 / 不要葱 / 糖水要热" autocomplete="off"
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 transition text-sm">
                 </div>
 
@@ -198,7 +198,6 @@
         const DUITNOW_PHONE = "0162207137";   
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6lj4CZrXCGFqm3rvK5JJMx_9ZVFxOvJ_486tCZYnOTb37CZAxTS3EJWSSESXtt2ELzA/exec"; 
 
-        // 已移除 cafe2.jpeg
         const ALL_SLIDES = [
             {
                 image: "cafe1.jpeg",
@@ -244,14 +243,13 @@
         window.addEventListener('DOMContentLoaded', () => {
             renderDots();
             checkCurrentDayAndDisable();
-            updatePriceHeader(); // 依据开关更新“菜单价格”文本
+            updatePriceHeader();
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             updateMenuInfo();
             startCarousel();
             initSwipeEvents();
         });
 
-        // 依据 ENABLE_SATURDAY 动态显示价格
         function updatePriceHeader() {
             const priceHeader = document.getElementById('priceHeader');
             if (ENABLE_SATURDAY) {
@@ -268,7 +266,6 @@
             ).join('');
         }
 
-        // 检查截单规则：设置为 8月13号 8:00 PM (20:00) 截单
         function checkCurrentDayAndDisable() {
             const now = new Date();
             const currentDayOfWeek = now.getDay();
@@ -501,20 +498,48 @@
             document.getElementById('copyAmountText').innerText = `复制转账金额 (${currentTotal})`;
         }
 
+        // 剪贴板安全复制函数（支持 HTTPS 级 fallback）
+        function safeCopyText(text, successCallback) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(successCallback).catch(() => fallbackCopy(text, successCallback));
+            } else {
+                fallbackCopy(text, successCallback);
+            }
+        }
+
+        function fallbackCopy(text, successCallback) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.style.position = "fixed";
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                successCallback();
+            } catch (err) {
+                alert("复制失败，请手动复制：" + text);
+            }
+            document.body.removeChild(textArea);
+        }
+
         function copyAmount() {
-            navigator.clipboard.writeText(currentTotal);
-            const span = document.getElementById('copyAmountText');
-            const originalText = span.innerText;
-            span.innerText = `✅ 已复制金额 RM ${currentTotal}！`;
-            setTimeout(() => { span.innerText = originalText; }, 2500);
+            safeCopyText(currentTotal, () => {
+                const span = document.getElementById('copyAmountText');
+                const originalText = span.innerText;
+                span.innerText = `✅ 已复制金额 RM ${currentTotal}！`;
+                setTimeout(() => { span.innerText = originalText; }, 2500);
+            });
         }
 
         function copyPhone() {
-            navigator.clipboard.writeText(DUITNOW_PHONE);
-            const span = document.getElementById('copyPhoneText');
-            const originalText = span.innerText;
-            span.innerText = `✅ 已复制号码 ${DUITNOW_PHONE}！`;
-            setTimeout(() => { span.innerText = originalText; }, 2500);
+            safeCopyText(DUITNOW_PHONE, () => {
+                const span = document.getElementById('copyPhoneText');
+                const originalText = span.innerText;
+                span.innerText = `✅ 已复制号码 ${DUITNOW_PHONE}！`;
+                setTimeout(() => { span.innerText = originalText; }, 2500);
+            });
         }
 
         async function handleOrder(event) {
@@ -524,8 +549,12 @@
             const wantMainDish = document.getElementById('wantMainDish').checked;
             const wantDessert = document.getElementById('wantDessert').checked;
 
-            if (!wantMainDish && !wantDessert) {
-                alert("⚠️ 请至少选择一份主餐或糖水！");
+            const mainQty = wantMainDish ? (parseInt(document.getElementById('qty').value) || 0) : 0;
+            const dessertQty = (day === "星期六" && wantDessert) ? (parseInt(document.getElementById('dessertQty').value) || 0) : 0;
+
+            // 严格的提交校验
+            if ((!wantMainDish || mainQty <= 0) && (!wantDessert || dessertQty <= 0)) {
+                alert("⚠️ 请至少选择 1 份主餐或糖水！");
                 return;
             }
 
@@ -535,10 +564,8 @@
             btn.disabled = true;
             btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i><span>正在提交订单...</span>`;
 
-            const name = document.getElementById('name').value;
-            const mainQty = wantMainDish ? (parseInt(document.getElementById('qty').value) || 0) : 0;
-            const dessertQty = (day === "星期六" && wantDessert) ? (parseInt(document.getElementById('dessertQty').value) || 0) : 0;
-            const notes = document.getElementById('notes').value || '无';
+            const name = document.getElementById('name').value.trim();
+            const notes = document.getElementById('notes').value.trim() || '无';
             const total = currentTotal;
 
             const dishName = (day === "星期五") ? "古早味酿豆腐" : "招牌卤肉饭";
@@ -553,9 +580,10 @@
                 notes: notes 
             };
 
+            // 发送数据到 Google Sheets
             if (GOOGLE_SCRIPT_URL) {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 2500);
+                const timeoutId = setTimeout(() => controller.abort(), 5000);
 
                 try {
                     await fetch(GOOGLE_SCRIPT_URL, {
@@ -572,20 +600,21 @@
                 }
             }
 
+            // 构建 WhatsApp 消息模板
             let waMessage = `🛒 *【晚餐/糖水预订订单】*%0A` +
                             `--------------------------------%0A` +
-                            `👤 *名字*：${name}%0A` +
-                            `📅 *用餐日期*：${day}%0A`;
+                            `👤 *名字*：${encodeURIComponent(name)}%0A` +
+                            `📅 *用餐日期*：${encodeURIComponent(day)}%0A`;
 
-            if (wantMainDish) {
-                waMessage += `🍲 *主餐*：${dishName} x ${mainQty} 份%0A`;
+            if (wantMainDish && mainQty > 0) {
+                waMessage += `🍲 *主餐*：${encodeURIComponent(dishName)} x ${mainQty} 份%0A`;
             }
-            if (day === "星期六" && wantDessert) {
+            if (day === "星期六" && wantDessert && dessertQty > 0) {
                 waMessage += `🥣 *糖水*：周六限定糖水 x ${dessertQty} 份%0A`;
             }
 
             waMessage += `💰 *总计*：RM ${total}%0A` +
-                         `📝 *备注*：${notes}%0A` +
+                         `📝 *备注*：${encodeURIComponent(notes)}%0A` +
                          `--------------------------------%0A` +
                          `已下单，已按照 RM ${total} 完成转账/准备付款，请查收！`;
 
@@ -595,7 +624,7 @@
                 btn.disabled = false;
                 btn.innerHTML = originalBtnText;
                 window.open(waUrl, '_blank');
-            }, 500);
+            }, 300);
         }
     </script>
 </body>
