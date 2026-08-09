@@ -34,12 +34,8 @@
             </div>
         </div>
 
-        <!-- 4 张图指示点 -->
-        <div class="absolute top-3 right-3 flex space-x-1.5 z-20 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 shadow">
-            <button type="button" onclick="goToSlide(0)" id="dot0" class="w-2 h-2 rounded-full bg-amber-400 transition-all focus:outline-none"></button>
-            <button type="button" onclick="goToSlide(1)" id="dot1" class="w-2 h-2 rounded-full bg-white/50 transition-all focus:outline-none"></button>
-            <button type="button" onclick="goToSlide(2)" id="dot2" class="w-2 h-2 rounded-full bg-white/50 transition-all focus:outline-none"></button>
-            <button type="button" onclick="goToSlide(3)" id="dot3" class="w-2 h-2 rounded-full bg-white/50 transition-all focus:outline-none"></button>
+        <!-- 动态渲染指示点容器 -->
+        <div id="carouselDots" class="absolute top-3 right-3 flex space-x-1.5 z-20 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 shadow">
         </div>
     </div>
 
@@ -57,7 +53,7 @@
                 </div>
                 <div class="text-right">
                     <span class="text-xs text-slate-400 block font-medium">截单规则</span>
-                    <span class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2.5 py-1 rounded-lg">用餐当天 12:00 AM 截单</span>
+                    <span class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2.5 py-1 rounded-lg">用餐前一天 12:00 AM 截单</span>
                 </div>
             </div>
 
@@ -198,40 +194,51 @@
     </div>
 
     <script>
-        // ==================== 配置项 ====================
+        // ==================== 全局开关配置 ====================
+        const ENABLE_SATURDAY = false; // 👈 开关：设置为 false 自动屏蔽星期六菜单及对应照片！设为 true 开启！
+
         const MAIN_DISH_PRICE = 13; // 主餐单价 RM 13.00
         const DESSERT_PRICE = 5;    // 糖水单价 RM 5.00
         const MY_PHONE_NUMBER = "60145952975"; 
         const DUITNOW_PHONE = "0162207137";   
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6lj4CZrXCGFqm3rvK5JJMx_9ZVFxOvJ_486tCZYnOTb37CZAxTS3EJWSSESXtt2ELzA/exec"; 
 
-        // 4 张照片配置
-        const SLIDES = [
+        // 完整照片库配置
+        const ALL_SLIDES = [
             {
                 image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=800&auto=format&fit=crop",
                 badge: "✨ GRC CAFE 舒适环境",
                 title: "☕ 温馨餐厅氛围",
-                sub: "优雅灯光与舒适空间，尽享惬意时光"
+                sub: "优雅灯光与舒适空间，尽享惬意时光",
+                isSaturday: false
             },
             {
                 image: "dish1.jpeg",
                 badge: "周五限定主餐",
                 title: "🍲 古早味酿豆腐",
-                sub: "RM 13.00 / 份"
+                sub: "RM 13.00 / 份",
+                isSaturday: false
             },
             {
                 image: "dish2.jpeg",
                 badge: "周六限定主餐",
                 title: "🍲 招牌卤肉饭",
-                sub: "RM 13.00 / 份"
+                sub: "RM 13.00 / 份",
+                isSaturday: true // 👈 星期六照片
             },
             {
                 image: "dish3.jpeg",
                 badge: "周六限定糖水",
                 title: "🥣 滋润糖水",
-                sub: "RM 5.00 / 份 | 限量 20 份"
+                sub: "RM 5.00 / 份 | 限量 20 份",
+                isSaturday: true // 👈 星期六照片
             }
         ];
+
+        // 依据开关自动过滤轮播图片
+        const SLIDES = ENABLE_SATURDAY 
+            ? ALL_SLIDES 
+            : ALL_SLIDES.filter(slide => !slide.isSaturday);
         // ============================================================
 
         let currentTotal = 13;
@@ -242,6 +249,7 @@
         let touchEndX = 0;
 
         window.addEventListener('DOMContentLoaded', () => {
+            renderDots();
             checkCurrentDayAndDisable();
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             updateMenuInfo();
@@ -249,12 +257,20 @@
             initSwipeEvents();
         });
 
-        // 自动计算下周五、六并检查当天 12:00 AM 截单逻辑
+        // 动态生成轮播图圆点
+        function renderDots() {
+            const dotsContainer = document.getElementById('carouselDots');
+            dotsContainer.innerHTML = SLIDES.map((_, i) => 
+                `<button type="button" onclick="goToSlide(${i})" id="dot${i}" class="w-2 h-2 rounded-full ${i === 0 ? 'bg-amber-400' : 'bg-white/50'} transition-all focus:outline-none"></button>`
+            ).join('');
+        }
+
+        // 自动计算下周五、六并检查【前一天 12:00 AM】截单逻辑
         function checkCurrentDayAndDisable() {
             const now = new Date();
             const currentDayOfWeek = now.getDay(); // 0 = 周日, 1 = 周一 ... 6 = 周六
             
-            // 计算目标周五 (Target Friday) 和周六 (Target Saturday)
+            // 计算目标周五与周六
             const daysUntilFriday = (5 - currentDayOfWeek + 7) % 7 || 7; 
             
             const targetFriday = new Date(now);
@@ -263,11 +279,10 @@
             const targetSaturday = new Date(targetFriday);
             targetSaturday.setDate(targetFriday.getDate() + 1);
 
-            // 截单时间设为当天的 12:00 AM (00:00:00)
-            const friDeadline = new Date(targetFriday.getFullYear(), targetFriday.getMonth(), targetFriday.getDate(), 0, 0, 0);
-            const satDeadline = new Date(targetSaturday.getFullYear(), targetSaturday.getMonth(), targetSaturday.getDate(), 0, 0, 0);
+            // 截单时间：前一天 12:00 AM
+            const friDeadline = new Date(targetFriday.getFullYear(), targetFriday.getMonth(), targetFriday.getDate() - 1, 0, 0, 0);
+            const satDeadline = new Date(targetSaturday.getFullYear(), targetSaturday.getMonth(), targetSaturday.getDate() - 1, 0, 0, 0);
 
-            // 格式化日期字符串
             const friDateStr = `${targetFriday.getMonth() + 1}月${targetFriday.getDate()}日`;
             const satDateStr = `${targetSaturday.getMonth() + 1}月${targetSaturday.getDate()}日`;
 
@@ -275,7 +290,6 @@
             const optSaturday = document.getElementById('optSaturday');
             const daySelect = document.getElementById('day');
 
-            // 判断周五截单状态
             if (now >= friDeadline) {
                 optFriday.disabled = true;
                 optFriday.innerText = `星期五 (${friDateStr}) - 🍲 古早味酿豆腐 [已截单]`;
@@ -284,8 +298,11 @@
                 optFriday.innerText = `星期五 (${friDateStr}) - 🍲 古早味酿豆腐`;
             }
 
-            // 判断周六截单状态
-            if (now >= satDeadline) {
+            // 开关为 false 时暂停星期六
+            if (!ENABLE_SATURDAY) {
+                optSaturday.disabled = true;
+                optSaturday.innerText = `星期六 (${satDateStr}) - 暂停预订`;
+            } else if (now >= satDeadline) {
                 optSaturday.disabled = true;
                 optSaturday.innerText = `星期六 (${satDateStr}) - 🍲 卤肉饭 / 🥣 糖水 [已截单]`;
             } else {
@@ -293,10 +310,9 @@
                 optSaturday.innerText = `星期六 (${satDateStr}) - 🍲 卤肉饭 / 🥣 糖水`;
             }
 
-            // 自动选择可用选项
             if (optFriday.disabled && !optSaturday.disabled) {
                 daySelect.value = "星期六";
-            } else if (!optFriday.disabled) {
+            } else {
                 daySelect.value = "星期五";
             }
         }
@@ -457,7 +473,7 @@
             let current = parseInt(qtyInput.value) || 1;
             current += amount;
             if (current < 1) current = 1;
-            if (current > 20) current = 20; // 糖水限制最多 20 份
+            if (current > 20) current = 20;
             qtyInput.value = current;
             calculateTotal();
         }
@@ -502,7 +518,7 @@
             setTimeout(() => { span.innerText = originalText; }, 2500);
         }
 
-        // ================= 提交表单逻辑 (超时控制防卡死 + 新窗口跳转) =================
+        // 表单提交逻辑
         async function handleOrder(event) {
             event.preventDefault();
 
@@ -539,7 +555,6 @@
                 notes: notes 
             };
 
-            // 1. 发送到 Google Sheets (设置 2.5 秒超时控制，避免无限卡 Loading)
             if (GOOGLE_SCRIPT_URL) {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 2500);
@@ -559,7 +574,6 @@
                 }
             }
 
-            // 2. 拼接 WhatsApp 消息
             let waMessage = `🛒 *【晚餐/糖水预订订单】*%0A` +
                             `--------------------------------%0A` +
                             `👤 *名字*：${name}%0A` +
@@ -579,7 +593,6 @@
 
             const waUrl = `https://wa.me/${MY_PHONE_NUMBER}?text=${waMessage}`;
 
-            // 3. 恢复按钮状态并在新标签页/WhatsApp App 打开，解决页面卡转圈问题
             setTimeout(() => {
                 btn.disabled = false;
                 btn.innerHTML = originalBtnText;
