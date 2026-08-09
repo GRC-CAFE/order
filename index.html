@@ -13,7 +13,7 @@
     <!-- 顶部 Banner 轮播图区域 (1:1 比例，顶部对齐防裁剪) -->
     <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-xl cursor-grab active:cursor-grabbing bg-slate-900 aspect-square">
         <!-- 动态轮播图片：高清无渐变阴影遮挡 -->
-        <img id="carouselImage" src="https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=800&auto=format&fit=crop" 
+        <img id="carouselImage" src="cafe1.jpeg" 
              class="w-full h-full object-cover object-top transition-opacity duration-500 opacity-100 pointer-events-none" 
              alt="GRC CAFE 展示">
         
@@ -53,7 +53,7 @@
                 </div>
                 <div class="text-right">
                     <span class="text-xs text-slate-400 block font-medium">截单规则</span>
-                    <span class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2.5 py-1 rounded-lg">预订至 8月13号(星期4) 截单</span>
+                    <span class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2.5 py-1 rounded-lg">预订至 8月13号 截单</span>
                 </div>
             </div>
 
@@ -80,7 +80,7 @@
                 <div class="bg-amber-50/60 border border-amber-200/60 rounded-2xl p-4 space-y-3">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-2">
-                            <span class="text-2xl" id="menuIcon">🍔</span>
+                            <span class="text-2xl" id="menuIcon">🍲</span>
                             <div>
                                 <p class="text-xs text-amber-700 font-medium">主餐菜单：</p>
                                 <p class="text-sm font-bold text-amber-950" id="menuText">古早味酿豆腐 (RM 13.00 / 份)</p>
@@ -199,17 +199,24 @@
 
         const MAIN_DISH_PRICE = 13; // 主餐单价 RM 13.00
         const DESSERT_PRICE = 5;    // 糖水单价 RM 5.00
-        const MY_PHONE_NUMBER = "0162207137"; 
+        const MY_PHONE_NUMBER = "60145952975"; 
         const DUITNOW_PHONE = "0162207137";   
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6lj4CZrXCGFqm3rvK5JJMx_9ZVFxOvJ_486tCZYnOTb37CZAxTS3EJWSSESXtt2ELzA/exec"; 
 
-        // 完整照片库配置
+        // 完整照片库配置（已替换为 cafe1.jpeg 和 cafe2.jpeg）
         const ALL_SLIDES = [
             {
-                image: "https://images.unsplash.com/photo-1554118811-1e0d58224f24?q=80&w=800&auto=format&fit=crop",
+                image: "cafe1.jpeg",
+                badge: "✨ 家的味道 GRC CAFE",
+                title: "☕ 家的味道 GRC CAFE",
+                sub: "善用设施，避免交通拥堵，预备心轻松服侍",
+                isSaturday: false
+            },
+            {
+                image: "cafe2.jpeg",
                 badge: "✨ GRC CAFE 舒适环境",
-                title: "☕ 温馨餐厅氛围",
-                sub: "优雅灯光与舒适空间，尽享惬意时光",
+                title: "☕ 尽享惬意时光",
+                sub: "为您提供优质温馨的用餐体验，欢迎订餐",
                 isSaturday: false
             },
             {
@@ -410,7 +417,7 @@
             }
         }
 
-        // 切换日期更新菜单
+        // 切换日期更新菜单（已将星期五的汉堡 Icon 替换为 🍲）
         function updateMenuInfo() {
             const day = document.getElementById('day').value;
             const menuIcon = document.getElementById('menuIcon');
@@ -420,7 +427,7 @@
             const wantMainDish = document.getElementById('wantMainDish');
 
             if (day === "星期五") {
-                menuIcon.innerText = "🍔";
+                menuIcon.innerText = "🍲";
                 menuText.innerText = "古早味酿豆腐 (RM 13.00 / 份)";
                 dessertSection.classList.add('hidden');
                 mainDishToggle.classList.add('hidden');
