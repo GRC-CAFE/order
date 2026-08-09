@@ -30,14 +30,14 @@
             <div class="inline-block bg-white/85 backdrop-blur-md p-3 rounded-2xl border border-white/80 shadow-md max-w-full">
                 <div class="flex items-center space-x-2 mb-0.5">
                     <span id="carouselBadge" class="bg-amber-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-                        ✨ GRC CAFE 舒适环境
+                        ✨ 家的味道 GRC CAFE
                     </span>
                 </div>
                 <h1 id="carouselTitle" class="text-base font-black tracking-wide text-slate-800">
-                    ☕ 温馨餐厅氛围
+                    ☕ 善用设施
                 </h1>
                 <p id="carouselSub" class="text-slate-600 text-xs mt-0.5 font-medium">
-                    优雅灯光与舒适空间，尽享惬意时光
+                    避免交通拥堵，预备心轻松服侍
                 </p>
             </div>
         </div>
@@ -202,9 +202,9 @@
         const ALL_SLIDES = [
             {
                 image: "cafe1.jpeg",
-                badge: "✨ GRC CAFE 舒适环境",
-                title: "☕ 温馨餐厅氛围",
-                sub: "优雅灯光与舒适空间，尽享惬意时光",
+                badge: "✨ 家的味道 GRC CAFE",
+                title: "☕ 善用设施",
+                sub: "避免交通拥堵，预备心轻松服侍",
                 isSaturday: false
             },
             {
@@ -320,7 +320,7 @@
             carouselTimer = setInterval(() => {
                 slideIndex = (slideIndex + 1) % SLIDES.length;
                 showSlide(slideIndex);
-            }, 4500);
+            }, 5000);
         }
 
         function stopCarousel() {
