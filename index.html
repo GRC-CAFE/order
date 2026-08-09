@@ -14,31 +14,9 @@
             display: block;
             object-fit: cover;
         }
-        /* 缓慢旋转动画（用于 BGM 图标） */
-        @keyframes spin-slow {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        .animate-spin-slow {
-            animation: spin-slow 4s linear infinite;
-        }
     </style>
 </head>
 <body class="bg-gradient-to-b from-amber-50/80 via-orange-50/30 to-amber-50/60 min-h-screen pb-12 select-none relative font-sans text-slate-800">
-
-    <!-- 🎵 右上角悬浮 BGM 控制器（高亮白底） -->
-    <div class="fixed top-4 right-4 z-50">
-        <button id="bgmBtn" type="button" onclick="toggleBGM()" 
-                class="w-10 h-10 bg-white/90 backdrop-blur-md border border-amber-200/80 rounded-full shadow-md flex items-center justify-center text-amber-600 active:scale-90 transition-all hover:bg-white"
-                title="播放/暂停背景音乐">
-            <i id="bgmIcon" class="fa-solid fa-music text-sm"></i>
-        </button>
-    </div>
-
-    <!-- 音乐播放器 -->
-    <audio id="bgmAudio" loop preload="none">
-        <source src="cafe-bgm.mp3" type="audio/mpeg">
-    </audio>
 
     <!-- 顶部 Banner 区域 -->
     <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-lg cursor-grab active:cursor-grabbing bg-white">
@@ -56,7 +34,7 @@
                     </span>
                 </div>
                 <h1 id="carouselTitle" class="text-base font-black tracking-wide text-slate-800">
-                    ☕ 家的味道 GRC CAFE
+                    ☕ 温馨餐厅氛围
                 </h1>
                 <p id="carouselSub" class="text-slate-600 text-xs mt-0.5 font-medium">
                     善用设施，避免交通拥堵，预备心轻松服侍
@@ -167,7 +145,7 @@
                         <span id="totalText" class="text-2xl font-black text-amber-600">RM 13.00</span>
                     </div>
 
-                    <!-- 🟢 调整为经典的 WhatsApp 品牌绿渐变按钮 -->
+                    <!-- WhatsApp 品牌绿提交按钮 -->
                     <button type="submit" id="submitBtn" 
                             class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 active:scale-[0.98] text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all">
                         <i class="fa-brands fa-whatsapp text-white text-2xl"></i>
@@ -259,7 +237,6 @@
         let currentTotal = 13;
         let slideIndex = 0;
         let carouselTimer = null;
-        let isBgmPlaying = false;
 
         let touchStartX = 0;
         let touchEndX = 0;
@@ -273,29 +250,6 @@
             startCarousel();
             initSwipeEvents();
         });
-
-        // 🎵 BGM 控制逻辑
-        function toggleBGM() {
-            const audio = document.getElementById('bgmAudio');
-            const icon = document.getElementById('bgmIcon');
-            const btn = document.getElementById('bgmBtn');
-
-            if (!isBgmPlaying) {
-                audio.play().then(() => {
-                    isBgmPlaying = true;
-                    icon.classList.add('animate-spin-slow', 'text-amber-500');
-                    btn.classList.add('border-amber-400', 'bg-amber-50');
-                }).catch(err => {
-                    console.log("播放失败：", err);
-                    alert("请确认目录中包含 cafe-bgm.mp3 音频文件！");
-                });
-            } else {
-                audio.pause();
-                isBgmPlaying = false;
-                icon.classList.remove('animate-spin-slow', 'text-amber-500');
-                btn.classList.remove('border-amber-400', 'bg-amber-50');
-            }
-        }
 
         function updatePriceHeader() {
             const priceHeader = document.getElementById('priceHeader');
