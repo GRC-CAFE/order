@@ -25,19 +25,19 @@
              class="w-full h-auto block transition-opacity duration-500 opacity-100 pointer-events-none" 
              alt="GRC CAFE 展示">
 
-        <!-- 底部文字 overlay (自适应文字宽度，防止右侧大片留白) -->
-        <div id="overlayWrapper" class="absolute bottom-3 left-3 text-slate-800 pointer-events-none z-10 max-w-[70%] transition-all">
-            <div id="overlayCard" class="bg-white/90 backdrop-blur-md p-3 rounded-2xl border border-white/80 shadow-md inline-block">
-                <div class="flex items-center space-x-1 mb-1">
-                    <span id="carouselBadge" class="bg-amber-500 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
-                        ✨ 家的味道 GRC CAFE
+        <!-- 底部文字 overlay -->
+        <div class="absolute bottom-3 left-3 right-3 text-slate-800 pointer-events-none z-10">
+            <div class="inline-block bg-white/85 backdrop-blur-md p-3 rounded-2xl border border-white/80 shadow-md max-w-full">
+                <div class="flex items-center space-x-2 mb-0.5">
+                    <span id="carouselBadge" class="bg-amber-500 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm">
+                        ✨ GRC CAFE 舒适环境
                     </span>
                 </div>
-                <h1 id="carouselTitle" class="text-xs font-bold tracking-wide text-slate-800">
-                    ☕ 家的味道 GRC CAFE
+                <h1 id="carouselTitle" class="text-base font-black tracking-wide text-slate-800">
+                    ☕ 温馨餐厅氛围
                 </h1>
-                <p id="carouselSub" class="text-slate-600 text-[11px] mt-1 font-medium leading-tight">
-                    善用设施，避免交通拥堵，预备心轻松服侍
+                <p id="carouselSub" class="text-slate-600 text-xs mt-0.5 font-medium">
+                    优雅灯光与舒适空间，尽享惬意时光
                 </p>
             </div>
         </div>
@@ -202,9 +202,9 @@
         const ALL_SLIDES = [
             {
                 image: "cafe1.jpeg",
-                badge: "✨ 家的味道 GRC CAFE",
-                title: "☕ 家的味道 GRC CAFE",
-                sub: "善用设施，避免交通拥堵，预备心轻松服侍",
+                badge: "✨ GRC CAFE 舒适环境",
+                title: "☕ 温馨餐厅氛围",
+                sub: "优雅灯光与舒适空间，尽享惬意时光",
                 isSaturday: false
             },
             {
@@ -320,7 +320,7 @@
             carouselTimer = setInterval(() => {
                 slideIndex = (slideIndex + 1) % SLIDES.length;
                 showSlide(slideIndex);
-            }, 5000);
+            }, 4500);
         }
 
         function stopCarousel() {
@@ -350,8 +350,6 @@
             const badge = document.getElementById('carouselBadge');
             const title = document.getElementById('carouselTitle');
             const sub = document.getElementById('carouselSub');
-            const overlayWrapper = document.getElementById('overlayWrapper');
-            const overlayCard = document.getElementById('overlayCard');
 
             img.style.opacity = '0.3';
 
@@ -361,13 +359,6 @@
                 badge.innerText = current.badge;
                 title.innerText = current.title;
                 sub.innerText = current.sub;
-
-                // 移除固定宽度，使用 max-w-[70%] 和自适应 inline-block 包裹
-                overlayWrapper.className = "absolute bottom-3 left-3 text-slate-800 pointer-events-none z-10 max-w-[70%] transition-all";
-                overlayCard.className = "bg-white/90 backdrop-blur-md p-3 rounded-2xl border border-white/80 shadow-md inline-block";
-                badge.className = "bg-amber-500 text-white text-[11px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider shadow-sm";
-                title.className = "text-xs font-bold tracking-wide text-slate-800";
-                sub.className = "text-slate-600 text-[11px] mt-1 font-medium leading-tight";
 
                 for (let i = 0; i < SLIDES.length; i++) {
                     const dot = document.getElementById(`dot${i}`);
