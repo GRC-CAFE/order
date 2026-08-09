@@ -7,17 +7,26 @@
     <!-- 引入 Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        /* 针对不同长宽比海报，去除任何黑边框 */
+        .banner-contain {
+            width: 100%;
+            height: auto;
+            display: block;
+            object-fit: cover; /* 撑满容器，消除上下/左右边框 */
+        }
+    </style>
 </head>
 <body class="bg-slate-100 min-h-screen pb-12 select-none">
 
-    <!-- 顶部 Banner 轮播图区域 (自适应高度 + 防裁剪) -->
-    <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-xl cursor-grab active:cursor-grabbing bg-slate-900 flex items-center justify-center min-h-[300px] max-h-[480px] aspect-square">
-        <!-- 动态轮播图片：改为 object-contain 确保全图完整显示不被 Zoom in -->
+    <!-- 顶部 Banner 区域 (根据图片自动适应高度，完全无黑边) -->
+    <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-xl cursor-grab active:cursor-grabbing bg-white">
+        <!-- 动态轮播图片：全宽展示，无黑边 -->
         <img id="carouselImage" src="cafe1.jpeg" 
-             class="w-full h-full object-contain transition-opacity duration-500 opacity-100 pointer-events-none" 
+             class="w-full h-auto block transition-opacity duration-500 opacity-100 pointer-events-none" 
              alt="GRC CAFE 展示">
         
-        <!-- 底部文字与标签 overlay -->
+        <!-- 底部文字 overlay -->
         <div class="absolute bottom-3 left-3 right-3 text-white pointer-events-none z-10">
             <div class="inline-block bg-black/60 backdrop-blur-md p-3 rounded-2xl border border-white/10 shadow-lg max-w-full">
                 <div class="flex items-center space-x-2 mb-1">
@@ -34,7 +43,7 @@
             </div>
         </div>
 
-        <!-- 动态渲染指示点容器 -->
+        <!-- 动态指示点 -->
         <div id="carouselDots" class="absolute top-3 right-3 flex space-x-1.5 z-20 bg-black/50 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/20 shadow">
         </div>
     </div>
@@ -44,8 +53,6 @@
         
         <!-- 1. 表单卡片 -->
         <div class="bg-white rounded-2xl shadow-xl p-6 border border-slate-100 space-y-5">
-            
-            <!-- 截单说明 -->
             <div class="flex justify-between items-center pb-4 border-b border-slate-100">
                 <div>
                     <span class="text-xs text-slate-400 block font-medium">菜单价格</span>
@@ -59,15 +66,12 @@
 
             <!-- 表单输入区 -->
             <form id="orderForm" onsubmit="handleOrder(event)" class="space-y-4">
-                
-                <!-- 姓名 -->
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">您的名字 / 称呼 <span class="text-rose-500">*</span></label>
                     <input type="text" id="name" required placeholder="例如：Tan / Ah Beng" 
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 transition text-sm">
                 </div>
 
-                <!-- 预订日期 (动态更新) -->
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">预订用餐日期 <span class="text-rose-500">*</span></label>
                     <select id="day" onchange="updateMenuInfo()" required class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-amber-500 transition font-bold text-slate-800 text-sm">
@@ -76,7 +80,6 @@
                     </select>
                 </div>
 
-                <!-- 主餐点选区 -->
                 <div class="bg-amber-50/60 border border-amber-200/60 rounded-2xl p-4 space-y-3">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-2">
@@ -86,14 +89,12 @@
                                 <p class="text-sm font-bold text-amber-950" id="menuText">古早味酿豆腐 (RM 13.00 / 份)</p>
                             </div>
                         </div>
-                        <!-- 星期六出现勾选框 -->
                         <label id="mainDishToggle" class="hidden text-xs font-bold text-slate-600 flex items-center cursor-pointer bg-white px-2.5 py-1.5 rounded-lg border border-amber-200">
                             <input type="checkbox" id="wantMainDish" checked onchange="toggleMainDish()" class="w-4 h-4 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mr-1.5">
                             订购主餐
                         </label>
                     </div>
 
-                    <!-- 主餐数量加减器 -->
                     <div id="mainQtyContainer" class="flex items-center justify-between pt-1">
                         <span class="text-xs font-bold text-slate-600">主餐份数：</span>
                         <div class="flex items-center space-x-3">
@@ -104,7 +105,6 @@
                     </div>
                 </div>
 
-                <!-- 🥣 星期六限定糖水卡片（保留限量 20 份） -->
                 <div id="dessertSection" class="hidden bg-rose-50/70 border border-rose-200 rounded-2xl p-4 space-y-3">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-2">
@@ -122,7 +122,6 @@
                         <div class="text-xs font-black text-rose-600">+ RM 5.00 / 份</div>
                     </div>
 
-                    <!-- 糖水数量选择（上限 20 份） -->
                     <div id="dessertQtyContainer" class="hidden flex items-center justify-between pt-1">
                         <span class="text-xs font-bold text-slate-600">糖水份数：</span>
                         <div class="flex items-center space-x-2">
@@ -133,14 +132,12 @@
                     </div>
                 </div>
 
-                <!-- 备注 -->
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">特殊备注 (可选)</label>
                     <input type="text" id="notes" placeholder="如：少辣 / 不要葱 / 糖水要热" 
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-500 transition text-sm">
                 </div>
 
-                <!-- 总价预览与提交按钮 -->
                 <div class="pt-2">
                     <div class="flex justify-between items-center mb-3">
                         <span class="text-sm font-bold text-slate-600">预估总额：</span>
@@ -168,13 +165,11 @@
                 <img src="qrcode.jpeg" class="w-full h-full object-contain rounded-lg shadow-sm" alt="DuitNow 付款码">
             </div>
 
-            <!-- 动态提示转账金额 -->
             <div class="bg-rose-50 p-3 rounded-xl border border-rose-100">
                 <p class="text-xs text-rose-500 font-medium">扫码后请手动输入转账金额：</p>
                 <p id="qrAmountText" class="text-2xl font-black text-rose-600">RM 13.00</p>
             </div>
 
-            <!-- 手机端辅助快捷功能 -->
             <div class="space-y-2 pt-1">
                 <button type="button" onclick="copyAmount()" id="copyAmountBtn" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-3 rounded-xl border border-slate-200 flex items-center justify-center space-x-2 transition">
                     <i class="fa-regular fa-copy"></i>
@@ -194,28 +189,26 @@
     </div>
 
     <script>
-        // ==================== 全局开关配置 ====================
-        const ENABLE_SATURDAY = false; // 👈 开关：设置为 false 自动屏蔽星期六菜单及对应照片！设为 true 开启！
+        const ENABLE_SATURDAY = false;
 
-        const MAIN_DISH_PRICE = 13; // 主餐单价 RM 13.00
-        const DESSERT_PRICE = 5;    // 糖水单价 RM 5.00
-        const MY_PHONE_NUMBER = "0162207137"; 
+        const MAIN_DISH_PRICE = 13;
+        const DESSERT_PRICE = 5;    
+        const MY_PHONE_NUMBER = "60145952975"; 
         const DUITNOW_PHONE = "0162207137";   
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6lj4CZrXCGFqm3rvK5JJMx_9ZVFxOvJ_486tCZYnOTb37CZAxTS3EJWSSESXtt2ELzA/exec"; 
 
-        // 完整照片库配置
         const ALL_SLIDES = [
             {
                 image: "cafe1.jpeg",
-                badge: "✨ GRC CAFE",
+                badge: "✨ 家的味道 GRC CAFE",
                 title: "☕ 家的味道 GRC CAFE",
                 sub: "善用设施，避免交通拥堵，预备心轻松服侍",
                 isSaturday: false
             },
             {
                 image: "cafe2.jpeg",
-                badge: "✨ GRC CAFE",
-                title: "☕ 家的味道 GRC CAFE",
+                badge: "✨ GRC CAFE 舒适环境",
+                title: "☕ 尽享惬意时光",
                 sub: "为您提供优质温馨的用餐体验，欢迎订餐",
                 isSaturday: false
             },
@@ -242,11 +235,9 @@
             }
         ];
 
-        // 依据开关自动过滤轮播图片
         const SLIDES = ENABLE_SATURDAY 
             ? ALL_SLIDES 
             : ALL_SLIDES.filter(slide => !slide.isSaturday);
-        // ============================================================
 
         let currentTotal = 13;
         let slideIndex = 0;
@@ -264,7 +255,6 @@
             initSwipeEvents();
         });
 
-        // 动态生成轮播图圆点
         function renderDots() {
             const dotsContainer = document.getElementById('carouselDots');
             dotsContainer.innerHTML = SLIDES.map((_, i) => 
@@ -272,12 +262,10 @@
             ).join('');
         }
 
-        // 自动计算下周五、六并检查【前一天 12:00 AM】截单逻辑
         function checkCurrentDayAndDisable() {
             const now = new Date();
-            const currentDayOfWeek = now.getDay(); // 0 = 周日, 1 = 周一 ... 6 = 周六
+            const currentDayOfWeek = now.getDay();
             
-            // 计算目标周五与周六
             const daysUntilFriday = (5 - currentDayOfWeek + 7) % 7 || 7; 
             
             const targetFriday = new Date(now);
@@ -286,7 +274,6 @@
             const targetSaturday = new Date(targetFriday);
             targetSaturday.setDate(targetFriday.getDate() + 1);
 
-            // 截单时间：前一天 12:00 AM
             const friDeadline = new Date(targetFriday.getFullYear(), targetFriday.getMonth(), targetFriday.getDate() - 1, 0, 0, 0);
             const satDeadline = new Date(targetSaturday.getFullYear(), targetSaturday.getMonth(), targetSaturday.getDate() - 1, 0, 0, 0);
 
@@ -305,7 +292,6 @@
                 optFriday.innerText = `星期五 (${friDateStr}) - 🍲 古早味酿豆腐`;
             }
 
-            // 开关为 false 时暂停星期六
             if (!ENABLE_SATURDAY) {
                 optSaturday.disabled = true;
                 optSaturday.innerText = `星期六 (${satDateStr}) - 暂停预订`;
@@ -324,7 +310,6 @@
             }
         }
 
-        // 轮播逻辑
         function startCarousel() {
             stopCarousel();
             carouselTimer = setInterval(() => {
@@ -417,7 +402,6 @@
             }
         }
 
-        // 切换日期更新菜单
         function updateMenuInfo() {
             const day = document.getElementById('day').value;
             const menuIcon = document.getElementById('menuIcon');
@@ -525,7 +509,6 @@
             setTimeout(() => { span.innerText = originalText; }, 2500);
         }
 
-        // 表单提交逻辑
         async function handleOrder(event) {
             event.preventDefault();
 
