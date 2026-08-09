@@ -10,11 +10,11 @@
 </head>
 <body class="bg-slate-100 min-h-screen pb-12 select-none">
 
-    <!-- 顶部 Banner 轮播图区域 (1:1 比例，顶部对齐防裁剪) -->
-    <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-xl cursor-grab active:cursor-grabbing bg-slate-900 aspect-square">
-        <!-- 动态轮播图片：高清无渐变阴影遮挡 -->
+    <!-- 顶部 Banner 轮播图区域 (自适应高度 + 防裁剪) -->
+    <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-xl cursor-grab active:cursor-grabbing bg-slate-900 flex items-center justify-center min-h-[300px] max-h-[480px] aspect-square">
+        <!-- 动态轮播图片：改为 object-contain 确保全图完整显示不被 Zoom in -->
         <img id="carouselImage" src="cafe1.jpeg" 
-             class="w-full h-full object-cover object-top transition-opacity duration-500 opacity-100 pointer-events-none" 
+             class="w-full h-full object-contain transition-opacity duration-500 opacity-100 pointer-events-none" 
              alt="GRC CAFE 展示">
         
         <!-- 底部文字与标签 overlay -->
@@ -199,23 +199,23 @@
 
         const MAIN_DISH_PRICE = 13; // 主餐单价 RM 13.00
         const DESSERT_PRICE = 5;    // 糖水单价 RM 5.00
-        const MY_PHONE_NUMBER = "60145952975"; 
+        const MY_PHONE_NUMBER = "0162207137"; 
         const DUITNOW_PHONE = "0162207137";   
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6lj4CZrXCGFqm3rvK5JJMx_9ZVFxOvJ_486tCZYnOTb37CZAxTS3EJWSSESXtt2ELzA/exec"; 
 
-        // 完整照片库配置（已替换为 cafe1.jpeg 和 cafe2.jpeg）
+        // 完整照片库配置
         const ALL_SLIDES = [
             {
                 image: "cafe1.jpeg",
-                badge: "✨ 家的味道 GRC CAFE",
+                badge: "✨ GRC CAFE",
                 title: "☕ 家的味道 GRC CAFE",
                 sub: "善用设施，避免交通拥堵，预备心轻松服侍",
                 isSaturday: false
             },
             {
                 image: "cafe2.jpeg",
-                badge: "✨ GRC CAFE 舒适环境",
-                title: "☕ 尽享惬意时光",
+                badge: "✨ GRC CAFE",
+                title: "☕ 家的味道 GRC CAFE",
                 sub: "为您提供优质温馨的用餐体验，欢迎订餐",
                 isSaturday: false
             },
@@ -231,14 +231,14 @@
                 badge: "周六限定主餐",
                 title: "🍲 招牌卤肉饭",
                 sub: "RM 13.00 / 份",
-                isSaturday: true // 👈 星期六照片
+                isSaturday: true
             },
             {
                 image: "dish3.jpeg",
                 badge: "周六限定糖水",
                 title: "🥣 滋润糖水",
                 sub: "RM 5.00 / 份 | 限量 20 份",
-                isSaturday: true // 👈 星期六照片
+                isSaturday: true
             }
         ];
 
@@ -417,7 +417,7 @@
             }
         }
 
-        // 切换日期更新菜单（已将星期五的汉堡 Icon 替换为 🍲）
+        // 切换日期更新菜单
         function updateMenuInfo() {
             const day = document.getElementById('day').value;
             const menuIcon = document.getElementById('menuIcon');
