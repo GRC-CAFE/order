@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GRC CAFE - 晚餐与糖水预订</title>
-    <!-- 引入 Tailwind CSS 与 FontAwesome Icon -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -18,25 +17,16 @@
 </head>
 <body class="bg-gradient-to-b from-amber-50/80 via-orange-50/30 to-amber-50/60 min-h-screen pb-12 select-none relative font-sans text-slate-800">
 
-    <!-- 顶部 Banner 区域 -->
     <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-lg cursor-grab active:cursor-grabbing bg-white">
-        <!-- 动态轮播图片 -->
         <img id="carouselImage" src="cafe1.jpeg" 
              class="w-full h-auto block transition-opacity duration-500 opacity-100 pointer-events-none" 
              alt="GRC CAFE 展示">
-
-        <!-- 动态指示点 -->
         <div id="carouselDots" class="absolute top-3 right-3 flex space-x-1.5 z-20 bg-white/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/50 shadow-sm">
         </div>
     </div>
 
-    <!-- 表单与付款卡片容器 -->
     <div class="max-w-md mx-auto px-4 -mt-0.5 relative z-10 space-y-5">
-        
-        <!-- 1. 表单卡片 -->
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-amber-100/60 space-y-5">
-            
-            <!-- 菜单价格与截单说明 -->
             <div class="flex justify-between items-center pb-4 border-b border-slate-100">
                 <div>
                     <span class="text-xs text-slate-400 block font-medium">菜单价格</span>
@@ -44,11 +34,10 @@
                 </div>
                 <div class="text-right">
                     <span class="text-xs text-slate-400 block font-medium">截单规则</span>
-                    <span id="deadlineText" class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2.5 py-1 rounded-lg">预订至 8月13号 8PM 截单</span>
+                    <span id="deadlineText" class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2.5 py-1 rounded-lg">加载中...</span>
                 </div>
             </div>
 
-            <!-- 表单输入区 -->
             <form id="orderForm" onsubmit="handleOrder(event)" class="space-y-4">
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">您的名字 / 称呼 <span class="text-rose-500">*</span></label>
@@ -64,7 +53,6 @@
                     </select>
                 </div>
 
-                <!-- 主餐选择区 -->
                 <div id="mainDishSection" class="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-4 space-y-3 transition-all">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-2">
@@ -90,14 +78,13 @@
                     </div>
                 </div>
 
-                <!-- 糖水选择区 -->
                 <div id="dessertSection" class="hidden bg-rose-50/80 border border-rose-200/80 rounded-2xl p-4 space-y-3 transition-all">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-2">
                             <span class="text-xl">🥣</span>
                             <span class="text-sm font-bold text-rose-900" id="dessertTitleText">周六限定糖水</span>
                         </div>
-                        <span class="text-xs bg-rose-200/80 text-rose-800 font-bold px-2 py-0.5 rounded-full">限量 20 份</span>
+                        <span id="dessertLimitBadge" class="text-xs bg-rose-200/80 text-rose-800 font-bold px-2 py-0.5 rounded-full">加载中...</span>
                     </div>
                     
                     <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-rose-100 shadow-sm">
@@ -112,7 +99,7 @@
                         <span class="text-xs font-bold text-slate-600">糖水份数：</span>
                         <div class="flex items-center space-x-2">
                             <button type="button" onclick="adjustDessertQty(-1)" class="w-8 h-8 rounded-lg bg-white border border-rose-200 font-bold text-sm text-rose-800 shadow-sm active:scale-95 transition">-</button>
-                            <input type="number" id="dessertQty" value="1" min="1" max="20" readonly class="w-12 text-center text-sm font-bold bg-white border border-slate-200 rounded-lg py-1 text-slate-800">
+                            <input type="number" id="dessertQty" value="1" min="1" readonly class="w-12 text-center text-sm font-bold bg-white border border-slate-200 rounded-lg py-1 text-slate-800">
                             <button type="button" onclick="adjustDessertQty(1)" class="w-8 h-8 rounded-lg bg-white border border-rose-200 font-bold text-sm text-rose-800 shadow-sm active:scale-95 transition">+</button>
                         </div>
                     </div>
@@ -130,7 +117,6 @@
                         <span id="totalText" class="text-2xl font-black text-amber-600">RM 0.00</span>
                     </div>
 
-                    <!-- WhatsApp 提交按钮 -->
                     <button type="submit" id="submitBtn" 
                             class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 active:scale-[0.98] text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all">
                         <i class="fa-brands fa-whatsapp text-white text-2xl"></i>
@@ -140,7 +126,6 @@
             </form>
         </div>
 
-        <!-- 2. DuitNow 付款卡片 -->
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-amber-100/60 text-center space-y-4">
             <h2 class="text-lg font-bold text-slate-800 flex items-center justify-center space-x-2">
                 <i class="fa-solid fa-qrcode text-pink-600"></i>
@@ -176,7 +161,6 @@
     </div>
 
     <script>
-        // 默认离线配置
         let ENABLE_FRI_DINNER = true;
         let ENABLE_SAT_DINNER = true;
         let ENABLE_SAT_DESSERT = true;
@@ -186,14 +170,18 @@
         let SAT_DESSERT_NAME = "🥣 周六限定糖水";
 
         let FRI_MAIN_PRICE = 13;
-        let SAT_MAIN_PRICE = 13;
+        let SAT_MAIN_PRICE = 15;
         let DESSERT_PRICE = 5;    
+        let SAT_DESSERT_LIMIT = 20;
+        
+        let FRI_DEADLINE_TEXT = "预订至 8月14号 8PM 截单";
+        let SAT_DEADLINE_TEXT = "预订至 8月15号 8PM 截单";
 
         const MY_PHONE_NUMBER = "60162207137"; 
         const DUITNOW_PHONE = "0162207137";   
         
-        // 已更新为你最新的 Google Apps Script API 链接
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSG41CxGsWOn_nhS5R5YSPtaNcJH_FmpF75HCPUS2jrpCFj350oD67Tq1lWge9oSNbXA/exec"; 
+        // 已更新为您的最新 Google Apps Script Web App URL
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIY364DPltOZpvHe-OpAnHw2_3F6ZpIGLYnjnFu04G6x_5NJ7ttJWZ9GbDjWpDfwdCyA/exec"; 
 
         const ALL_SLIDES = [
             { image: "cafe1.jpeg", isSaturday: false },
@@ -233,9 +221,9 @@
                 const res = await fetch(GOOGLE_SCRIPT_URL);
                 const config = await res.json();
                 if (config && !config.error) {
-                    if (config.ENABLE_FRI_DINNER !== undefined) ENABLE_FRI_DINNER = config.ENABLE_FRI_DINNER;
-                    if (config.ENABLE_SAT_DINNER !== undefined) ENABLE_SAT_DINNER = config.ENABLE_SAT_DINNER;
-                    if (config.ENABLE_SAT_DESSERT !== undefined) ENABLE_SAT_DESSERT = config.ENABLE_SAT_DESSERT;
+                    if (config.ENABLE_FRI_DINNER !== undefined) ENABLE_FRI_DINNER = (config.ENABLE_FRI_DINNER === true || config.ENABLE_FRI_DINNER === "TRUE");
+                    if (config.ENABLE_SAT_DINNER !== undefined) ENABLE_SAT_DINNER = (config.ENABLE_SAT_DINNER === true || config.ENABLE_SAT_DINNER === "TRUE");
+                    if (config.ENABLE_SAT_DESSERT !== undefined) ENABLE_SAT_DESSERT = (config.ENABLE_SAT_DESSERT === true || config.ENABLE_SAT_DESSERT === "TRUE");
                     
                     if (config.friMenuName) FRI_MENU_NAME = config.friMenuName;
                     if (config.satMenuName) SAT_MENU_NAME = config.satMenuName;
@@ -244,9 +232,13 @@
                     if (config.friMainPrice) FRI_MAIN_PRICE = Number(config.friMainPrice);
                     if (config.satMainPrice) SAT_MAIN_PRICE = Number(config.satMainPrice);
                     if (config.dessertPrice) DESSERT_PRICE = Number(config.dessertPrice);
+                    if (config.satDessertLimit) SAT_DESSERT_LIMIT = Number(config.satDessertLimit);
+
+                    if (config.FRI_DEADLINE_TEXT) FRI_DEADLINE_TEXT = config.FRI_DEADLINE_TEXT;
+                    if (config.SAT_DEADLINE_TEXT) SAT_DEADLINE_TEXT = config.SAT_DEADLINE_TEXT;
                 }
             } catch (err) {
-                console.log("无法连接后台 API，降级使用本地默认配置", err);
+                console.log("无法连接后台 API，使用默认配置", err);
             }
         }
 
@@ -301,7 +293,6 @@
             const optSaturday = document.getElementById('optSaturday');
             const daySelect = document.getElementById('day');
 
-            // 周五逻辑
             if (!ENABLE_FRI_DINNER) {
                 optFriday.disabled = true;
                 optFriday.innerText = `星期五 (${friDateStr}) - 暂停预订`;
@@ -313,7 +304,6 @@
                 optFriday.innerText = `星期五 (${friDateStr}) - ${FRI_MENU_NAME}`;
             }
 
-            // 周六逻辑
             const isSatAvailable = ENABLE_SAT_DINNER || ENABLE_SAT_DESSERT;
             if (!isSatAvailable) {
                 optSaturday.disabled = true;
@@ -368,15 +358,8 @@
             startCarousel();
         }
 
-        function prevSlide() {
-            slideIndex = (slideIndex - 1 + SLIDES.length) % SLIDES.length;
-            showSlide(slideIndex);
-            startCarousel();
-        }
-
         function showSlide(index) {
             const img = document.getElementById('carouselImage');
-
             img.style.opacity = '0.3';
 
             setTimeout(() => {
@@ -426,7 +409,9 @@
             if (touchStartX - touchEndX > threshold) {
                 nextSlide();
             } else if (touchEndX - touchStartX > threshold) {
-                prevSlide();
+                slideIndex = (slideIndex - 1 + SLIDES.length) % SLIDES.length;
+                showSlide(slideIndex);
+                startCarousel();
             }
         }
 
@@ -438,8 +423,11 @@
             const dessertSection = document.getElementById('dessertSection');
             const mainDishToggle = document.getElementById('mainDishToggle');
             const wantMainDish = document.getElementById('wantMainDish');
+            const deadlineText = document.getElementById('deadlineText');
 
             if (day === "星期五") {
+                if (deadlineText) deadlineText.innerText = FRI_DEADLINE_TEXT;
+
                 if (ENABLE_FRI_DINNER) {
                     mainDishSection.classList.remove('hidden');
                     menuIcon.innerText = "🍲";
@@ -457,6 +445,8 @@
                 document.getElementById('dessertQtyContainer').classList.add('hidden');
 
             } else { // 星期六
+                if (deadlineText) deadlineText.innerText = SAT_DEADLINE_TEXT;
+
                 if (ENABLE_SAT_DINNER) {
                     mainDishSection.classList.remove('hidden');
                     menuIcon.innerText = "🍲";
@@ -478,6 +468,8 @@
                     dessertSection.classList.remove('hidden');
                     document.getElementById('dessertTitleText').innerText = `${SAT_DESSERT_NAME}（RM ${DESSERT_PRICE}.00 / 份）`;
                     document.getElementById('dessertUnitPriceText').innerText = `+ RM ${DESSERT_PRICE}.00 / 份`;
+                    document.getElementById('dessertLimitBadge').innerText = `限量 ${SAT_DESSERT_LIMIT} 份`;
+
                     if (!ENABLE_SAT_DINNER) {
                         document.getElementById('wantDessert').checked = true;
                         document.getElementById('dessertQtyContainer').classList.remove('hidden');
@@ -527,7 +519,7 @@
             let current = parseInt(qtyInput.value) || 1;
             current += amount;
             if (current < 1) current = 1;
-            if (current > 20) current = 20;
+            if (current > SAT_DESSERT_LIMIT) current = SAT_DESSERT_LIMIT;
             qtyInput.value = current;
             calculateTotal();
         }
@@ -656,7 +648,7 @@
                         signal: controller.signal
                     });
                 } catch (e) {
-                    console.log("Sheet fetch skipped or timed out:", e);
+                    console.log("Sheet 请求超时或跳过:", e);
                 } finally {
                     clearTimeout(timeoutId);
                 }
