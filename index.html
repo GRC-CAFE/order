@@ -166,14 +166,11 @@
     </div>
 
     <script>
-        // ==========================================
-        // 🛠️ DEBUG MODE 控制开关 (true = 开启调试 / false = 正常运行)
-        // ==========================================
         const DEBUG_MODE = false; 
 
-        let ENABLE_FRI_DINNER = true;
-        let ENABLE_SAT_DINNER = true;
-        let ENABLE_SAT_DESSERT = true;
+        let ENABLE_FRI_DINNER = false;
+        let ENABLE_SAT_DINNER = false;
+        let ENABLE_SAT_DESSERT = false;
 
         let FRI_MENU_NAME = "🍲 古早味酿豆腐";
         let SAT_MENU_NAME = "🍲 招牌卤肉饭";
@@ -190,22 +187,34 @@
         const MY_PHONE_NUMBER = "60162207137"; 
         const DUITNOW_PHONE = "0162207137";   
         
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIY364DPltOZpvHe-OpAnHw2_3F6ZpIGLYnjnFu04G6x_5NJ7ttJWZ9GbDjWpDfwdCyA/exec"; 
+        // 已经替换为您最新提供的 API 链接
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw-t99KLkdMEcFzto_gfkosudLT3ElFVOqndO3KHZImHgx71hUqr9CDNSRg2Km45-j9Mw/exec"; 
 
+        // 💡 标记照片属性：糖水海报设为 isDessert: true
         const ALL_SLIDES = [
-            { image: "cafe1.jpeg", isSaturday: false },
-            { image: "dish1.jpeg", isSaturday: false },
-            { image: "dish2.jpeg", isSaturday: true },
-            { image: "dish3.jpeg", isSaturday: true }
+            { image: "cafe1.jpeg", isFriday: false, isSaturdayMain: false, isDessert: false }, // 店面封面
+            { image: "dish1.jpeg", isFriday: true,  isSaturdayMain: false, isDessert: false }, // 周五主餐
+            { image: "dish2.jpeg", isFriday: false, isSaturdayMain: true,  isDessert: false }, // 周六主餐
+            { image: "dish3.jpeg", isFriday: false, isSaturdayMain: false, isDessert: true }   // 周六糖水
         ];
 
-        let SLIDES = ALL_SLIDES;
+        let SLIDES = [];
         let currentTotal = 0;
         let slideIndex = 0;
         let carouselTimer = null;
 
         let touchStartX = 0;
         let touchEndX = 0;
+
+        // 核心辅助函数：严谨解析布尔值
+        function parseBool(val) {
+            if (val === true || val === false) return val;
+            if (typeof val === 'string') {
+                const clean = val.trim().toUpperCase();
+                return clean === 'TRUE' || clean === '开';
+            }
+            return false;
+        }
 
         window.addEventListener('DOMContentLoaded', async () => {
             if (DEBUG_MODE) {
@@ -214,17 +223,13 @@
 
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             
-            // 1. 获取远程配置
+            // 1. 获取后端配置
             await fetchRemoteConfig();
 
-            // 2. 轮播图更新
-            SLIDES = (ENABLE_SAT_DINNER || ENABLE_SAT_DESSERT) 
-                ? ALL_SLIDES 
-                : ALL_SLIDES.filter(slide => !slide.isSaturday);
-
-            renderDots();
+            // 2. 根据布尔 Flag 动态筛选照片
+            updateCarouselSlides();
             
-            // 3. 执行校验与计算
+            // 3. 校验并渲染菜单
             checkCurrentDayAndDisable();
             updateMenuInfo();
             
@@ -238,9 +243,10 @@
                 const res = await fetch(GOOGLE_SCRIPT_URL);
                 const config = await res.json();
                 if (config && !config.error) {
-                    if (config.ENABLE_FRI_DINNER !== undefined) ENABLE_FRI_DINNER = (config.ENABLE_FRI_DINNER === true || config.ENABLE_FRI_DINNER === "TRUE");
-                    if (config.ENABLE_SAT_DINNER !== undefined) ENABLE_SAT_DINNER = (config.ENABLE_SAT_DINNER === true || config.ENABLE_SAT_DINNER === "TRUE");
-                    if (config.ENABLE_SAT_DESSERT !== undefined) ENABLE_SAT_DESSERT = (config.ENABLE_SAT_DESSERT === true || config.ENABLE_SAT_DESSERT === "TRUE");
+                    // 使用 parseBool 解析 Flag
+                    ENABLE_FRI_DINNER = parseBool(config.ENABLE_FRI_DINNER);
+                    ENABLE_SAT_DINNER = parseBool(config.ENABLE_SAT_DINNER);
+                    ENABLE_SAT_DESSERT = parseBool(config.ENABLE_SAT_DESSERT);
                     
                     if (config.friMenuName) FRI_MENU_NAME = config.friMenuName;
                     if (config.satMenuName) SAT_MENU_NAME = config.satMenuName;
@@ -259,6 +265,23 @@
             }
         }
 
+        function updateCarouselSlides() {
+            // 严格按 Flag 筛选轮播图片
+            SLIDES = ALL_SLIDES.filter(slide => {
+                if (slide.isFriday && !ENABLE_FRI_DINNER) return false;
+                if (slide.isSaturdayMain && !ENABLE_SAT_DINNER) return false;
+                if (slide.isDessert && !ENABLE_SAT_DESSERT) return false; // 糖水关闭时屏蔽糖水海报
+                return true;
+            });
+
+            if (SLIDES.length === 0) {
+                SLIDES = [{ image: "cafe1.jpeg", isFriday: false, isSaturdayMain: false, isDessert: false }];
+            }
+
+            renderDots();
+            showSlide(0);
+        }
+
         function updateHeaderInfo() {
             const priceHeader = document.getElementById('priceHeader');
             const deadlineText = document.getElementById('deadlineText');
@@ -275,17 +298,6 @@
                 items.push(`主餐 <span class="text-amber-600">RM ${FRI_MAIN_PRICE}</span>`);
                 if (deadlineText) deadlineText.innerText = FRI_DEADLINE_TEXT;
             } else if (selectedDay === "星期六" && isSatActive) {
-                if (ENABLE_SAT_DINNER) {
-                    items.push(`主餐 <span class="text-amber-600">RM ${SAT_MAIN_PRICE}</span>`);
-                }
-                if (ENABLE_SAT_DESSERT) {
-                    items.push(`糖水 <span class="text-amber-600">RM ${DESSERT_PRICE}</span>`);
-                }
-                if (deadlineText) deadlineText.innerText = SAT_DEADLINE_TEXT;
-            } else if (isFriActive) {
-                items.push(`主餐 <span class="text-amber-600">RM ${FRI_MAIN_PRICE}</span>`);
-                if (deadlineText) deadlineText.innerText = FRI_DEADLINE_TEXT;
-            } else if (isSatActive) {
                 if (ENABLE_SAT_DINNER) {
                     items.push(`主餐 <span class="text-amber-600">RM ${SAT_MAIN_PRICE}</span>`);
                 }
@@ -336,13 +348,9 @@
             const optSaturday = document.getElementById('optSaturday');
             const daySelect = document.getElementById('day');
 
-            // ----------------------------------------------------
-            // 核心逻辑：若开启 DEBUG_MODE，直接根据 Excel Flag 强制激活/禁用
-            // ----------------------------------------------------
             const isFriValid = DEBUG_MODE ? ENABLE_FRI_DINNER : (ENABLE_FRI_DINNER && now <= friEnd);
             const isSatValid = DEBUG_MODE ? (ENABLE_SAT_DINNER || ENABLE_SAT_DESSERT) : ((ENABLE_SAT_DINNER || ENABLE_SAT_DESSERT) && now <= satEnd);
 
-            // 1. 周五状态
             if (!isFriValid) {
                 optFriday.disabled = true;
                 optFriday.innerText = `星期五 (${friDateStr}) - 暂停预订`;
@@ -351,7 +359,6 @@
                 optFriday.innerText = `星期五 (${friDateStr}) - ${FRI_MENU_NAME}`;
             }
 
-            // 2. 周六状态
             if (!isSatValid) {
                 optSaturday.disabled = true;
                 optSaturday.innerText = `星期六 (${satDateStr}) - 暂停预订`;
@@ -364,7 +371,6 @@
                 optSaturday.innerText = text + items.join(" / ");
             }
 
-            // 3. 自动切换至当前可用的日期
             if (optFriday.disabled && !optSaturday.disabled) {
                 daySelect.value = "星期六";
             } else if (!optFriday.disabled) {
@@ -398,6 +404,7 @@
         }
 
         function showSlide(index) {
+            if (!SLIDES[index]) return;
             const img = document.getElementById('carouselImage');
             img.style.opacity = '0.3';
 
