@@ -174,13 +174,12 @@
         let DESSERT_PRICE = 5;    
         let SAT_DESSERT_LIMIT = 20;
         
-        let FRI_DEADLINE_TEXT = "预订至 8月14号 8PM 截单";
-        let SAT_DEADLINE_TEXT = "预订至 8月15号 8PM 截单";
+        let FRI_DEADLINE_TEXT = "预订至周四 8PM 截单";
+        let SAT_DEADLINE_TEXT = "预订至周五 8PM 截单";
 
         const MY_PHONE_NUMBER = "60162207137"; 
         const DUITNOW_PHONE = "0162207137";   
         
-        // 已更新为您的最新 Google Apps Script Web App URL
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzIY364DPltOZpvHe-OpAnHw2_3F6ZpIGLYnjnFu04G6x_5NJ7ttJWZ9GbDjWpDfwdCyA/exec"; 
 
         const ALL_SLIDES = [
@@ -273,16 +272,22 @@
 
         function checkCurrentDayAndDisable() {
             const now = new Date();
-            const currentDayOfWeek = now.getDay();
+            const currentDayOfWeek = now.getDay(); // 0: 周日, 1: 周一, ... 6: 周六
             
-            const daysUntilFriday = (5 - currentDayOfWeek + 7) % 7 || 7; 
-            
-            const targetFriday = new Date(now);
-            targetFriday.setDate(now.getDate() + (currentDayOfWeek === 5 ? 0 : daysUntilFriday));
-            
-            const targetSaturday = new Date(targetFriday);
-            targetSaturday.setDate(targetFriday.getDate() + 1);
+            // 计算当周【星期一】
+            const distanceToMonday = (currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek);
+            const monday = new Date(now);
+            monday.setDate(now.getDate() + distanceToMonday);
+            monday.setHours(0, 0, 0, 0);
 
+            // 计算当周【星期五】与【星期六】
+            const targetFriday = new Date(monday);
+            targetFriday.setDate(monday.getDate() + 4);
+
+            const targetSaturday = new Date(monday);
+            targetSaturday.setDate(monday.getDate() + 5);
+
+            // 截单时间（前一天 20:00）
             const friDeadline = new Date(targetFriday.getFullYear(), targetFriday.getMonth(), targetFriday.getDate() - 1, 20, 0, 0);
             const satDeadline = new Date(targetSaturday.getFullYear(), targetSaturday.getMonth(), targetSaturday.getDate() - 1, 20, 0, 0);
 
@@ -293,6 +298,7 @@
             const optSaturday = document.getElementById('optSaturday');
             const daySelect = document.getElementById('day');
 
+            // 星期五逻辑
             if (!ENABLE_FRI_DINNER) {
                 optFriday.disabled = true;
                 optFriday.innerText = `星期五 (${friDateStr}) - 暂停预订`;
@@ -304,6 +310,7 @@
                 optFriday.innerText = `星期五 (${friDateStr}) - ${FRI_MENU_NAME}`;
             }
 
+            // 星期六逻辑
             const isSatAvailable = ENABLE_SAT_DINNER || ENABLE_SAT_DESSERT;
             if (!isSatAvailable) {
                 optSaturday.disabled = true;
@@ -324,10 +331,9 @@
                 optSaturday.innerText = text + items.join(" / ");
             }
 
+            // 设置默认选中
             if (optFriday.disabled && !optSaturday.disabled) {
                 daySelect.value = "星期六";
-            } else if (!optFriday.disabled) {
-                daySelect.value = "星期五";
             } else {
                 daySelect.value = "星期五";
             }
@@ -444,7 +450,7 @@
                 document.getElementById('wantDessert').checked = false;
                 document.getElementById('dessertQtyContainer').classList.add('hidden');
 
-            } else { // 星期六
+            } else {
                 if (deadlineText) deadlineText.innerText = SAT_DEADLINE_TEXT;
 
                 if (ENABLE_SAT_DINNER) {
