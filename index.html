@@ -17,6 +17,11 @@
 </head>
 <body class="bg-gradient-to-b from-amber-50/80 via-orange-50/30 to-amber-50/60 min-h-screen pb-12 select-none relative font-sans text-slate-800">
 
+    <!-- Debug 状态提示条 -->
+    <div id="debugBanner" class="hidden bg-red-600 text-white text-xs font-bold py-1.5 text-center shadow-md">
+        🚨 DEBUG MODE 开启中：已绕过真实日期限制，仅根据 Excel / Google Sheet Flag 判定菜单显示 🚨
+    </div>
+
     <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-lg cursor-grab active:cursor-grabbing bg-white">
         <img id="carouselImage" src="cafe1.jpeg" 
              class="w-full h-auto block transition-opacity duration-500 opacity-100 pointer-events-none" 
@@ -161,6 +166,11 @@
     </div>
 
     <script>
+        // ==========================================
+        // 🛠️ DEBUG MODE 控制开关 (true = 开启调试 / false = 正常运行)
+        // ==========================================
+        const DEBUG_MODE = false; 
+
         let ENABLE_FRI_DINNER = true;
         let ENABLE_SAT_DINNER = true;
         let ENABLE_SAT_DESSERT = true;
@@ -198,18 +208,26 @@
         let touchEndX = 0;
 
         window.addEventListener('DOMContentLoaded', async () => {
+            if (DEBUG_MODE) {
+                document.getElementById('debugBanner').classList.remove('hidden');
+            }
+
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             
+            // 1. 获取远程配置
             await fetchRemoteConfig();
 
+            // 2. 轮播图更新
             SLIDES = (ENABLE_SAT_DINNER || ENABLE_SAT_DESSERT) 
                 ? ALL_SLIDES 
                 : ALL_SLIDES.filter(slide => !slide.isSaturday);
 
             renderDots();
+            
+            // 3. 执行校验与计算
             checkCurrentDayAndDisable();
-            updatePriceHeader();
             updateMenuInfo();
+            
             startCarousel();
             initSwipeEvents();
         });
@@ -241,21 +259,44 @@
             }
         }
 
-        function updatePriceHeader() {
+        function updateHeaderInfo() {
             const priceHeader = document.getElementById('priceHeader');
+            const deadlineText = document.getElementById('deadlineText');
+            const selectedDay = document.getElementById('day').value;
+            const optFriday = document.getElementById('optFriday');
+            const optSaturday = document.getElementById('optSaturday');
+
+            const isFriActive = ENABLE_FRI_DINNER && optFriday && !optFriday.disabled;
+            const isSatActive = (ENABLE_SAT_DINNER || ENABLE_SAT_DESSERT) && optSaturday && !optSaturday.disabled;
+
             let items = [];
-            
-            if (ENABLE_FRI_DINNER && ENABLE_SAT_DINNER && FRI_MAIN_PRICE === SAT_MAIN_PRICE) {
+
+            if (selectedDay === "星期五" && isFriActive) {
                 items.push(`主餐 <span class="text-amber-600">RM ${FRI_MAIN_PRICE}</span>`);
+                if (deadlineText) deadlineText.innerText = FRI_DEADLINE_TEXT;
+            } else if (selectedDay === "星期六" && isSatActive) {
+                if (ENABLE_SAT_DINNER) {
+                    items.push(`主餐 <span class="text-amber-600">RM ${SAT_MAIN_PRICE}</span>`);
+                }
+                if (ENABLE_SAT_DESSERT) {
+                    items.push(`糖水 <span class="text-amber-600">RM ${DESSERT_PRICE}</span>`);
+                }
+                if (deadlineText) deadlineText.innerText = SAT_DEADLINE_TEXT;
+            } else if (isFriActive) {
+                items.push(`主餐 <span class="text-amber-600">RM ${FRI_MAIN_PRICE}</span>`);
+                if (deadlineText) deadlineText.innerText = FRI_DEADLINE_TEXT;
+            } else if (isSatActive) {
+                if (ENABLE_SAT_DINNER) {
+                    items.push(`主餐 <span class="text-amber-600">RM ${SAT_MAIN_PRICE}</span>`);
+                }
+                if (ENABLE_SAT_DESSERT) {
+                    items.push(`糖水 <span class="text-amber-600">RM ${DESSERT_PRICE}</span>`);
+                }
+                if (deadlineText) deadlineText.innerText = SAT_DEADLINE_TEXT;
             } else {
-                if (ENABLE_FRI_DINNER) items.push(`五主餐 <span class="text-amber-600">RM ${FRI_MAIN_PRICE}</span>`);
-                if (ENABLE_SAT_DINNER) items.push(`六主餐 <span class="text-amber-600">RM ${SAT_MAIN_PRICE}</span>`);
+                if (deadlineText) deadlineText.innerText = "暂停预订";
             }
 
-            if (ENABLE_SAT_DESSERT) {
-                items.push(`糖水 <span class="text-amber-600">RM ${DESSERT_PRICE}</span>`);
-            }
-            
             if (items.length > 0) {
                 priceHeader.innerHTML = items.join(' | ');
             } else {
@@ -272,22 +313,19 @@
 
         function checkCurrentDayAndDisable() {
             const now = new Date();
-            const currentDayOfWeek = now.getDay(); // 0: 周日, 1: 周一... 6: 周六
+            const currentDayOfWeek = now.getDay(); 
             
-            // 计算当周【星期一】
             const distanceToMonday = (currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek);
             const monday = new Date(now);
             monday.setDate(now.getDate() + distanceToMonday);
             monday.setHours(0, 0, 0, 0);
 
-            // 计算当周【星期五】与【星期六】
             const targetFriday = new Date(monday);
             targetFriday.setDate(monday.getDate() + 4);
 
             const targetSaturday = new Date(monday);
             targetSaturday.setDate(monday.getDate() + 5);
 
-            // 用餐当天的结束时刻 (当天 23:59:59)
             const friEnd = new Date(targetFriday.getFullYear(), targetFriday.getMonth(), targetFriday.getDate(), 23, 59, 59);
             const satEnd = new Date(targetSaturday.getFullYear(), targetSaturday.getMonth(), targetSaturday.getDate(), 23, 59, 59);
 
@@ -298,8 +336,14 @@
             const optSaturday = document.getElementById('optSaturday');
             const daySelect = document.getElementById('day');
 
-            // 1. 星期五逻辑：仅在 Excel Flag 为 FALSE 或 已过周五当天 23:59 时禁用
-            if (!ENABLE_FRI_DINNER || now > friEnd) {
+            // ----------------------------------------------------
+            // 核心逻辑：若开启 DEBUG_MODE，直接根据 Excel Flag 强制激活/禁用
+            // ----------------------------------------------------
+            const isFriValid = DEBUG_MODE ? ENABLE_FRI_DINNER : (ENABLE_FRI_DINNER && now <= friEnd);
+            const isSatValid = DEBUG_MODE ? (ENABLE_SAT_DINNER || ENABLE_SAT_DESSERT) : ((ENABLE_SAT_DINNER || ENABLE_SAT_DESSERT) && now <= satEnd);
+
+            // 1. 周五状态
+            if (!isFriValid) {
                 optFriday.disabled = true;
                 optFriday.innerText = `星期五 (${friDateStr}) - 暂停预订`;
             } else {
@@ -307,9 +351,8 @@
                 optFriday.innerText = `星期五 (${friDateStr}) - ${FRI_MENU_NAME}`;
             }
 
-            // 2. 星期六逻辑：只要主餐或糖水 Flag 为 TRUE 且 没过周六 23:59 即可选
-            const isSatAvailable = ENABLE_SAT_DINNER || ENABLE_SAT_DESSERT;
-            if (!isSatAvailable || now > satEnd) {
+            // 2. 周六状态
+            if (!isSatValid) {
                 optSaturday.disabled = true;
                 optSaturday.innerText = `星期六 (${satDateStr}) - 暂停预订`;
             } else {
@@ -321,12 +364,10 @@
                 optSaturday.innerText = text + items.join(" / ");
             }
 
-            // 3. 默认选中可用的选项
+            // 3. 自动切换至当前可用的日期
             if (optFriday.disabled && !optSaturday.disabled) {
                 daySelect.value = "星期六";
             } else if (!optFriday.disabled) {
-                daySelect.value = "星期五";
-            } else {
                 daySelect.value = "星期五";
             }
         }
@@ -421,11 +462,10 @@
             const dessertSection = document.getElementById('dessertSection');
             const mainDishToggle = document.getElementById('mainDishToggle');
             const wantMainDish = document.getElementById('wantMainDish');
-            const deadlineText = document.getElementById('deadlineText');
+
+            updateHeaderInfo();
 
             if (day === "星期五") {
-                if (deadlineText) deadlineText.innerText = FRI_DEADLINE_TEXT;
-
                 if (ENABLE_FRI_DINNER) {
                     mainDishSection.classList.remove('hidden');
                     menuIcon.innerText = "🍲";
@@ -443,8 +483,6 @@
                 document.getElementById('dessertQtyContainer').classList.add('hidden');
 
             } else {
-                if (deadlineText) deadlineText.innerText = SAT_DEADLINE_TEXT;
-
                 if (ENABLE_SAT_DINNER) {
                     mainDishSection.classList.remove('hidden');
                     menuIcon.innerText = "🍲";
