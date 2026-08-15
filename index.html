@@ -30,7 +30,7 @@
         </div>
     </div>
 
-    <!-- 表单与付款卡片容器 (已修改 -mt-2 为 mt-4，避免遮挡 Banner 底部文字) -->
+    <!-- 表单与付款卡片容器 -->
     <div class="max-w-md mx-auto px-4 -mt-0.5 relative z-10 space-y-5">
         
         <!-- 1. 表单卡片 -->
@@ -40,7 +40,7 @@
             <div class="flex justify-between items-center pb-4 border-b border-slate-100">
                 <div>
                     <span class="text-xs text-slate-400 block font-medium">菜单价格</span>
-                    <span class="text-sm font-bold text-slate-800" id="priceHeader">主餐 <span class="text-amber-600">RM 13</span></span>
+                    <span class="text-sm font-bold text-slate-800" id="priceHeader">加载中...</span>
                 </div>
                 <div class="text-right">
                     <span class="text-xs text-slate-400 block font-medium">截单规则</span>
@@ -59,18 +59,19 @@
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">预订用餐日期 <span class="text-rose-500">*</span></label>
                     <select id="day" onchange="updateMenuInfo()" required class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition font-bold text-slate-800 text-sm">
-                        <option value="星期五" id="optFriday">星期五 - 🍲 古早味酿豆腐</option>
-                        <option value="星期六" id="optSaturday">星期六 - 🍲 卤肉饭 / 🥣 糖水</option>
+                        <option value="星期五" id="optFriday">星期五 - 加载中...</option>
+                        <option value="星期六" id="optSaturday">星期六 - 加载中...</option>
                     </select>
                 </div>
 
-                <div class="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-4 space-y-3 transition-all">
+                <!-- 主餐选择区 -->
+                <div id="mainDishSection" class="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-4 space-y-3 transition-all">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center space-x-2">
                             <span class="text-2xl" id="menuIcon">🍲</span>
                             <div>
                                 <p class="text-xs text-amber-800 font-medium">主餐菜单：</p>
-                                <p class="text-sm font-bold text-amber-950" id="menuText">古早味酿豆腐 (RM 13.00 / 份)</p>
+                                <p class="text-sm font-bold text-amber-950" id="menuText">加载中...</p>
                             </div>
                         </div>
                         <label id="mainDishToggle" class="hidden text-xs font-bold text-slate-600 flex items-center cursor-pointer bg-white px-2.5 py-1.5 rounded-lg border border-amber-200 shadow-sm">
@@ -89,11 +90,12 @@
                     </div>
                 </div>
 
+                <!-- 糖水选择区 -->
                 <div id="dessertSection" class="hidden bg-rose-50/80 border border-rose-200/80 rounded-2xl p-4 space-y-3 transition-all">
                     <div class="flex justify-between items-center">
                         <div class="flex items-center space-x-2">
                             <span class="text-xl">🥣</span>
-                            <span class="text-sm font-bold text-rose-900">周六限定糖水（RM 5.00 / 份）</span>
+                            <span class="text-sm font-bold text-rose-900" id="dessertTitleText">周六限定糖水</span>
                         </div>
                         <span class="text-xs bg-rose-200/80 text-rose-800 font-bold px-2 py-0.5 rounded-full">限量 20 份</span>
                     </div>
@@ -103,7 +105,7 @@
                             <input type="checkbox" id="wantDessert" onchange="toggleDessertQty()" class="w-4 h-4 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mr-2">
                             订购周六糖水
                         </label>
-                        <div class="text-xs font-black text-rose-600">+ RM 5.00 / 份</div>
+                        <div class="text-xs font-black text-rose-600" id="dessertUnitPriceText">+ RM 5.00 / 份</div>
                     </div>
 
                     <div id="dessertQtyContainer" class="hidden flex items-center justify-between pt-1">
@@ -125,10 +127,10 @@
                 <div class="pt-2">
                     <div class="flex justify-between items-center mb-3 px-1">
                         <span class="text-sm font-bold text-slate-600">预估总额：</span>
-                        <span id="totalText" class="text-2xl font-black text-amber-600">RM 13.00</span>
+                        <span id="totalText" class="text-2xl font-black text-amber-600">RM 0.00</span>
                     </div>
 
-                    <!-- WhatsApp 品牌绿提交按钮 -->
+                    <!-- WhatsApp 提交按钮 -->
                     <button type="submit" id="submitBtn" 
                             class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 active:scale-[0.98] text-white font-bold py-4 rounded-xl shadow-lg shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all">
                         <i class="fa-brands fa-whatsapp text-white text-2xl"></i>
@@ -152,13 +154,13 @@
 
             <div class="bg-rose-50/80 p-3.5 rounded-xl border border-rose-100/80 shadow-sm">
                 <p class="text-xs text-rose-500 font-medium">扫码后请手动输入转账金额：</p>
-                <p id="qrAmountText" class="text-2xl font-black text-rose-600">RM 13.00</p>
+                <p id="qrAmountText" class="text-2xl font-black text-rose-600">RM 0.00</p>
             </div>
 
             <div class="space-y-2 pt-1">
                 <button type="button" onclick="copyAmount()" id="copyAmountBtn" class="w-full bg-amber-50 hover:bg-amber-100/80 active:scale-[0.98] text-amber-900 text-xs font-bold py-3 rounded-xl border border-amber-200/60 flex items-center justify-center space-x-2 transition-all">
                     <i class="fa-regular fa-copy"></i>
-                    <span id="copyAmountText">复制转账金额 (13.00)</span>
+                    <span id="copyAmountText">复制转账金额</span>
                 </button>
 
                 <button type="button" onclick="copyPhone()" id="copyPhoneBtn" class="w-full bg-amber-50 hover:bg-amber-100/80 active:scale-[0.98] text-amber-900 text-xs font-bold py-3 rounded-xl border border-amber-200/60 flex items-center justify-center space-x-2 transition-all">
@@ -174,60 +176,99 @@
     </div>
 
     <script>
-        const ENABLE_SATURDAY = false; // 👈 开关：设为 false 则隐藏周六菜单、周六照片及“糖水 RM 5”价格！
+        // 默认离线配置
+        let ENABLE_FRI_DINNER = true;
+        let ENABLE_SAT_DINNER = true;
+        let ENABLE_SAT_DESSERT = true;
 
-        const MAIN_DISH_PRICE = 13;
-        const DESSERT_PRICE = 5;    
+        let FRI_MENU_NAME = "🍲 古早味酿豆腐";
+        let SAT_MENU_NAME = "🍲 招牌卤肉饭";
+        let SAT_DESSERT_NAME = "🥣 周六限定糖水";
+
+        let FRI_MAIN_PRICE = 13;
+        let SAT_MAIN_PRICE = 13;
+        let DESSERT_PRICE = 5;    
+
         const MY_PHONE_NUMBER = "60162207137"; 
         const DUITNOW_PHONE = "0162207137";   
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx6lj4CZrXCGFqm3rvK5JJMx_9ZVFxOvJ_486tCZYnOTb37CZAxTS3EJWSSESXtt2ELzA/exec"; 
+        
+        // 已更新为你最新的 Google Apps Script API 链接
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwSG41CxGsWOn_nhS5R5YSPtaNcJH_FmpF75HCPUS2jrpCFj350oD67Tq1lWge9oSNbXA/exec"; 
 
         const ALL_SLIDES = [
-            {
-                image: "cafe1.jpeg",
-                isSaturday: false
-            },
-            {
-                image: "dish1.jpeg",
-                isSaturday: false
-            },
-            {
-                image: "dish2.jpeg",
-                isSaturday: true
-            },
-            {
-                image: "dish3.jpeg",
-                isSaturday: true
-            }
+            { image: "cafe1.jpeg", isSaturday: false },
+            { image: "dish1.jpeg", isSaturday: false },
+            { image: "dish2.jpeg", isSaturday: true },
+            { image: "dish3.jpeg", isSaturday: true }
         ];
 
-        const SLIDES = ENABLE_SATURDAY 
-            ? ALL_SLIDES 
-            : ALL_SLIDES.filter(slide => !slide.isSaturday);
-
-        let currentTotal = 13;
+        let SLIDES = ALL_SLIDES;
+        let currentTotal = 0;
         let slideIndex = 0;
         let carouselTimer = null;
 
         let touchStartX = 0;
         let touchEndX = 0;
 
-        window.addEventListener('DOMContentLoaded', () => {
+        window.addEventListener('DOMContentLoaded', async () => {
+            document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
+            
+            await fetchRemoteConfig();
+
+            SLIDES = (ENABLE_SAT_DINNER || ENABLE_SAT_DESSERT) 
+                ? ALL_SLIDES 
+                : ALL_SLIDES.filter(slide => !slide.isSaturday);
+
             renderDots();
             checkCurrentDayAndDisable();
             updatePriceHeader();
-            document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             updateMenuInfo();
             startCarousel();
             initSwipeEvents();
         });
 
+        async function fetchRemoteConfig() {
+            if (!GOOGLE_SCRIPT_URL) return;
+            try {
+                const res = await fetch(GOOGLE_SCRIPT_URL);
+                const config = await res.json();
+                if (config && !config.error) {
+                    if (config.ENABLE_FRI_DINNER !== undefined) ENABLE_FRI_DINNER = config.ENABLE_FRI_DINNER;
+                    if (config.ENABLE_SAT_DINNER !== undefined) ENABLE_SAT_DINNER = config.ENABLE_SAT_DINNER;
+                    if (config.ENABLE_SAT_DESSERT !== undefined) ENABLE_SAT_DESSERT = config.ENABLE_SAT_DESSERT;
+                    
+                    if (config.friMenuName) FRI_MENU_NAME = config.friMenuName;
+                    if (config.satMenuName) SAT_MENU_NAME = config.satMenuName;
+                    if (config.satDessertName) SAT_DESSERT_NAME = config.satDessertName;
+                    
+                    if (config.friMainPrice) FRI_MAIN_PRICE = Number(config.friMainPrice);
+                    if (config.satMainPrice) SAT_MAIN_PRICE = Number(config.satMainPrice);
+                    if (config.dessertPrice) DESSERT_PRICE = Number(config.dessertPrice);
+                }
+            } catch (err) {
+                console.log("无法连接后台 API，降级使用本地默认配置", err);
+            }
+        }
+
         function updatePriceHeader() {
             const priceHeader = document.getElementById('priceHeader');
-            if (ENABLE_SATURDAY) {
-                priceHeader.innerHTML = `主餐 <span class="text-amber-600">RM 13</span> | 糖水 <span class="text-amber-600">RM 5</span>`;
+            let items = [];
+            
+            if (ENABLE_FRI_DINNER && ENABLE_SAT_DINNER && FRI_MAIN_PRICE === SAT_MAIN_PRICE) {
+                items.push(`主餐 <span class="text-amber-600">RM ${FRI_MAIN_PRICE}</span>`);
             } else {
-                priceHeader.innerHTML = `主餐 <span class="text-amber-600">RM 13</span>`;
+                if (ENABLE_FRI_DINNER) items.push(`五主餐 <span class="text-amber-600">RM ${FRI_MAIN_PRICE}</span>`);
+                if (ENABLE_SAT_DINNER) items.push(`六主餐 <span class="text-amber-600">RM ${SAT_MAIN_PRICE}</span>`);
+            }
+
+            if (ENABLE_SAT_DESSERT) {
+                items.push(`糖水 <span class="text-amber-600">RM ${DESSERT_PRICE}</span>`);
+            }
+            
+            if (items.length > 0) {
+                priceHeader.innerHTML = items.join(' | ');
+            } else {
+                priceHeader.innerHTML = `<span class="text-rose-500">暂停预订</span>`;
             }
         }
 
@@ -260,27 +301,43 @@
             const optSaturday = document.getElementById('optSaturday');
             const daySelect = document.getElementById('day');
 
-            if (now >= friDeadline) {
+            // 周五逻辑
+            if (!ENABLE_FRI_DINNER) {
                 optFriday.disabled = true;
-                optFriday.innerText = `星期五 (${friDateStr}) - 🍲 古早味酿豆腐 [已截单]`;
+                optFriday.innerText = `星期五 (${friDateStr}) - 暂停预订`;
+            } else if (now >= friDeadline) {
+                optFriday.disabled = true;
+                optFriday.innerText = `星期五 (${friDateStr}) - ${FRI_MENU_NAME} [已截单]`;
             } else {
                 optFriday.disabled = false;
-                optFriday.innerText = `星期五 (${friDateStr}) - 🍲 古早味酿豆腐`;
+                optFriday.innerText = `星期五 (${friDateStr}) - ${FRI_MENU_NAME}`;
             }
 
-            if (!ENABLE_SATURDAY) {
+            // 周六逻辑
+            const isSatAvailable = ENABLE_SAT_DINNER || ENABLE_SAT_DESSERT;
+            if (!isSatAvailable) {
                 optSaturday.disabled = true;
                 optSaturday.innerText = `星期六 (${satDateStr}) - 暂停预订`;
             } else if (now >= satDeadline) {
                 optSaturday.disabled = true;
-                optSaturday.innerText = `星期六 (${satDateStr}) - 🍲 卤肉饭 / 🥣 糖水 [已截单]`;
+                let text = `星期六 (${satDateStr}) - `;
+                let items = [];
+                if (ENABLE_SAT_DINNER) items.push(SAT_MENU_NAME);
+                if (ENABLE_SAT_DESSERT) items.push(SAT_DESSERT_NAME);
+                optSaturday.innerText = text + items.join(" / ") + " [已截单]";
             } else {
                 optSaturday.disabled = false;
-                optSaturday.innerText = `星期六 (${satDateStr}) - 🍲 卤肉饭 / 🥣 糖水`;
+                let text = `星期六 (${satDateStr}) - `;
+                let items = [];
+                if (ENABLE_SAT_DINNER) items.push(SAT_MENU_NAME);
+                if (ENABLE_SAT_DESSERT) items.push(SAT_DESSERT_NAME);
+                optSaturday.innerText = text + items.join(" / ");
             }
 
             if (optFriday.disabled && !optSaturday.disabled) {
                 daySelect.value = "星期六";
+            } else if (!optFriday.disabled) {
+                daySelect.value = "星期五";
             } else {
                 daySelect.value = "星期五";
             }
@@ -288,6 +345,7 @@
 
         function startCarousel() {
             stopCarousel();
+            if (SLIDES.length <= 1) return;
             carouselTimer = setInterval(() => {
                 slideIndex = (slideIndex + 1) % SLIDES.length;
                 showSlide(slideIndex);
@@ -376,24 +434,59 @@
             const day = document.getElementById('day').value;
             const menuIcon = document.getElementById('menuIcon');
             const menuText = document.getElementById('menuText');
+            const mainDishSection = document.getElementById('mainDishSection');
             const dessertSection = document.getElementById('dessertSection');
             const mainDishToggle = document.getElementById('mainDishToggle');
             const wantMainDish = document.getElementById('wantMainDish');
 
             if (day === "星期五") {
-                menuIcon.innerText = "🍲";
-                menuText.innerText = "古早味酿豆腐 (RM 13.00 / 份)";
+                if (ENABLE_FRI_DINNER) {
+                    mainDishSection.classList.remove('hidden');
+                    menuIcon.innerText = "🍲";
+                    menuText.innerText = `${FRI_MENU_NAME} (RM ${FRI_MAIN_PRICE}.00 / 份)`;
+                    mainDishToggle.classList.add('hidden');
+                    wantMainDish.checked = true;
+                    document.getElementById('mainQtyContainer').classList.remove('hidden');
+                } else {
+                    mainDishSection.classList.add('hidden');
+                    wantMainDish.checked = false;
+                }
+                
                 dessertSection.classList.add('hidden');
-                mainDishToggle.classList.add('hidden');
-                wantMainDish.checked = true;
-                document.getElementById('mainQtyContainer').classList.remove('hidden');
                 document.getElementById('wantDessert').checked = false;
                 document.getElementById('dessertQtyContainer').classList.add('hidden');
-            } else {
-                menuIcon.innerText = "🍲";
-                menuText.innerText = "招牌卤肉饭 (RM 13.00 / 份)";
-                dessertSection.classList.remove('hidden');
-                mainDishToggle.classList.remove('hidden');
+
+            } else { // 星期六
+                if (ENABLE_SAT_DINNER) {
+                    mainDishSection.classList.remove('hidden');
+                    menuIcon.innerText = "🍲";
+                    menuText.innerText = `${SAT_MENU_NAME} (RM ${SAT_MAIN_PRICE}.00 / 份)`;
+                    
+                    if (ENABLE_SAT_DESSERT) {
+                        mainDishToggle.classList.remove('hidden');
+                    } else {
+                        mainDishToggle.classList.add('hidden');
+                        wantMainDish.checked = true;
+                        document.getElementById('mainQtyContainer').classList.remove('hidden');
+                    }
+                } else {
+                    mainDishSection.classList.add('hidden');
+                    wantMainDish.checked = false;
+                }
+
+                if (ENABLE_SAT_DESSERT) {
+                    dessertSection.classList.remove('hidden');
+                    document.getElementById('dessertTitleText').innerText = `${SAT_DESSERT_NAME}（RM ${DESSERT_PRICE}.00 / 份）`;
+                    document.getElementById('dessertUnitPriceText').innerText = `+ RM ${DESSERT_PRICE}.00 / 份`;
+                    if (!ENABLE_SAT_DINNER) {
+                        document.getElementById('wantDessert').checked = true;
+                        document.getElementById('dessertQtyContainer').classList.remove('hidden');
+                    }
+                } else {
+                    dessertSection.classList.add('hidden');
+                    document.getElementById('wantDessert').checked = false;
+                    document.getElementById('dessertQtyContainer').classList.add('hidden');
+                }
             }
             calculateTotal();
         }
@@ -449,10 +542,14 @@
             let total = 0;
 
             if (wantMainDish) {
-                total += mainQty * MAIN_DISH_PRICE;
+                if (day === "星期五" && ENABLE_FRI_DINNER) {
+                    total += mainQty * FRI_MAIN_PRICE;
+                } else if (day === "星期六" && ENABLE_SAT_DINNER) {
+                    total += mainQty * SAT_MAIN_PRICE;
+                }
             }
 
-            if (day === "星期六" && wantDessert) {
+            if (day === "星期六" && ENABLE_SAT_DESSERT && wantDessert) {
                 total += dessertQty * DESSERT_PRICE;
             }
 
@@ -513,8 +610,11 @@
             const wantMainDish = document.getElementById('wantMainDish').checked;
             const wantDessert = document.getElementById('wantDessert').checked;
 
-            const mainQty = wantMainDish ? (parseInt(document.getElementById('qty').value) || 0) : 0;
-            const dessertQty = (day === "星期六" && wantDessert) ? (parseInt(document.getElementById('dessertQty').value) || 0) : 0;
+            const isMainAvailable = (day === "星期五" && ENABLE_FRI_DINNER) || (day === "星期六" && ENABLE_SAT_DINNER);
+            const isDessertAvailable = (day === "星期六" && ENABLE_SAT_DESSERT);
+
+            const mainQty = (isMainAvailable && wantMainDish) ? (parseInt(document.getElementById('qty').value) || 0) : 0;
+            const dessertQty = (isDessertAvailable && wantDessert) ? (parseInt(document.getElementById('dessertQty').value) || 0) : 0;
 
             if ((!wantMainDish || mainQty <= 0) && (!wantDessert || dessertQty <= 0)) {
                 alert("⚠️ 请至少选择 1 份主餐或糖水！");
@@ -531,7 +631,7 @@
             const notes = document.getElementById('notes').value.trim() || '无';
             const total = currentTotal;
 
-            const dishName = (day === "星期五") ? "古早味酿豆腐" : "招牌卤肉饭";
+            const dishName = (day === "星期五") ? FRI_MENU_NAME : SAT_MENU_NAME;
             const qtySummary = `主餐:${mainQty} | 糖水:${dessertQty}`;
 
             const payload = { 
@@ -567,11 +667,11 @@
                             `👤 *名字*：${encodeURIComponent(name)}%0A` +
                             `📅 *用餐日期*：${encodeURIComponent(day)}%0A`;
 
-            if (wantMainDish && mainQty > 0) {
+            if (isMainAvailable && wantMainDish && mainQty > 0) {
                 waMessage += `🍲 *主餐*：${encodeURIComponent(dishName)} x ${mainQty} 份%0A`;
             }
-            if (day === "星期六" && wantDessert && dessertQty > 0) {
-                waMessage += `🥣 *糖水*：周六限定糖水 x ${dessertQty} 份%0A`;
+            if (isDessertAvailable && wantDessert && dessertQty > 0) {
+                waMessage += `🥣 *糖水*：${encodeURIComponent(SAT_DESSERT_NAME)} x ${dessertQty} 份%0A`;
             }
 
             waMessage += `💰 *总计*：RM ${total}%0A` +
