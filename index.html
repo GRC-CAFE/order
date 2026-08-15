@@ -272,7 +272,7 @@
 
         function checkCurrentDayAndDisable() {
             const now = new Date();
-            const currentDayOfWeek = now.getDay(); // 0: 周日, 1: 周一, ... 6: 周六
+            const currentDayOfWeek = now.getDay(); // 0: 周日, 1: 周一... 6: 周六
             
             // 计算当周【星期一】
             const distanceToMonday = (currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek);
@@ -287,9 +287,9 @@
             const targetSaturday = new Date(monday);
             targetSaturday.setDate(monday.getDate() + 5);
 
-            // 截单时间（前一天 20:00）
-            const friDeadline = new Date(targetFriday.getFullYear(), targetFriday.getMonth(), targetFriday.getDate() - 1, 20, 0, 0);
-            const satDeadline = new Date(targetSaturday.getFullYear(), targetSaturday.getMonth(), targetSaturday.getDate() - 1, 20, 0, 0);
+            // 用餐当天的结束时刻 (当天 23:59:59)
+            const friEnd = new Date(targetFriday.getFullYear(), targetFriday.getMonth(), targetFriday.getDate(), 23, 59, 59);
+            const satEnd = new Date(targetSaturday.getFullYear(), targetSaturday.getMonth(), targetSaturday.getDate(), 23, 59, 59);
 
             const friDateStr = `${targetFriday.getMonth() + 1}月${targetFriday.getDate()}日`;
             const satDateStr = `${targetSaturday.getMonth() + 1}月${targetSaturday.getDate()}日`;
@@ -298,30 +298,20 @@
             const optSaturday = document.getElementById('optSaturday');
             const daySelect = document.getElementById('day');
 
-            // 星期五逻辑
-            if (!ENABLE_FRI_DINNER) {
+            // 1. 星期五逻辑：仅在 Excel Flag 为 FALSE 或 已过周五当天 23:59 时禁用
+            if (!ENABLE_FRI_DINNER || now > friEnd) {
                 optFriday.disabled = true;
                 optFriday.innerText = `星期五 (${friDateStr}) - 暂停预订`;
-            } else if (now >= friDeadline) {
-                optFriday.disabled = true;
-                optFriday.innerText = `星期五 (${friDateStr}) - ${FRI_MENU_NAME} [已截单]`;
             } else {
                 optFriday.disabled = false;
                 optFriday.innerText = `星期五 (${friDateStr}) - ${FRI_MENU_NAME}`;
             }
 
-            // 星期六逻辑
+            // 2. 星期六逻辑：只要主餐或糖水 Flag 为 TRUE 且 没过周六 23:59 即可选
             const isSatAvailable = ENABLE_SAT_DINNER || ENABLE_SAT_DESSERT;
-            if (!isSatAvailable) {
+            if (!isSatAvailable || now > satEnd) {
                 optSaturday.disabled = true;
                 optSaturday.innerText = `星期六 (${satDateStr}) - 暂停预订`;
-            } else if (now >= satDeadline) {
-                optSaturday.disabled = true;
-                let text = `星期六 (${satDateStr}) - `;
-                let items = [];
-                if (ENABLE_SAT_DINNER) items.push(SAT_MENU_NAME);
-                if (ENABLE_SAT_DESSERT) items.push(SAT_DESSERT_NAME);
-                optSaturday.innerText = text + items.join(" / ") + " [已截单]";
             } else {
                 optSaturday.disabled = false;
                 let text = `星期六 (${satDateStr}) - `;
@@ -331,9 +321,11 @@
                 optSaturday.innerText = text + items.join(" / ");
             }
 
-            // 设置默认选中
+            // 3. 默认选中可用的选项
             if (optFriday.disabled && !optSaturday.disabled) {
                 daySelect.value = "星期六";
+            } else if (!optFriday.disabled) {
+                daySelect.value = "星期五";
             } else {
                 daySelect.value = "星期五";
             }
