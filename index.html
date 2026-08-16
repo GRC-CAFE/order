@@ -97,7 +97,7 @@
                                 <div class="flex items-center space-x-3">
                                     <input type="checkbox" id="chkDessert" onchange="toggleCard('Dessert')" class="w-5 h-5 text-rose-600 rounded border-slate-300 focus:ring-rose-500 mt-0.5">
                                     <div>
-                                        <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">🥣 周六限定糖水</div>
+                                        <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">星期六 - 加载中...</div>
                                         <div class="flex items-center space-x-2 mt-0.5">
                                             <span id="txtDessertPrice" class="text-xs font-medium text-rose-600">RM --.00 / 份</span>
                                             <span id="badgeDessertLimit" class="text-[10px] bg-rose-100 text-rose-700 font-bold px-1.5 py-0.5 rounded-full">限量</span>
@@ -183,7 +183,7 @@
 
         let FRI_MENU_NAME = "🍲 古早味酿豆腐";
         let SAT_MENU_NAME = "🍲 招牌卤肉饭";
-        let SAT_DESSERT_NAME = "🥣 周六限定糖水";
+        let SAT_DESSERT_NAME = "🥣 南瓜雪耳薏米糖水";
 
         let FRI_MAIN_PRICE = 13;
         let SAT_MAIN_PRICE = 15;
@@ -298,7 +298,8 @@
             document.getElementById('txtSatTitle').innerText = `星期六 (${satDateStr}) - ${SAT_MENU_NAME}`;
             document.getElementById('txtSatPrice').innerText = `RM ${SAT_MAIN_PRICE}.00 / 份`;
 
-            document.getElementById('txtDessertTitle').innerText = `${SAT_DESSERT_NAME} (${satDateStr})`;
+            // 统一统一为：星期六 (X月X日) - 糖水名称
+            document.getElementById('txtDessertTitle').innerText = `星期六 (${satDateStr}) - ${SAT_DESSERT_NAME}`;
             document.getElementById('txtDessertPrice').innerText = `RM ${DESSERT_PRICE}.00 / 份`;
             document.getElementById('badgeDessertLimit').innerText = `限量 ${SAT_DESSERT_LIMIT} 份`;
 
