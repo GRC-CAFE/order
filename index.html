@@ -276,18 +276,17 @@
 
         function setupMenuUI() {
             const now = new Date();
-            const currentDayOfWeek = now.getDay(); 
-            const daysUntilNextMonday = (currentDayOfWeek === 0) ? 1 : (8 - currentDayOfWeek);
-            
-            const nextMonday = new Date(now);
-            nextMonday.setDate(now.getDate() + daysUntilNextMonday);
-            nextMonday.setHours(0, 0, 0, 0);
+            const currentDay = now.getDay(); // 0 是周日, 1-6 是周一至周六
 
-            const targetFriday = new Date(nextMonday);
-            targetFriday.setDate(nextMonday.getDate() + 4);
+            // 计算距离最靠近的星期五的天数 (5 - currentDay + 7) % 7
+            const daysToFriday = (5 - currentDay + 7) % 7;
+            const targetFriday = new Date(now);
+            targetFriday.setDate(now.getDate() + daysToFriday);
 
-            const targetSaturday = new Date(nextMonday);
-            targetSaturday.setDate(nextMonday.getDate() + 5);
+            // 计算距离最靠近的星期六的天数 (6 - currentDay + 7) % 7
+            const daysToSaturday = (6 - currentDay + 7) % 7;
+            const targetSaturday = new Date(now);
+            targetSaturday.setDate(now.getDate() + daysToSaturday);
 
             const friDateStr = `${targetFriday.getMonth() + 1}月${targetFriday.getDate()}日`;
             const satDateStr = `${targetSaturday.getMonth() + 1}月${targetSaturday.getDate()}日`;
