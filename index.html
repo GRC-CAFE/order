@@ -6,14 +6,6 @@
     <title>GRC CAFE - 晚餐与糖水预订</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .banner-contain {
-            width: 100%;
-            height: auto;
-            display: block;
-            object-fit: cover;
-        }
-    </style>
 </head>
 <body class="bg-gradient-to-b from-amber-50/80 via-orange-50/30 to-amber-50/60 min-h-screen pb-12 select-none relative font-sans text-slate-800">
 
@@ -35,11 +27,11 @@
             <div class="flex justify-between items-center pb-4 border-b border-slate-100">
                 <div>
                     <span class="text-xs text-slate-400 block font-medium">菜单价格</span>
-                    <span class="text-sm font-bold text-slate-800" id="priceHeader">加载中...</span>
+                    <span class="text-xs font-bold text-slate-800" id="priceHeader">加载中...</span>
                 </div>
                 <div class="text-right">
                     <span class="text-xs text-slate-400 block font-medium">截单规则</span>
-                    <span id="deadlineText" class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2.5 py-1 rounded-lg">加载中...</span>
+                    <span id="deadlineText" class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2 py-0.5 rounded-lg">周四/周五 8PM 截单</span>
                 </div>
             </div>
 
@@ -50,63 +42,80 @@
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
                 </div>
 
+                <!-- 选餐区域：可多选全部 -->
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">预订用餐日期 <span class="text-rose-500">*</span></label>
-                    <select id="day" onchange="updateMenuInfo()" required class="w-full px-4 py-3 rounded-xl border border-slate-200 bg-slate-50/50 focus:bg-white focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition font-bold text-slate-800 text-sm">
-                        <option value="星期五" id="optFriday">星期五 - 加载中...</option>
-                        <option value="星期六" id="optSaturday">星期六 - 加载中...</option>
-                    </select>
-                </div>
-
-                <div id="mainDishSection" class="bg-amber-50/80 border border-amber-200/80 rounded-2xl p-4 space-y-3 transition-all">
-                    <div class="flex items-center justify-between">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-2xl" id="menuIcon">🍲</span>
-                            <div>
-                                <p class="text-xs text-amber-800 font-medium">主餐菜单：</p>
-                                <p class="text-sm font-bold text-amber-950" id="menuText">加载中...</p>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">选择预订餐点 (可多选) <span class="text-rose-500">*</span></label>
+                    <div class="space-y-3">
+                        
+                        <!-- 星期五餐点卡片 -->
+                        <div id="cardFriday" class="p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50/50 transition-all space-y-3">
+                            <label class="flex items-start justify-between cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" id="chkFriMain" onchange="toggleCard('Fri')" class="w-5 h-5 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mt-0.5">
+                                    <div>
+                                        <div id="txtFriTitle" class="text-sm font-bold text-slate-800">星期五 - 加载中...</div>
+                                        <div id="txtFriPrice" class="text-xs font-medium text-amber-700">RM --.00 / 份</div>
+                                    </div>
+                                </div>
+                            </label>
+                            
+                            <div id="qtyFriBox" class="hidden flex items-center justify-between pt-2 border-t border-amber-200/50">
+                                <span class="text-xs font-bold text-slate-600">份数：</span>
+                                <div class="flex items-center space-x-3">
+                                    <button type="button" onclick="adjustQty('Fri', -1)" class="w-8 h-8 rounded-lg bg-white hover:bg-amber-50 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">-</button>
+                                    <input type="number" id="qtyFri" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
+                                    <button type="button" onclick="adjustQty('Fri', 1)" class="w-8 h-8 rounded-lg bg-white hover:bg-amber-50 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">+</button>
+                                </div>
                             </div>
                         </div>
-                        <label id="mainDishToggle" class="hidden text-xs font-bold text-slate-600 flex items-center cursor-pointer bg-white px-2.5 py-1.5 rounded-lg border border-amber-200 shadow-sm">
-                            <input type="checkbox" id="wantMainDish" checked onchange="toggleMainDish()" class="w-4 h-4 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mr-1.5">
-                            订购主餐
-                        </label>
-                    </div>
 
-                    <div id="mainQtyContainer" class="flex items-center justify-between pt-1">
-                        <span class="text-xs font-bold text-slate-600">主餐份数：</span>
-                        <div class="flex items-center space-x-3">
-                            <button type="button" onclick="adjustQty(-1)" class="w-9 h-9 rounded-xl bg-white hover:bg-amber-50 text-amber-800 font-bold text-lg flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">-</button>
-                            <input type="number" id="qty" value="1" min="1" readonly class="w-14 text-center py-1 font-bold text-base border border-slate-200 rounded-xl bg-white shadow-inner text-slate-800">
-                            <button type="button" onclick="adjustQty(1)" class="w-9 h-9 rounded-xl bg-white hover:bg-amber-50 text-amber-800 font-bold text-lg flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">+</button>
-                        </div>
-                    </div>
-                </div>
+                        <!-- 星期六主餐卡片 -->
+                        <div id="cardSaturday" class="p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50/50 transition-all space-y-3">
+                            <label class="flex items-start justify-between cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" id="chkSatMain" onchange="toggleCard('Sat')" class="w-5 h-5 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mt-0.5">
+                                    <div>
+                                        <div id="txtSatTitle" class="text-sm font-bold text-slate-800">星期六 - 加载中...</div>
+                                        <div id="txtSatPrice" class="text-xs font-medium text-amber-700">RM --.00 / 份</div>
+                                    </div>
+                                </div>
+                            </label>
 
-                <div id="dessertSection" class="hidden bg-rose-50/80 border border-rose-200/80 rounded-2xl p-4 space-y-3 transition-all">
-                    <div class="flex justify-between items-center">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-xl">🥣</span>
-                            <span class="text-sm font-bold text-rose-900" id="dessertTitleText">周六限定糖水</span>
+                            <div id="qtySatBox" class="hidden flex items-center justify-between pt-2 border-t border-amber-200/50">
+                                <span class="text-xs font-bold text-slate-600">份数：</span>
+                                <div class="flex items-center space-x-3">
+                                    <button type="button" onclick="adjustQty('Sat', -1)" class="w-8 h-8 rounded-lg bg-white hover:bg-amber-50 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">-</button>
+                                    <input type="number" id="qtySat" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
+                                    <button type="button" onclick="adjustQty('Sat', 1)" class="w-8 h-8 rounded-lg bg-white hover:bg-amber-50 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">+</button>
+                                </div>
+                            </div>
                         </div>
-                        <span id="dessertLimitBadge" class="text-xs bg-rose-200/80 text-rose-800 font-bold px-2 py-0.5 rounded-full">加载中...</span>
-                    </div>
-                    
-                    <div class="flex items-center justify-between bg-white p-3 rounded-xl border border-rose-100 shadow-sm">
-                        <label for="wantDessert" class="text-xs font-bold text-slate-700 flex items-center cursor-pointer">
-                            <input type="checkbox" id="wantDessert" onchange="toggleDessertQty()" class="w-4 h-4 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mr-2">
-                            订购周六糖水
-                        </label>
-                        <div class="text-xs font-black text-rose-600" id="dessertUnitPriceText">+ RM 5.00 / 份</div>
-                    </div>
 
-                    <div id="dessertQtyContainer" class="hidden flex items-center justify-between pt-1">
-                        <span class="text-xs font-bold text-slate-600">糖水份数：</span>
-                        <div class="flex items-center space-x-2">
-                            <button type="button" onclick="adjustDessertQty(-1)" class="w-8 h-8 rounded-lg bg-white border border-rose-200 font-bold text-sm text-rose-800 shadow-sm active:scale-95 transition">-</button>
-                            <input type="number" id="dessertQty" value="1" min="1" readonly class="w-12 text-center text-sm font-bold bg-white border border-slate-200 rounded-lg py-1 text-slate-800">
-                            <button type="button" onclick="adjustDessertQty(1)" class="w-8 h-8 rounded-lg bg-white border border-rose-200 font-bold text-sm text-rose-800 shadow-sm active:scale-95 transition">+</button>
+                        <!-- 周六糖水卡片 -->
+                        <div id="cardDessert" class="p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50/50 transition-all space-y-3">
+                            <label class="flex items-start justify-between cursor-pointer">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" id="chkDessert" onchange="toggleCard('Dessert')" class="w-5 h-5 text-rose-600 rounded border-slate-300 focus:ring-rose-500 mt-0.5">
+                                    <div>
+                                        <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">🥣 周六限定糖水</div>
+                                        <div class="flex items-center space-x-2 mt-0.5">
+                                            <span id="txtDessertPrice" class="text-xs font-medium text-rose-600">RM --.00 / 份</span>
+                                            <span id="badgeDessertLimit" class="text-[10px] bg-rose-100 text-rose-700 font-bold px-1.5 py-0.5 rounded-full">限量</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </label>
+
+                            <div id="qtyDessertBox" class="hidden flex items-center justify-between pt-2 border-t border-rose-200/50">
+                                <span class="text-xs font-bold text-slate-600">份数：</span>
+                                <div class="flex items-center space-x-3">
+                                    <button type="button" onclick="adjustQty('Dessert', -1)" class="w-8 h-8 rounded-lg bg-white hover:bg-rose-50 text-rose-800 font-bold text-base flex items-center justify-center border border-rose-200 shadow-sm active:scale-95 transition">-</button>
+                                    <input type="number" id="qtyDessert" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
+                                    <button type="button" onclick="adjustQty('Dessert', 1)" class="w-8 h-8 rounded-lg bg-white hover:bg-rose-50 text-rose-800 font-bold text-base flex items-center justify-center border border-rose-200 shadow-sm active:scale-95 transition">+</button>
+                                </div>
+                            </div>
                         </div>
+
                     </div>
                 </div>
 
@@ -168,9 +177,9 @@
     <script>
         const DEBUG_MODE = false; 
 
-        let ENABLE_FRI_DINNER = false;
-        let ENABLE_SAT_DINNER = false;
-        let ENABLE_SAT_DESSERT = false;
+        let ENABLE_FRI_DINNER = true;
+        let ENABLE_SAT_DINNER = true;
+        let ENABLE_SAT_DESSERT = true;
 
         let FRI_MENU_NAME = "🍲 古早味酿豆腐";
         let SAT_MENU_NAME = "🍲 招牌卤肉饭";
@@ -180,33 +189,27 @@
         let SAT_MAIN_PRICE = 15;
         let DESSERT_PRICE = 5;    
         let SAT_DESSERT_LIMIT = 20;
-        
-        let FRI_DEADLINE_TEXT = "预订至周四 8PM 截单";
-        let SAT_DEADLINE_TEXT = "预订至周五 8PM 截单";
 
         const MY_PHONE_NUMBER = "60162207137"; 
         const DUITNOW_PHONE = "0162207137";   
         
-        // 已经替换为您最新提供的 API 链接
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw-t99KLkdMEcFzto_gfkosudLT3ElFVOqndO3KHZImHgx71hUqr9CDNSRg2Km45-j9Mw/exec"; 
 
-        // 💡 标记照片属性：糖水海报设为 isDessert: true
         const ALL_SLIDES = [
-            { image: "cafe1.jpeg", isFriday: false, isSaturdayMain: false, isDessert: false }, // 店面封面
-            { image: "dish1.jpeg", isFriday: true,  isSaturdayMain: false, isDessert: false }, // 周五主餐
-            { image: "dish2.jpeg", isFriday: false, isSaturdayMain: true,  isDessert: false }, // 周六主餐
-            { image: "dish3.jpeg", isFriday: false, isSaturdayMain: false, isDessert: true }   // 周六糖水
+            { image: "cafe1.jpeg", isFriday: false, isSaturdayMain: false, isDessert: false },
+            { image: "dish1.jpeg", isFriday: true,  isSaturdayMain: false, isDessert: false },
+            { image: "dish2.jpeg", isFriday: false, isSaturdayMain: true,  isDessert: false },
+            { image: "dish3.jpeg", isFriday: false, isSaturdayMain: false, isDessert: true }
         ];
 
         let SLIDES = [];
-        let currentTotal = 0;
+        let currentTotal = "0.00";
         let slideIndex = 0;
         let carouselTimer = null;
 
         let touchStartX = 0;
         let touchEndX = 0;
 
-        // 核心辅助函数：严谨解析布尔值
         function parseBool(val) {
             if (val === true || val === false) return val;
             if (typeof val === 'string') {
@@ -223,15 +226,9 @@
 
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             
-            // 1. 获取后端配置
             await fetchRemoteConfig();
-
-            // 2. 根据布尔 Flag 动态筛选照片
             updateCarouselSlides();
-            
-            // 3. 校验并渲染菜单
-            checkCurrentDayAndDisable();
-            updateMenuInfo();
+            setupMenuUI();
             
             startCarousel();
             initSwipeEvents();
@@ -243,7 +240,6 @@
                 const res = await fetch(GOOGLE_SCRIPT_URL);
                 const config = await res.json();
                 if (config && !config.error) {
-                    // 使用 parseBool 解析 Flag
                     ENABLE_FRI_DINNER = parseBool(config.ENABLE_FRI_DINNER);
                     ENABLE_SAT_DINNER = parseBool(config.ENABLE_SAT_DINNER);
                     ENABLE_SAT_DESSERT = parseBool(config.ENABLE_SAT_DESSERT);
@@ -256,9 +252,6 @@
                     if (config.satMainPrice) SAT_MAIN_PRICE = Number(config.satMainPrice);
                     if (config.dessertPrice) DESSERT_PRICE = Number(config.dessertPrice);
                     if (config.satDessertLimit) SAT_DESSERT_LIMIT = Number(config.satDessertLimit);
-
-                    if (config.FRI_DEADLINE_TEXT) FRI_DEADLINE_TEXT = config.FRI_DEADLINE_TEXT;
-                    if (config.SAT_DEADLINE_TEXT) SAT_DEADLINE_TEXT = config.SAT_DEADLINE_TEXT;
                 }
             } catch (err) {
                 console.log("无法连接后台 API，使用默认配置", err);
@@ -266,11 +259,10 @@
         }
 
         function updateCarouselSlides() {
-            // 严格按 Flag 筛选轮播图片
             SLIDES = ALL_SLIDES.filter(slide => {
                 if (slide.isFriday && !ENABLE_FRI_DINNER) return false;
                 if (slide.isSaturdayMain && !ENABLE_SAT_DINNER) return false;
-                if (slide.isDessert && !ENABLE_SAT_DESSERT) return false; // 糖水关闭时屏蔽糖水海报
+                if (slide.isDessert && !ENABLE_SAT_DESSERT) return false;
                 return true;
             });
 
@@ -282,38 +274,111 @@
             showSlide(0);
         }
 
-        function updateHeaderInfo() {
-            const priceHeader = document.getElementById('priceHeader');
-            const deadlineText = document.getElementById('deadlineText');
-            const selectedDay = document.getElementById('day').value;
-            const optFriday = document.getElementById('optFriday');
-            const optSaturday = document.getElementById('optSaturday');
+        function setupMenuUI() {
+            const now = new Date();
+            const currentDayOfWeek = now.getDay(); 
+            const daysUntilNextMonday = (currentDayOfWeek === 0) ? 1 : (8 - currentDayOfWeek);
+            
+            const nextMonday = new Date(now);
+            nextMonday.setDate(now.getDate() + daysUntilNextMonday);
+            nextMonday.setHours(0, 0, 0, 0);
 
-            const isFriActive = ENABLE_FRI_DINNER && optFriday && !optFriday.disabled;
-            const isSatActive = (ENABLE_SAT_DINNER || ENABLE_SAT_DESSERT) && optSaturday && !optSaturday.disabled;
+            const targetFriday = new Date(nextMonday);
+            targetFriday.setDate(nextMonday.getDate() + 4);
 
-            let items = [];
+            const targetSaturday = new Date(nextMonday);
+            targetSaturday.setDate(nextMonday.getDate() + 5);
 
-            if (selectedDay === "星期五" && isFriActive) {
-                items.push(`主餐 <span class="text-amber-600">RM ${FRI_MAIN_PRICE}</span>`);
-                if (deadlineText) deadlineText.innerText = FRI_DEADLINE_TEXT;
-            } else if (selectedDay === "星期六" && isSatActive) {
-                if (ENABLE_SAT_DINNER) {
-                    items.push(`主餐 <span class="text-amber-600">RM ${SAT_MAIN_PRICE}</span>`);
-                }
-                if (ENABLE_SAT_DESSERT) {
-                    items.push(`糖水 <span class="text-amber-600">RM ${DESSERT_PRICE}</span>`);
-                }
-                if (deadlineText) deadlineText.innerText = SAT_DEADLINE_TEXT;
-            } else {
-                if (deadlineText) deadlineText.innerText = "暂停预订";
+            const friDateStr = `${targetFriday.getMonth() + 1}月${targetFriday.getDate()}日`;
+            const satDateStr = `${targetSaturday.getMonth() + 1}月${targetSaturday.getDate()}日`;
+
+            // 设置标题与价格
+            document.getElementById('txtFriTitle').innerText = `星期五 (${friDateStr}) - ${FRI_MENU_NAME}`;
+            document.getElementById('txtFriPrice').innerText = `RM ${FRI_MAIN_PRICE}.00 / 份`;
+
+            document.getElementById('txtSatTitle').innerText = `星期六 (${satDateStr}) - ${SAT_MENU_NAME}`;
+            document.getElementById('txtSatPrice').innerText = `RM ${SAT_MAIN_PRICE}.00 / 份`;
+
+            document.getElementById('txtDessertTitle').innerText = `${SAT_DESSERT_NAME} (${satDateStr})`;
+            document.getElementById('txtDessertPrice').innerText = `RM ${DESSERT_PRICE}.00 / 份`;
+            document.getElementById('badgeDessertLimit').innerText = `限量 ${SAT_DESSERT_LIMIT} 份`;
+
+            document.getElementById('priceHeader').innerHTML = `主餐 RM${FRI_MAIN_PRICE}/RM${SAT_MAIN_PRICE} | 糖水 RM${DESSERT_PRICE}`;
+
+            // 控制全局卡片开关状态
+            if (!ENABLE_FRI_DINNER) {
+                document.getElementById('cardFriday').classList.add('hidden');
+            }
+            if (!ENABLE_SAT_DINNER) {
+                document.getElementById('cardSaturday').classList.add('hidden');
+            }
+            if (!ENABLE_SAT_DESSERT) {
+                document.getElementById('cardDessert').classList.add('hidden');
             }
 
-            if (items.length > 0) {
-                priceHeader.innerHTML = items.join(' | ');
+            calculateTotal();
+        }
+
+        function toggleCard(type) {
+            const chk = document.getElementById(`chk${type === 'Fri' ? 'FriMain' : type === 'Sat' ? 'SatMain' : 'Dessert'}`);
+            const card = document.getElementById(`card${type === 'Fri' ? 'Friday' : type === 'Sat' ? 'Saturday' : 'Dessert'}`);
+            const qtyBox = document.getElementById(`qty${type}Box`);
+
+            if (chk.checked) {
+                if (type === 'Dessert') {
+                    card.className = "p-3.5 rounded-xl border-2 border-rose-500 bg-rose-50/60 shadow-sm transition-all space-y-3";
+                } else {
+                    card.className = "p-3.5 rounded-xl border-2 border-amber-500 bg-amber-50/60 shadow-sm transition-all space-y-3";
+                }
+                qtyBox.classList.remove('hidden');
             } else {
-                priceHeader.innerHTML = `<span class="text-rose-500">暂停预订</span>`;
+                card.className = "p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50/50 transition-all space-y-3";
+                qtyBox.classList.add('hidden');
             }
+            calculateTotal();
+        }
+
+        function adjustQty(type, amount) {
+            const input = document.getElementById(`qty${type}`);
+            let val = parseInt(input.value) || 1;
+            val += amount;
+            if (val < 1) val = 1;
+            
+            if (type === 'Dessert' && val > SAT_DESSERT_LIMIT) {
+                val = SAT_DESSERT_LIMIT;
+            }
+            
+            input.value = val;
+            calculateTotal();
+        }
+
+        function calculateTotal() {
+            let total = 0;
+
+            const friChecked = document.getElementById('chkFriMain').checked;
+            const satChecked = document.getElementById('chkSatMain').checked;
+            const dessertChecked = document.getElementById('chkDessert').checked;
+
+            if (friChecked && ENABLE_FRI_DINNER) {
+                const qty = parseInt(document.getElementById('qtyFri').value) || 1;
+                total += qty * FRI_MAIN_PRICE;
+            }
+
+            if (satChecked && ENABLE_SAT_DINNER) {
+                const qty = parseInt(document.getElementById('qtySat').value) || 1;
+                total += qty * SAT_MAIN_PRICE;
+            }
+
+            if (dessertChecked && ENABLE_SAT_DESSERT) {
+                const qty = parseInt(document.getElementById('qtyDessert').value) || 1;
+                total += qty * DESSERT_PRICE;
+            }
+
+            currentTotal = total.toFixed(2);
+
+            document.getElementById('totalText').innerText = `RM ${currentTotal}`;
+            document.getElementById('qrAmountText').innerText = `RM ${currentTotal}`;
+            document.getElementById('copyAmountText').innerText = `复制转账金额 (${currentTotal})`;
         }
 
         function renderDots() {
@@ -321,65 +386,6 @@
             dotsContainer.innerHTML = SLIDES.map((_, i) => 
                 `<button type="button" onclick="goToSlide(${i})" id="dot${i}" class="w-2 h-2 rounded-full ${i === 0 ? 'bg-amber-500' : 'bg-slate-300'} transition-all focus:outline-none"></button>`
             ).join('');
-        }
-
-        function checkCurrentDayAndDisable() {
-            const now = new Date();
-            const currentDayOfWeek = now.getDay(); // 0 是周日, 1-6 是周一至周六
-            
-            // 计算距离下一个周一（Next Monday）的天数
-            // 若今天是周日(0)，距离下周一还有 1 天；若今天是周一(1)，距离下周一还有 7 天
-            const daysUntilNextMonday = (currentDayOfWeek === 0) ? 1 : (8 - currentDayOfWeek);
-            
-            const nextMonday = new Date(now);
-            nextMonday.setDate(now.getDate() + daysUntilNextMonday);
-            nextMonday.setHours(0, 0, 0, 0);
-
-            // 以下一个周一为基准，计算下周五与下周六
-            const targetFriday = new Date(nextMonday);
-            targetFriday.setDate(nextMonday.getDate() + 4);
-
-            const targetSaturday = new Date(nextMonday);
-            targetSaturday.setDate(nextMonday.getDate() + 5);
-
-            const friEnd = new Date(targetFriday.getFullYear(), targetFriday.getMonth(), targetFriday.getDate(), 23, 59, 59);
-            const satEnd = new Date(targetSaturday.getFullYear(), targetSaturday.getMonth(), targetSaturday.getDate(), 23, 59, 59);
-
-            const friDateStr = `${targetFriday.getMonth() + 1}月${targetFriday.getDate()}日`;
-            const satDateStr = `${targetSaturday.getMonth() + 1}月${targetSaturday.getDate()}日`;
-
-            const optFriday = document.getElementById('optFriday');
-            const optSaturday = document.getElementById('optSaturday');
-            const daySelect = document.getElementById('day');
-
-            const isFriValid = DEBUG_MODE ? ENABLE_FRI_DINNER : (ENABLE_FRI_DINNER && now <= friEnd);
-            const isSatValid = DEBUG_MODE ? (ENABLE_SAT_DINNER || ENABLE_SAT_DESSERT) : ((ENABLE_SAT_DINNER || ENABLE_SAT_DESSERT) && now <= satEnd);
-
-            if (!isFriValid) {
-                optFriday.disabled = true;
-                optFriday.innerText = `星期五 (${friDateStr}) - 暂停预订`;
-            } else {
-                optFriday.disabled = false;
-                optFriday.innerText = `星期五 (${friDateStr}) - ${FRI_MENU_NAME}`;
-            }
-
-            if (!isSatValid) {
-                optSaturday.disabled = true;
-                optSaturday.innerText = `星期六 (${satDateStr}) - 暂停预订`;
-            } else {
-                optSaturday.disabled = false;
-                let text = `星期六 (${satDateStr}) - `;
-                let items = [];
-                if (ENABLE_SAT_DINNER) items.push(SAT_MENU_NAME);
-                if (ENABLE_SAT_DESSERT) items.push(SAT_DESSERT_NAME);
-                optSaturday.innerText = text + items.join(" / ");
-            }
-
-            if (optFriday.disabled && !optSaturday.disabled) {
-                daySelect.value = "星期六";
-            } else if (!optFriday.disabled) {
-                daySelect.value = "星期五";
-            }
         }
 
         function startCarousel() {
@@ -465,140 +471,6 @@
             }
         }
 
-        function updateMenuInfo() {
-            const day = document.getElementById('day').value;
-            const menuIcon = document.getElementById('menuIcon');
-            const menuText = document.getElementById('menuText');
-            const mainDishSection = document.getElementById('mainDishSection');
-            const dessertSection = document.getElementById('dessertSection');
-            const mainDishToggle = document.getElementById('mainDishToggle');
-            const wantMainDish = document.getElementById('wantMainDish');
-
-            updateHeaderInfo();
-
-            if (day === "星期五") {
-                if (ENABLE_FRI_DINNER) {
-                    mainDishSection.classList.remove('hidden');
-                    menuIcon.innerText = "🍲";
-                    menuText.innerText = `${FRI_MENU_NAME} (RM ${FRI_MAIN_PRICE}.00 / 份)`;
-                    mainDishToggle.classList.add('hidden');
-                    wantMainDish.checked = true;
-                    document.getElementById('mainQtyContainer').classList.remove('hidden');
-                } else {
-                    mainDishSection.classList.add('hidden');
-                    wantMainDish.checked = false;
-                }
-                
-                dessertSection.classList.add('hidden');
-                document.getElementById('wantDessert').checked = false;
-                document.getElementById('dessertQtyContainer').classList.add('hidden');
-
-            } else {
-                if (ENABLE_SAT_DINNER) {
-                    mainDishSection.classList.remove('hidden');
-                    menuIcon.innerText = "🍲";
-                    menuText.innerText = `${SAT_MENU_NAME} (RM ${SAT_MAIN_PRICE}.00 / 份)`;
-                    
-                    if (ENABLE_SAT_DESSERT) {
-                        mainDishToggle.classList.remove('hidden');
-                    } else {
-                        mainDishToggle.classList.add('hidden');
-                        wantMainDish.checked = true;
-                        document.getElementById('mainQtyContainer').classList.remove('hidden');
-                    }
-                } else {
-                    mainDishSection.classList.add('hidden');
-                    wantMainDish.checked = false;
-                }
-
-                if (ENABLE_SAT_DESSERT) {
-                    dessertSection.classList.remove('hidden');
-                    document.getElementById('dessertTitleText').innerText = `${SAT_DESSERT_NAME}（RM ${DESSERT_PRICE}.00 / 份）`;
-                    document.getElementById('dessertUnitPriceText').innerText = `+ RM ${DESSERT_PRICE}.00 / 份`;
-                    document.getElementById('dessertLimitBadge').innerText = `限量 ${SAT_DESSERT_LIMIT} 份`;
-
-                    if (!ENABLE_SAT_DINNER) {
-                        document.getElementById('wantDessert').checked = true;
-                        document.getElementById('dessertQtyContainer').classList.remove('hidden');
-                    }
-                } else {
-                    dessertSection.classList.add('hidden');
-                    document.getElementById('wantDessert').checked = false;
-                    document.getElementById('dessertQtyContainer').classList.add('hidden');
-                }
-            }
-            calculateTotal();
-        }
-
-        function toggleMainDish() {
-            const wantMainDish = document.getElementById('wantMainDish').checked;
-            const container = document.getElementById('mainQtyContainer');
-            if (wantMainDish) {
-                container.classList.remove('hidden');
-            } else {
-                container.classList.add('hidden');
-            }
-            calculateTotal();
-        }
-
-        function adjustQty(amount) {
-            const qtyInput = document.getElementById('qty');
-            let current = parseInt(qtyInput.value) || 1;
-            current += amount;
-            if (current < 1) current = 1;
-            qtyInput.value = current;
-            calculateTotal();
-        }
-
-        function toggleDessertQty() {
-            const wantDessert = document.getElementById('wantDessert').checked;
-            const container = document.getElementById('dessertQtyContainer');
-            if (wantDessert) {
-                container.classList.remove('hidden');
-            } else {
-                container.classList.add('hidden');
-            }
-            calculateTotal();
-        }
-
-        function adjustDessertQty(amount) {
-            const qtyInput = document.getElementById('dessertQty');
-            let current = parseInt(qtyInput.value) || 1;
-            current += amount;
-            if (current < 1) current = 1;
-            if (current > SAT_DESSERT_LIMIT) current = SAT_DESSERT_LIMIT;
-            qtyInput.value = current;
-            calculateTotal();
-        }
-
-        function calculateTotal() {
-            const day = document.getElementById('day').value;
-            const wantMainDish = document.getElementById('wantMainDish').checked;
-            const mainQty = parseInt(document.getElementById('qty').value) || 1;
-            const wantDessert = document.getElementById('wantDessert').checked;
-            const dessertQty = parseInt(document.getElementById('dessertQty').value) || 1;
-
-            let total = 0;
-
-            if (wantMainDish) {
-                if (day === "星期五" && ENABLE_FRI_DINNER) {
-                    total += mainQty * FRI_MAIN_PRICE;
-                } else if (day === "星期六" && ENABLE_SAT_DINNER) {
-                    total += mainQty * SAT_MAIN_PRICE;
-                }
-            }
-
-            if (day === "星期六" && ENABLE_SAT_DESSERT && wantDessert) {
-                total += dessertQty * DESSERT_PRICE;
-            }
-
-            currentTotal = total.toFixed(2);
-
-            document.getElementById('totalText').innerText = `RM ${currentTotal}`;
-            document.getElementById('qrAmountText').innerText = `RM ${currentTotal}`;
-            document.getElementById('copyAmountText').innerText = `复制转账金额 (${currentTotal})`;
-        }
-
         function safeCopyText(text, successCallback) {
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text).then(successCallback).catch(() => fallbackCopy(text, successCallback));
@@ -645,18 +517,12 @@
         async function handleOrder(event) {
             event.preventDefault();
 
-            const day = document.getElementById('day').value;
-            const wantMainDish = document.getElementById('wantMainDish').checked;
-            const wantDessert = document.getElementById('wantDessert').checked;
+            const friChecked = document.getElementById('chkFriMain').checked;
+            const satChecked = document.getElementById('chkSatMain').checked;
+            const dessertChecked = document.getElementById('chkDessert').checked;
 
-            const isMainAvailable = (day === "星期五" && ENABLE_FRI_DINNER) || (day === "星期六" && ENABLE_SAT_DINNER);
-            const isDessertAvailable = (day === "星期六" && ENABLE_SAT_DESSERT);
-
-            const mainQty = (isMainAvailable && wantMainDish) ? (parseInt(document.getElementById('qty').value) || 0) : 0;
-            const dessertQty = (isDessertAvailable && wantDessert) ? (parseInt(document.getElementById('dessertQty').value) || 0) : 0;
-
-            if ((!wantMainDish || mainQty <= 0) && (!wantDessert || dessertQty <= 0)) {
-                alert("⚠️ 请至少选择 1 份主餐或糖水！");
+            if (!friChecked && !satChecked && !dessertChecked) {
+                alert("⚠️ 请至少勾选一项餐点（星期五主餐、星期六主餐或糖水）！");
                 return;
             }
 
@@ -670,14 +536,30 @@
             const notes = document.getElementById('notes').value.trim() || '无';
             const total = currentTotal;
 
-            const dishName = (day === "星期五") ? FRI_MENU_NAME : SAT_MENU_NAME;
-            const qtySummary = `主餐:${mainQty} | 糖水:${dessertQty}`;
+            let selectedItems = [];
+            let daysList = [];
+
+            if (friChecked && ENABLE_FRI_DINNER) {
+                const q = parseInt(document.getElementById('qtyFri').value) || 1;
+                selectedItems.push(`星期五 ${FRI_MENU_NAME} x ${q}份`);
+                daysList.push("星期五");
+            }
+            if (satChecked && ENABLE_SAT_DINNER) {
+                const q = parseInt(document.getElementById('qtySat').value) || 1;
+                selectedItems.push(`星期六 ${SAT_MENU_NAME} x ${q}份`);
+                daysList.push("星期六");
+            }
+            if (dessertChecked && ENABLE_SAT_DESSERT) {
+                const q = parseInt(document.getElementById('qtyDessert').value) || 1;
+                selectedItems.push(`星期六 ${SAT_DESSERT_NAME} x ${q}份`);
+                if (!daysList.includes("星期六")) daysList.push("星期六");
+            }
 
             const payload = { 
                 timestamp: new Date().toLocaleString("zh-CN", { timeZone: "Asia/Kuala_Lumpur" }),
                 name: name, 
-                day: day, 
-                quantity: qtySummary,
+                day: daysList.join(" & "), 
+                quantity: selectedItems.join(" ; "),
                 total: total, 
                 notes: notes 
             };
@@ -704,14 +586,11 @@
             let waMessage = `🛒 *【晚餐/糖水预订订单】*%0A` +
                             `--------------------------------%0A` +
                             `👤 *名字*：${encodeURIComponent(name)}%0A` +
-                            `📅 *用餐日期*：${encodeURIComponent(day)}%0A`;
+                            `🍱 *已选餐点*：%0A`;
 
-            if (isMainAvailable && wantMainDish && mainQty > 0) {
-                waMessage += `🍲 *主餐*：${encodeURIComponent(dishName)} x ${mainQty} 份%0A`;
-            }
-            if (isDessertAvailable && wantDessert && dessertQty > 0) {
-                waMessage += `🥣 *糖水*：${encodeURIComponent(SAT_DESSERT_NAME)} x ${dessertQty} 份%0A`;
-            }
+            selectedItems.forEach(item => {
+                waMessage += `• ${encodeURIComponent(item)}%0A`;
+            });
 
             waMessage += `💰 *总计*：RM ${total}%0A` +
                          `📝 *备注*：${encodeURIComponent(notes)}%0A` +
