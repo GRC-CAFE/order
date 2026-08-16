@@ -303,7 +303,28 @@
             document.getElementById('txtDessertPrice').innerText = `RM ${DESSERT_PRICE}.00 / 份`;
             document.getElementById('badgeDessertLimit').innerText = `限量 ${SAT_DESSERT_LIMIT} 份`;
 
-            document.getElementById('priceHeader').innerHTML = `主餐 RM${FRI_MAIN_PRICE}/RM${SAT_MAIN_PRICE} | 糖水 RM${DESSERT_PRICE}`;
+            // 动态拼接价格 header (遵循 Flag 逻辑)
+            let priceParts = [];
+            
+            // 拼接主餐价格
+            let mainPrices = [];
+            if (ENABLE_FRI_DINNER) mainPrices.push(`RM${FRI_MAIN_PRICE}`);
+            if (ENABLE_SAT_DINNER) mainPrices.push(`RM${SAT_MAIN_PRICE}`);
+            
+            if (mainPrices.length > 0) {
+                priceParts.push(`主餐 ${mainPrices.join('/')}`);
+            }
+
+            // 拼接糖水价格
+            if (ENABLE_SAT_DESSERT) {
+                priceParts.push(`糖水 RM${DESSERT_PRICE}`);
+            }
+
+            if (priceParts.length > 0) {
+                document.getElementById('priceHeader').innerHTML = priceParts.join(' | ');
+            } else {
+                document.getElementById('priceHeader').innerHTML = `<span class="text-rose-500 font-bold">暂停预订</span>`;
+            }
 
             // 控制全局卡片开关状态
             if (!ENABLE_FRI_DINNER) {
