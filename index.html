@@ -166,7 +166,7 @@
     </div>
 
     <script>
-        const DEBUG_MODE = true; 
+        const DEBUG_MODE = false; 
 
         let ENABLE_FRI_DINNER = false;
         let ENABLE_SAT_DINNER = false;
@@ -325,18 +325,22 @@
 
         function checkCurrentDayAndDisable() {
             const now = new Date();
-            const currentDayOfWeek = now.getDay(); 
+            const currentDayOfWeek = now.getDay(); // 0 是周日, 1-6 是周一至周六
             
-            const distanceToMonday = (currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek);
-            const monday = new Date(now);
-            monday.setDate(now.getDate() + distanceToMonday);
-            monday.setHours(0, 0, 0, 0);
+            // 计算距离下一个周一（Next Monday）的天数
+            // 若今天是周日(0)，距离下周一还有 1 天；若今天是周一(1)，距离下周一还有 7 天
+            const daysUntilNextMonday = (currentDayOfWeek === 0) ? 1 : (8 - currentDayOfWeek);
+            
+            const nextMonday = new Date(now);
+            nextMonday.setDate(now.getDate() + daysUntilNextMonday);
+            nextMonday.setHours(0, 0, 0, 0);
 
-            const targetFriday = new Date(monday);
-            targetFriday.setDate(monday.getDate() + 4);
+            // 以下一个周一为基准，计算下周五与下周六
+            const targetFriday = new Date(nextMonday);
+            targetFriday.setDate(nextMonday.getDate() + 4);
 
-            const targetSaturday = new Date(monday);
-            targetSaturday.setDate(monday.getDate() + 5);
+            const targetSaturday = new Date(nextMonday);
+            targetSaturday.setDate(nextMonday.getDate() + 5);
 
             const friEnd = new Date(targetFriday.getFullYear(), targetFriday.getMonth(), targetFriday.getDate(), 23, 59, 59);
             const satEnd = new Date(targetSaturday.getFullYear(), targetSaturday.getMonth(), targetSaturday.getDate(), 23, 59, 59);
