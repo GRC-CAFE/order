@@ -97,7 +97,7 @@
                                 <div class="flex items-center space-x-3">
                                     <input type="checkbox" id="chkDessert" onchange="toggleCard('Dessert')" class="w-5 h-5 text-rose-600 rounded border-slate-300 focus:ring-rose-500 mt-0.5">
                                     <div>
-                                        <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">星期六 - 加载中...</div>
+                                        <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">🥣 周六限定糖水</div>
                                         <div class="flex items-center space-x-2 mt-0.5">
                                             <span id="txtDessertPrice" class="text-xs font-medium text-rose-600">RM --.00 / 份</span>
                                             <span id="badgeDessertLimit" class="text-[10px] bg-rose-100 text-rose-700 font-bold px-1.5 py-0.5 rounded-full">限量</span>
@@ -183,7 +183,7 @@
 
         let FRI_MENU_NAME = "🍲 古早味酿豆腐";
         let SAT_MENU_NAME = "🍲 招牌卤肉饭";
-        let SAT_DESSERT_NAME = "🥣 南瓜雪耳薏米糖水";
+        let SAT_DESSERT_NAME = "🥣 周六限定糖水";
 
         let FRI_MAIN_PRICE = 13;
         let SAT_MAIN_PRICE = 15;
@@ -276,17 +276,18 @@
 
         function setupMenuUI() {
             const now = new Date();
-            const currentDay = now.getDay(); // 0 是周日, 1-6 是周一至周六
+            const currentDayOfWeek = now.getDay(); 
+            const daysUntilNextMonday = (currentDayOfWeek === 0) ? 1 : (8 - currentDayOfWeek);
+            
+            const nextMonday = new Date(now);
+            nextMonday.setDate(now.getDate() + daysUntilNextMonday);
+            nextMonday.setHours(0, 0, 0, 0);
 
-            // 计算距离最靠近的星期五的天数 (5 - currentDay + 7) % 7
-            const daysToFriday = (5 - currentDay + 7) % 7;
-            const targetFriday = new Date(now);
-            targetFriday.setDate(now.getDate() + daysToFriday);
+            const targetFriday = new Date(nextMonday);
+            targetFriday.setDate(nextMonday.getDate() + 4);
 
-            // 计算距离最靠近的星期六的天数 (6 - currentDay + 7) % 7
-            const daysToSaturday = (6 - currentDay + 7) % 7;
-            const targetSaturday = new Date(now);
-            targetSaturday.setDate(now.getDate() + daysToSaturday);
+            const targetSaturday = new Date(nextMonday);
+            targetSaturday.setDate(nextMonday.getDate() + 5);
 
             const friDateStr = `${targetFriday.getMonth() + 1}月${targetFriday.getDate()}日`;
             const satDateStr = `${targetSaturday.getMonth() + 1}月${targetSaturday.getDate()}日`;
@@ -298,33 +299,11 @@
             document.getElementById('txtSatTitle').innerText = `星期六 (${satDateStr}) - ${SAT_MENU_NAME}`;
             document.getElementById('txtSatPrice').innerText = `RM ${SAT_MAIN_PRICE}.00 / 份`;
 
-            // 统一统一为：星期六 (X月X日) - 糖水名称
-            document.getElementById('txtDessertTitle').innerText = `星期六 (${satDateStr}) - ${SAT_DESSERT_NAME}`;
+            document.getElementById('txtDessertTitle').innerText = `${SAT_DESSERT_NAME} (${satDateStr})`;
             document.getElementById('txtDessertPrice').innerText = `RM ${DESSERT_PRICE}.00 / 份`;
             document.getElementById('badgeDessertLimit').innerText = `限量 ${SAT_DESSERT_LIMIT} 份`;
 
-            // 动态拼接价格 header (遵循 Flag 逻辑)
-            let priceParts = [];
-            
-            // 拼接主餐价格
-            let mainPrices = [];
-            if (ENABLE_FRI_DINNER) mainPrices.push(`RM${FRI_MAIN_PRICE}`);
-            if (ENABLE_SAT_DINNER) mainPrices.push(`RM${SAT_MAIN_PRICE}`);
-            
-            if (mainPrices.length > 0) {
-                priceParts.push(`主餐 ${mainPrices.join('/')}`);
-            }
-
-            // 拼接糖水价格
-            if (ENABLE_SAT_DESSERT) {
-                priceParts.push(`糖水 RM${DESSERT_PRICE}`);
-            }
-
-            if (priceParts.length > 0) {
-                document.getElementById('priceHeader').innerHTML = priceParts.join(' | ');
-            } else {
-                document.getElementById('priceHeader').innerHTML = `<span class="text-rose-500 font-bold">暂停预订</span>`;
-            }
+            document.getElementById('priceHeader').innerHTML = `主餐 RM${FRI_MAIN_PRICE}/RM${SAT_MAIN_PRICE} | 糖水 RM${DESSERT_PRICE}`;
 
             // 控制全局卡片开关状态
             if (!ENABLE_FRI_DINNER) {
@@ -415,7 +394,7 @@
             carouselTimer = setInterval(() => {
                 slideIndex = (slideIndex + 1) % SLIDES.length;
                 showSlide(slideIndex);
-            }, 5000);
+            }, 8000);
         }
 
         function stopCarousel() {
