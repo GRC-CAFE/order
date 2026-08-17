@@ -276,18 +276,27 @@
 
         function setupMenuUI() {
             const now = new Date();
-            const currentDayOfWeek = now.getDay(); 
-            const daysUntilNextMonday = (currentDayOfWeek === 0) ? 1 : (8 - currentDayOfWeek);
+            const currentDayOfWeek = now.getDay(); // 0 是周日, 1-6 是周一至周六
             
-            const nextMonday = new Date(now);
-            nextMonday.setDate(now.getDate() + daysUntilNextMonday);
-            nextMonday.setHours(0, 0, 0, 0);
+            // 计算本周一的距离 (若今天是周日，按-6计算到本周一)
+            const distToMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
+            
+            const thisMonday = new Date(now);
+            thisMonday.setDate(now.getDate() + distToMonday);
+            thisMonday.setHours(0, 0, 0, 0);
 
-            const targetFriday = new Date(nextMonday);
-            targetFriday.setDate(nextMonday.getDate() + 4);
+            // 计算最近的星期五(+4)和星期六(+5)
+            let targetFriday = new Date(thisMonday);
+            targetFriday.setDate(thisMonday.getDate() + 4);
 
-            const targetSaturday = new Date(nextMonday);
-            targetSaturday.setDate(nextMonday.getDate() + 5);
+            let targetSaturday = new Date(thisMonday);
+            targetSaturday.setDate(thisMonday.getDate() + 5);
+
+            // 如果今天是周日，自动计算下一周的星期五和星期六
+            if (currentDayOfWeek === 0) {
+                targetFriday.setDate(targetFriday.getDate() + 7);
+                targetSaturday.setDate(targetSaturday.getDate() + 7);
+            }
 
             const friDateStr = `${targetFriday.getMonth() + 1}月${targetFriday.getDate()}日`;
             const satDateStr = `${targetSaturday.getMonth() + 1}月${targetSaturday.getDate()}日`;
@@ -538,7 +547,6 @@
 
             let selectedItems = [];
             
-            // 构建传递给后端按品类拆分的数据结构
             const payload = { 
                 timestamp: new Date().toLocaleString("zh-CN", { timeZone: "Asia/Kuala_Lumpur" }),
                 name: name, 
