@@ -54,7 +54,10 @@
                                     <input type="checkbox" id="chkFriMain" onchange="toggleCard('Fri')" class="w-5 h-5 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mt-0.5">
                                     <div>
                                         <div id="txtFriTitle" class="text-sm font-bold text-slate-800">星期五 - 加载中...</div>
-                                        <div id="txtFriPrice" class="text-xs font-medium text-amber-700">RM --.00 / 份</div>
+                                        <div class="flex items-center space-x-2 mt-0.5">
+                                            <span id="txtFriPrice" class="text-xs font-medium text-amber-700">RM --.00 / 份</span>
+                                            <span id="badgeFriCount" class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full">已预订 0 份</span>
+                                        </div>
                                     </div>
                                 </div>
                             </label>
@@ -76,7 +79,10 @@
                                     <input type="checkbox" id="chkSatMain" onchange="toggleCard('Sat')" class="w-5 h-5 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mt-0.5">
                                     <div>
                                         <div id="txtSatTitle" class="text-sm font-bold text-slate-800">星期六 - 加载中...</div>
-                                        <div id="txtSatPrice" class="text-xs font-medium text-amber-700">RM --.00 / 份</div>
+                                        <div class="flex items-center space-x-2 mt-0.5">
+                                            <span id="txtSatPrice" class="text-xs font-medium text-amber-700">RM --.00 / 份</span>
+                                            <span id="badgeSatCount" class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full">已预订 0 份</span>
+                                        </div>
                                     </div>
                                 </div>
                             </label>
@@ -100,7 +106,7 @@
                                         <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">星期六 - 加载中...</div>
                                         <div class="flex items-center space-x-2 mt-0.5">
                                             <span id="txtDessertPrice" class="text-xs font-medium text-rose-600">RM --.00 / 份</span>
-                                            <span id="badgeDessertLimit" class="text-[10px] bg-rose-100 text-rose-700 font-bold px-1.5 py-0.5 rounded-full">限量</span>
+                                            <span id="badgeDessertCount" class="text-[10px] bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded-full">已订 0 / 20 份</span>
                                         </div>
                                     </div>
                                 </div>
@@ -190,6 +196,10 @@
         let DESSERT_PRICE = 5;    
         let SAT_DESSERT_LIMIT = 20;
 
+        let FRI_ORDERED_QTY = 0;
+        let SAT_ORDERED_QTY = 0;
+        let DESSERT_ORDERED_QTY = 0;
+
         const MY_PHONE_NUMBER = "60162207137"; 
         const DUITNOW_PHONE = "0162207137";   
         
@@ -252,6 +262,10 @@
                     if (config.satMainPrice) SAT_MAIN_PRICE = Number(config.satMainPrice);
                     if (config.dessertPrice) DESSERT_PRICE = Number(config.dessertPrice);
                     if (config.satDessertLimit) SAT_DESSERT_LIMIT = Number(config.satDessertLimit);
+
+                    if (config.friOrderedQty !== undefined) FRI_ORDERED_QTY = Number(config.friOrderedQty);
+                    if (config.satOrderedQty !== undefined) SAT_ORDERED_QTY = Number(config.satOrderedQty);
+                    if (config.dessertOrderedQty !== undefined) DESSERT_ORDERED_QTY = Number(config.dessertOrderedQty);
                 }
             } catch (err) {
                 console.log("无法连接后台 API，使用默认配置", err);
@@ -276,23 +290,20 @@
 
         function setupMenuUI() {
             const now = new Date();
-            const currentDayOfWeek = now.getDay(); // 0 是周日, 1-6 是周一至周六
+            const currentDayOfWeek = now.getDay(); 
             
-            // 计算本周一的距离 (若今天是周日，按-6计算到本周一)
             const distToMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
             
             const thisMonday = new Date(now);
             thisMonday.setDate(now.getDate() + distToMonday);
             thisMonday.setHours(0, 0, 0, 0);
 
-            // 计算最近的星期五(+4)和星期六(+5)
             let targetFriday = new Date(thisMonday);
             targetFriday.setDate(thisMonday.getDate() + 4);
 
             let targetSaturday = new Date(thisMonday);
             targetSaturday.setDate(thisMonday.getDate() + 5);
 
-            // 如果今天是周日，自动计算下一周的星期五和星期六
             if (currentDayOfWeek === 0) {
                 targetFriday.setDate(targetFriday.getDate() + 7);
                 targetSaturday.setDate(targetSaturday.getDate() + 7);
@@ -301,21 +312,20 @@
             const friDateStr = `${targetFriday.getMonth() + 1}月${targetFriday.getDate()}日`;
             const satDateStr = `${targetSaturday.getMonth() + 1}月${targetSaturday.getDate()}日`;
 
-            // 设置标题与价格
             document.getElementById('txtFriTitle').innerText = `星期五 (${friDateStr}) - ${FRI_MENU_NAME}`;
             document.getElementById('txtFriPrice').innerText = `RM ${FRI_MAIN_PRICE}.00 / 份`;
+            document.getElementById('badgeFriCount').innerText = `已预订 ${FRI_ORDERED_QTY} 份`;
 
             document.getElementById('txtSatTitle').innerText = `星期六 (${satDateStr}) - ${SAT_MENU_NAME}`;
             document.getElementById('txtSatPrice').innerText = `RM ${SAT_MAIN_PRICE}.00 / 份`;
+            document.getElementById('badgeSatCount').innerText = `已预订 ${SAT_ORDERED_QTY} 份`;
 
-            // 统一日期在前格式：星期六 (8月22日) - 糖水名称
             document.getElementById('txtDessertTitle').innerText = `星期六 (${satDateStr}) - ${SAT_DESSERT_NAME}`;
             document.getElementById('txtDessertPrice').innerText = `RM ${DESSERT_PRICE}.00 / 份`;
-            document.getElementById('badgeDessertLimit').innerText = `限量 ${SAT_DESSERT_LIMIT} 份`;
+            document.getElementById('badgeDessertCount').innerText = `已订 ${DESSERT_ORDERED_QTY} / ${SAT_DESSERT_LIMIT} 份`;
 
             document.getElementById('priceHeader').innerHTML = `主餐 RM${FRI_MAIN_PRICE}/RM${SAT_MAIN_PRICE} | 糖水 RM${DESSERT_PRICE}`;
 
-            // 控制全局卡片开关状态
             if (!ENABLE_FRI_DINNER) {
                 document.getElementById('cardFriday').classList.add('hidden');
             }
@@ -628,10 +638,9 @@
 
             const waUrl = `https://wa.me/${MY_PHONE_NUMBER}?text=${waMessage}`;
 
+            // 核心修改：使用 window.location.href 在当前页面无缝跳转，100% 杜绝浏览器拦截
             setTimeout(() => {
-                btn.disabled = false;
-                btn.innerHTML = originalBtnText;
-                window.open(waUrl, '_blank');
+                window.location.href = waUrl;
             }, 300);
         }
     </script>
