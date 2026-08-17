@@ -537,32 +537,52 @@
             const total = currentTotal;
 
             let selectedItems = [];
-            let daysList = [];
-
-            if (friChecked && ENABLE_FRI_DINNER) {
-                const q = parseInt(document.getElementById('qtyFri').value) || 1;
-                selectedItems.push(`星期五 ${FRI_MENU_NAME} x ${q}份`);
-                daysList.push("星期五");
-            }
-            if (satChecked && ENABLE_SAT_DINNER) {
-                const q = parseInt(document.getElementById('qtySat').value) || 1;
-                selectedItems.push(`星期六 ${SAT_MENU_NAME} x ${q}份`);
-                daysList.push("星期六");
-            }
-            if (dessertChecked && ENABLE_SAT_DESSERT) {
-                const q = parseInt(document.getElementById('qtyDessert').value) || 1;
-                selectedItems.push(`星期六 ${SAT_DESSERT_NAME} x ${q}份`);
-                if (!daysList.includes("星期六")) daysList.push("星期六");
-            }
-
+            
+            // 构建传递给后端按品类拆分的数据结构
             const payload = { 
                 timestamp: new Date().toLocaleString("zh-CN", { timeZone: "Asia/Kuala_Lumpur" }),
                 name: name, 
-                day: daysList.join(" & "), 
-                quantity: selectedItems.join(" ; "),
-                total: total, 
-                notes: notes 
+                notes: notes,
+                friOrder: null,
+                satOrder: null,
+                dessertOrder: null
             };
+
+            if (friChecked && ENABLE_FRI_DINNER) {
+                const q = parseInt(document.getElementById('qtyFri').value) || 1;
+                const subtotal = q * FRI_MAIN_PRICE;
+                selectedItems.push(`星期五 ${FRI_MENU_NAME} x ${q}份`);
+                payload.friOrder = {
+                    checked: true,
+                    detail: FRI_MENU_NAME,
+                    qty: q,
+                    subtotal: subtotal
+                };
+            }
+
+            if (satChecked && ENABLE_SAT_DINNER) {
+                const q = parseInt(document.getElementById('qtySat').value) || 1;
+                const subtotal = q * SAT_MAIN_PRICE;
+                selectedItems.push(`星期六 ${SAT_MENU_NAME} x ${q}份`);
+                payload.satOrder = {
+                    checked: true,
+                    detail: SAT_MENU_NAME,
+                    qty: q,
+                    subtotal: subtotal
+                };
+            }
+
+            if (dessertChecked && ENABLE_SAT_DESSERT) {
+                const q = parseInt(document.getElementById('qtyDessert').value) || 1;
+                const subtotal = q * DESSERT_PRICE;
+                selectedItems.push(`星期六 ${SAT_DESSERT_NAME} x ${q}份`);
+                payload.dessertOrder = {
+                    checked: true,
+                    detail: SAT_DESSERT_NAME,
+                    qty: q,
+                    subtotal: subtotal
+                };
+            }
 
             if (GOOGLE_SCRIPT_URL) {
                 const controller = new AbortController();
