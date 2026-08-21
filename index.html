@@ -332,7 +332,20 @@
             document.getElementById('txtDessertPrice').innerText = `RM ${DESSERT_PRICE}.00 / 份`;
             document.getElementById('badgeDessertCount').innerText = `已订 ${DESSERT_ORDERED_QTY} / ${SAT_DESSERT_LIMIT} 份`;
 
-            document.getElementById('priceHeader').innerHTML = `主餐 RM${FRI_MAIN_PRICE}/RM${SAT_MAIN_PRICE} | 糖水 RM${DESSERT_PRICE}`;
+            // 动态构建主餐及糖水价格显示（修复写死逻辑）
+            let mainPrices = [];
+            if (ENABLE_FRI_DINNER) mainPrices.push(`RM${FRI_MAIN_PRICE}`);
+            if (ENABLE_SAT_DINNER) mainPrices.push(`RM${SAT_MAIN_PRICE}`);
+
+            let priceParts = [];
+            if (mainPrices.length > 0) {
+                priceParts.push(`主餐 ${mainPrices.join('/')}`);
+            }
+            if (ENABLE_SAT_DESSERT) {
+                priceParts.push(`糖水 RM${DESSERT_PRICE}`);
+            }
+
+            document.getElementById('priceHeader').innerText = priceParts.join(' | ') || "暂无可选餐点";
 
             if (!ENABLE_FRI_DINNER) {
                 document.getElementById('cardFriday').classList.add('hidden');
