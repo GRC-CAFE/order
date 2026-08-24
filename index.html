@@ -206,6 +206,8 @@
 
     <script>
         let deferredPrompt = null;
+        // 设置 1 天冷却时间 (24小时 * 60分钟 * 60秒 * 1000毫秒)
+        const PROMPT_COOLDOWN = 24 * 60 * 60 * 1000; 
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
@@ -213,10 +215,14 @@
             });
         }
 
+        // Android / Chrome 等平台的 PWA 安装监听
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            if (!localStorage.getItem('pwa_prompt_dismissed')) {
+            
+            const lastDismissed = localStorage.getItem('pwa_prompt_dismissed_time');
+            // 如果从未关过，或者记录的时间距现在已超过 24 小时，则再次显示
+            if (!lastDismissed || (Date.now() - parseInt(lastDismissed)) > PROMPT_COOLDOWN) {
                 document.getElementById('pwaInstallBanner').classList.remove('hidden');
             }
         });
@@ -228,22 +234,29 @@
             deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
         }
 
+        // 点击“下次 Later”记录当前时间戳
         function dismissPwaPrompt() {
             document.getElementById('pwaInstallBanner').classList.add('hidden');
-            localStorage.setItem('pwa_prompt_dismissed', 'true');
+            localStorage.setItem('pwa_prompt_dismissed_time', Date.now().toString());
         }
 
+        // iOS 检查逻辑
         function checkIosPrompt() {
             const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-            if (isIos && !isStandalone && !localStorage.getItem('ios_pwa_dismissed')) {
+            
+            const lastDismissed = localStorage.getItem('ios_pwa_dismissed_time');
+            const isExpired = !lastDismissed || (Date.now() - parseInt(lastDismissed)) > PROMPT_COOLDOWN;
+
+            if (isIos && !isStandalone && isExpired) {
                 document.getElementById('iosInstallBanner').classList.remove('hidden');
             }
         }
 
+        // iOS 点击关闭按钮记录时间戳
         function dismissIosPrompt() {
             document.getElementById('iosInstallBanner').classList.add('hidden');
-            localStorage.setItem('ios_pwa_dismissed', 'true');
+            localStorage.setItem('ios_pwa_dismissed_time', Date.now().toString());
         }
 
         const DEBUG_MODE = false; 
@@ -374,7 +387,6 @@
             const dishCountText = FRI_DISHES.length > 1 ? ` (${FRI_DISHES.length}款可选)` : '';
             document.getElementById('txtFriSectionHeader').innerText = `📅 星期五晚餐 Friday (${friDateStr})${dishCountText}`;
 
-            // 动态渲染周五菜色卡片（包含显示各自已预订数量）
             const friListContainer = document.getElementById('friDishesList');
             if (FRI_DISHES.length === 0) {
                 friListContainer.innerHTML = `<div class="text-xs text-slate-400 p-2">暂无可用菜品</div>`;
