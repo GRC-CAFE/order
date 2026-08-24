@@ -298,7 +298,7 @@
             { image: "dish2.jpeg", isFriday: false, isSaturdayMain: true,  isDessert: false, isInstruction: false },
             { image: "dish3.jpeg", isFriday: false, isSaturdayMain: false, isDessert: true,  isInstruction: false },
             { image: "instruction.jpeg", isFriday: false, isSaturdayMain: false, isDessert: false, isInstruction: true },
-            { image: "pwa.jpeg", isFriday: false, isSaturdayMain: false, isDessert: false, isInstruction: false }
+            { image: "PWA.JPEG", isFriday: false, isSaturdayMain: false, isDessert: false, isInstruction: false }
         ];
 
         let SLIDES = [];
@@ -360,6 +360,13 @@
 
         function updateCarouselSlides() {
             SLIDES = ALL_SLIDES.filter(slide => {
+                // pwa.jpeg 和 instruction.jpeg 永远显示，不受 dish1-3 开关影响
+                const imgName = slide.image.toLowerCase();
+                if (slide.isInstruction || imgName.includes('pwa')) {
+                    return true;
+                }
+
+                // 其他菜品图片根据后台开关进行过滤
                 if (slide.isFriday && !ENABLE_FRI_DINNER) return false;
                 if (slide.isSaturdayMain && !ENABLE_SAT_DINNER) return false;
                 if (slide.isDessert && !ENABLE_SAT_DESSERT) return false;
