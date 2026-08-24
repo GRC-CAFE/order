@@ -24,12 +24,12 @@
             <img src="logo-192.png" class="w-10 h-10 rounded-xl shadow-sm border border-slate-700 object-cover" alt="App Logo">
             <div>
                 <div class="text-xs font-bold text-white">安装 GRC CAFE 应用 / Install App</div>
-                <div class="text-[11px] text-slate-300">添加到桌面，预订更快捷！ Add to home screen!</div>
+                <div class="text-[11px] text-slate-300">添加到桌面，预订更快捷！ / Add to home screen!</div>
             </div>
         </div>
         <div class="flex items-center space-x-2">
-            <button type="button" onclick="dismissPwaPrompt()" class="text-slate-400 hover:text-white text-xs px-2 py-1">下次 Later</button>
-            <button type="button" id="btnInstallPwa" onclick="triggerPwaInstall()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-md active:scale-95 transition">立即安装 Install</button>
+            <button type="button" onclick="dismissPwaPrompt()" class="text-slate-400 hover:text-white text-xs px-2 py-1">下次 / Later</button>
+            <button type="button" id="btnInstallPwa" onclick="triggerPwaInstall()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-md active:scale-95 transition">立即安装 / Install</button>
         </div>
     </div>
 
@@ -47,7 +47,7 @@
 
     <!-- Debug 状态提示条 -->
     <div id="debugBanner" class="hidden bg-red-600 text-white text-xs font-bold py-1.5 text-center shadow-md">
-        🚨 DEBUG MODE 开启中 🚨
+        🚨 DEBUG MODE 开启中 / Debug Mode Active 🚨
     </div>
 
     <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-lg cursor-grab active:cursor-grabbing bg-white">
@@ -59,12 +59,12 @@
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-amber-100/60 space-y-5">
             <div class="flex justify-between items-center pb-4 border-b border-slate-100">
                 <div>
-                    <span class="text-xs text-slate-400 block font-medium">菜单价格 Price</span>
+                    <span class="text-xs text-slate-400 block font-medium">菜单价格 / Price</span>
                     <span class="text-xs font-bold text-slate-800" id="priceHeader">加载中 Loading...</span>
                 </div>
                 <div class="text-right">
-                    <span class="text-xs text-slate-400 block font-medium">截单规则 Cut-off</span>
-                    <span id="deadlineText" class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2 py-0.5 rounded-lg">周四/周五 8PM 截单</span>
+                    <span class="text-xs text-slate-400 block font-medium">截单规则 / Cut-off</span>
+                    <span id="deadlineText" class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2 py-0.5 rounded-lg">周四/周五 8PM 截单 / Cut-off Thu/Fri 8PM</span>
                 </div>
             </div>
 
@@ -83,7 +83,7 @@
                         <!-- 星期五 菜单容器 -->
                         <div id="sectionFriday" class="space-y-3">
                             <div id="txtFriSectionHeader" class="text-xs font-bold text-amber-700 bg-amber-100/60 px-2.5 py-1 rounded-lg inline-block">
-                                📅 星期五晚餐 Friday Dinner
+                                📅 星期五晚餐 / Friday Dinner
                             </div>
                             <div id="friDishesList" class="space-y-3">
                                 <!-- 由 JS 动态渲染菜色卡片 -->
@@ -96,17 +96,17 @@
                                 <div class="flex items-center space-x-3">
                                     <input type="checkbox" id="chkSatMain" onchange="toggleCard('Sat')" class="w-5 h-5 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mt-0.5">
                                     <div>
-                                        <div id="txtSatTitle" class="text-sm font-bold text-slate-800">星期六 Saturday - 加载中...</div>
+                                        <div id="txtSatTitle" class="text-sm font-bold text-slate-800">星期六 Saturday - 加载中 Loading...</div>
                                         <div class="flex items-center space-x-2 mt-0.5">
                                             <span id="txtSatPrice" class="text-xs font-medium text-amber-700">RM --.00 / portion</span>
-                                            <span id="badgeSatCount" class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full">已预订 0 份</span>
+                                            <span id="badgeSatCount" class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full">已预订 / Booked 0 份</span>
                                         </div>
                                     </div>
                                 </div>
                             </label>
 
                             <div id="qtySatBox" class="hidden flex items-center justify-between pt-2 border-t border-amber-200/50">
-                                <span class="text-xs font-bold text-slate-600">份数 Qty:</span>
+                                <span class="text-xs font-bold text-slate-600">份数 / Qty:</span>
                                 <div class="flex items-center space-x-3">
                                     <button type="button" onclick="adjustQty('Sat', -1)" class="w-8 h-8 rounded-lg bg-white hover:bg-amber-50 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">-</button>
                                     <input type="number" id="qtySat" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
@@ -121,17 +121,17 @@
                                 <div class="flex items-center space-x-3">
                                     <input type="checkbox" id="chkDessert" onchange="toggleCard('Dessert')" class="w-5 h-5 text-rose-600 rounded border-slate-300 focus:ring-rose-500 mt-0.5">
                                     <div>
-                                        <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">星期六 Dessert - 加载中...</div>
+                                        <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">星期六 Dessert - 加载中 Loading...</div>
                                         <div class="flex items-center space-x-2 mt-0.5">
                                             <span id="txtDessertPrice" class="text-xs font-medium text-rose-600">RM --.00 / portion</span>
-                                            <span id="badgeDessertCount" class="text-[10px] bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded-full">已订 0 份</span>
+                                            <span id="badgeDessertCount" class="text-[10px] bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded-full">已订 / Booked 0 份</span>
                                         </div>
                                     </div>
                                 </div>
                             </label>
 
                             <div id="qtyDessertBox" class="hidden flex items-center justify-between pt-2 border-t border-rose-200/50">
-                                <span class="text-xs font-bold text-slate-600">份数 Qty:</span>
+                                <span class="text-xs font-bold text-slate-600">份数 / Qty:</span>
                                 <div class="flex items-center space-x-3">
                                     <button type="button" onclick="adjustQty('Dessert', -1)" class="w-8 h-8 rounded-lg bg-white hover:bg-rose-50 text-rose-800 font-bold text-base flex items-center justify-center border border-rose-200 shadow-sm active:scale-95 transition">-</button>
                                     <input type="number" id="qtyDessert" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
@@ -151,7 +151,7 @@
 
                 <div class="pt-2">
                     <div class="flex justify-between items-center mb-3 px-1">
-                        <span class="text-sm font-bold text-slate-600">预估总额 Est. Total:</span>
+                        <span class="text-sm font-bold text-slate-600">预估总额 / Est. Total:</span>
                         <span id="totalText" class="text-2xl font-black text-amber-600">RM 0.00</span>
                     </div>
                 </div>
@@ -163,21 +163,21 @@
                 <i class="fa-solid fa-qrcode text-pink-600"></i>
                 <span>DuitNow / Touch 'n Go 付款 Payment</span>
             </h2>
-            <p class="text-xs text-slate-500">使用任何银行 App / TNG eWallet 扫描二维码付款：</p>
+            <p class="text-xs text-slate-500">使用任何银行 App / TNG eWallet 扫描二维码付款：<br><span class="text-[11px] text-slate-400">Scan QR code using any Banking App / TNG eWallet:</span></p>
             
             <div class="relative w-56 h-56 mx-auto bg-amber-50/30 rounded-2xl border-2 border-amber-100 p-2.5 flex items-center justify-center shadow-sm">
                 <img src="qrcode.jpeg" class="w-full h-full object-contain rounded-xl shadow-sm" alt="DuitNow 付款码">
             </div>
 
             <div class="bg-rose-50/80 p-3.5 rounded-xl border border-rose-100/80 shadow-sm">
-                <p class="text-xs text-rose-500 font-medium">扫码后请手动输入转账金额：</p>
+                <p class="text-xs text-rose-500 font-medium">扫码后请手动输入转账金额：<br><span class="text-[11px] text-rose-400">Please enter transfer amount manually after scanning:</span></p>
                 <p id="qrAmountText" class="text-2xl font-black text-rose-600">RM 0.00</p>
             </div>
 
             <div class="space-y-2 pt-1">
                 <button type="button" onclick="copyAmount()" id="copyAmountBtn" class="w-full bg-amber-50 hover:bg-amber-100/80 active:scale-[0.98] text-amber-900 text-xs font-bold py-3 rounded-xl border border-amber-200/60 flex items-center justify-center space-x-2 transition-all">
                     <i class="fa-regular fa-copy"></i>
-                    <span id="copyAmountText">复制转账金额 Copy Amount</span>
+                    <span id="copyAmountText">复制转账金额 / Copy Amount</span>
                 </button>
 
                 <button type="button" onclick="copyPhone()" id="copyPhoneBtn" class="w-full bg-amber-50 hover:bg-amber-100/80 active:scale-[0.98] text-amber-900 text-xs font-bold py-3 rounded-xl border border-amber-200/60 flex items-center justify-center space-x-2 transition-all">
@@ -206,7 +206,6 @@
 
     <script>
         let deferredPrompt = null;
-        // 设置 1 天冷却时间 (24小时 * 60分钟 * 60秒 * 1000毫秒)
         const PROMPT_COOLDOWN = 24 * 60 * 60 * 1000; 
 
         if ('serviceWorker' in navigator) {
@@ -215,13 +214,11 @@
             });
         }
 
-        // Android / Chrome 等平台的 PWA 安装监听
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
             
             const lastDismissed = localStorage.getItem('pwa_prompt_dismissed_time');
-            // 如果从未关过，或者记录的时间距现在已超过 24 小时，则再次显示
             if (!lastDismissed || (Date.now() - parseInt(lastDismissed)) > PROMPT_COOLDOWN) {
                 document.getElementById('pwaInstallBanner').classList.remove('hidden');
             }
@@ -234,13 +231,11 @@
             deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
         }
 
-        // 点击“下次 Later”记录当前时间戳
         function dismissPwaPrompt() {
             document.getElementById('pwaInstallBanner').classList.add('hidden');
             localStorage.setItem('pwa_prompt_dismissed_time', Date.now().toString());
         }
 
-        // iOS 检查逻辑
         function checkIosPrompt() {
             const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
@@ -253,7 +248,6 @@
             }
         }
 
-        // iOS 点击关闭按钮记录时间戳
         function dismissIosPrompt() {
             document.getElementById('iosInstallBanner').classList.add('hidden');
             localStorage.setItem('ios_pwa_dismissed_time', Date.now().toString());
@@ -267,8 +261,8 @@
 
         let FRI_DISHES = [];
 
-        let SAT_MENU_NAME = "🍲 招牌卤肉饭";
-        let SAT_DESSERT_NAME = "🥣 周六限定糖水";
+        let SAT_MENU_NAME = "🍲 招牌卤肉饭 / Signature Braised Pork Rice";
+        let SAT_DESSERT_NAME = "🥣 周六限定糖水 / Saturday Special Dessert";
 
         let SAT_MAIN_PRICE = 15;
         let DESSERT_PRICE = 5;    
@@ -342,7 +336,7 @@
                     if (config.dessertOrderedQty !== undefined) DESSERT_ORDERED_QTY = Number(config.dessertOrderedQty);
                 }
             } catch (err) {
-                console.log("无法连接后台 API，使用默认配置", err);
+                console.log("无法连接后台 API，使用默认配置 / Cannot connect to API, using defaults", err);
             }
         }
 
@@ -384,12 +378,12 @@
             const friDateStr = `${targetFriday.getMonth() + 1}/${targetFriday.getDate()}`;
             const satDateStr = `${targetSaturday.getMonth() + 1}/${targetSaturday.getDate()}`;
 
-            const dishCountText = FRI_DISHES.length > 1 ? ` (${FRI_DISHES.length}款可选)` : '';
+            const dishCountText = FRI_DISHES.length > 1 ? ` (${FRI_DISHES.length}款可选 / ${FRI_DISHES.length} items available)` : '';
             document.getElementById('txtFriSectionHeader').innerText = `📅 星期五晚餐 Friday (${friDateStr})${dishCountText}`;
 
             const friListContainer = document.getElementById('friDishesList');
             if (FRI_DISHES.length === 0) {
-                friListContainer.innerHTML = `<div class="text-xs text-slate-400 p-2">暂无可用菜品</div>`;
+                friListContainer.innerHTML = `<div class="text-xs text-slate-400 p-2">暂无可用菜品 / No dishes available</div>`;
             } else {
                 friListContainer.innerHTML = FRI_DISHES.map((dish, idx) => `
                     <div id="cardFri_${idx}" class="p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50/50 transition-all space-y-3">
@@ -400,13 +394,13 @@
                                     <div class="text-sm font-bold text-slate-800">${dish.name}</div>
                                     <div class="flex items-center space-x-2 mt-0.5">
                                         <span class="text-xs font-medium text-amber-700">RM ${dish.price}.00 / portion</span>
-                                        <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full">已预订 ${dish.booked || 0} 份</span>
+                                        <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full">已预订 / Booked ${dish.booked || 0} 份</span>
                                     </div>
                                 </div>
                             </div>
                         </label>
                         <div id="qtyFriBox_${idx}" class="hidden flex items-center justify-between pt-2 border-t border-amber-200/50">
-                            <span class="text-xs font-bold text-slate-600">份数 Qty:</span>
+                            <span class="text-xs font-bold text-slate-600">份数 / Qty:</span>
                             <div class="flex items-center space-x-3">
                                 <button type="button" onclick="adjustFriQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-white hover:bg-amber-50 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">-</button>
                                 <input type="number" id="qtyFri_${idx}" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
@@ -419,18 +413,18 @@
 
             document.getElementById('txtSatTitle').innerText = `星期六 Sat (${satDateStr}) Main - ${SAT_MENU_NAME}`;
             document.getElementById('txtSatPrice').innerText = `RM ${SAT_MAIN_PRICE}.00 / 份 portion`;
-            document.getElementById('badgeSatCount').innerText = `已预订 ${SAT_ORDERED_QTY} 份`;
+            document.getElementById('badgeSatCount').innerText = `已预订 / Booked ${SAT_ORDERED_QTY} 份`;
 
             document.getElementById('txtDessertTitle').innerText = `星期六 Sat (${satDateStr}) Dessert - ${SAT_DESSERT_NAME}`;
             document.getElementById('txtDessertPrice').innerText = `RM ${DESSERT_PRICE}.00 / 份 portion`;
-            document.getElementById('badgeDessertCount').innerText = `已订 ${DESSERT_ORDERED_QTY} / ${SAT_DESSERT_LIMIT} 份`;
+            document.getElementById('badgeDessertCount').innerText = `已订 / Booked ${DESSERT_ORDERED_QTY} / ${SAT_DESSERT_LIMIT} 份`;
 
             let priceParts = [];
             if (ENABLE_FRI_DINNER && FRI_DISHES.length > 0) priceParts.push(`周五晚餐 Fri RM${FRI_DISHES[0].price}`);
             if (ENABLE_SAT_DINNER) priceParts.push(`周六主餐 Sat RM${SAT_MAIN_PRICE}`);
             if (ENABLE_SAT_DESSERT) priceParts.push(`糖水 Dessert RM${DESSERT_PRICE}`);
 
-            document.getElementById('priceHeader').innerText = priceParts.join(' | ') || "暂无可选餐点 No Meals Available";
+            document.getElementById('priceHeader').innerText = priceParts.join(' | ') || "暂无可选餐点 / No Meals Available";
 
             if (!ENABLE_FRI_DINNER) document.getElementById('sectionFriday').classList.add('hidden');
             if (!ENABLE_SAT_DINNER) document.getElementById('cardSaturday').classList.add('hidden');
@@ -512,7 +506,7 @@
             currentTotal = total.toFixed(2);
             document.getElementById('totalText').innerText = `RM ${currentTotal}`;
             document.getElementById('qrAmountText').innerText = `RM ${currentTotal}`;
-            document.getElementById('copyAmountText').innerText = `复制转账金额 Copy Amount (${currentTotal})`;
+            document.getElementById('copyAmountText').innerText = `复制转账金额 / Copy Amount (${currentTotal})`;
         }
 
         function renderDots() {
@@ -592,7 +586,7 @@
             safeCopyText(currentTotal, () => {
                 const span = document.getElementById('copyAmountText');
                 const orig = span.innerText;
-                span.innerText = `✅ 已复制金额 Copied RM ${currentTotal}！`;
+                span.innerText = `✅ 已复制金额 / Copied RM ${currentTotal}！`;
                 setTimeout(() => { span.innerText = orig; }, 2500);
             });
         }
@@ -601,7 +595,7 @@
             safeCopyText(DUITNOW_PHONE, () => {
                 const span = document.getElementById('copyPhoneText');
                 const orig = span.innerText;
-                span.innerText = `✅ 已复制号码 Copied ${DUITNOW_PHONE}！`;
+                span.innerText = `✅ 已复制号码 / Copied ${DUITNOW_PHONE}！`;
                 setTimeout(() => { span.innerText = orig; }, 2500);
             });
         }
@@ -675,7 +669,7 @@
                         body: JSON.stringify(payload)
                     });
                 } catch (e) {
-                    console.log("Sheet 请求跳过或失败:", e);
+                    console.log("Sheet 请求跳过或失败 / Sheet request failed:", e);
                 }
             }
 
@@ -691,7 +685,8 @@
             waMessage += `💰 *总计 Total*：RM ${total}%0A` +
                          `📝 *备注 Remarks*：${encodeURIComponent(notes)}%0A` +
                          `--------------------------------%0A` +
-                         `已下单，已按照 RM ${total} 完成转账/准备付款，请查收！`;
+                         `已下单，已按照 RM ${total} 完成转账/准备付款，请查收！%0A` +
+                         `Order placed. Transferred/Ready to pay RM ${total}, please check!`;
 
             setTimeout(() => {
                 window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${waMessage}`;
