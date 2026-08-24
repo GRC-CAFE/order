@@ -18,7 +18,7 @@
 </head>
 <body class="bg-gradient-to-b from-amber-50/80 via-orange-50/30 to-amber-50/60 min-h-screen pb-32 select-none relative font-sans text-slate-800">
 
-    <!-- 自定义 PWA 安装提示弹窗 (Android/Chrome) -->
+    <!-- 自定义 PWA 安装提示弹窗 -->
     <div id="pwaInstallBanner" class="hidden fixed top-3 left-3 right-3 max-w-md mx-auto z-50 bg-slate-900/95 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700/80 flex items-center justify-between transition-all">
         <div class="flex items-center space-x-3">
             <img src="logo-192.png" class="w-10 h-10 rounded-xl shadow-sm border border-slate-700 object-cover" alt="App Logo">
@@ -33,7 +33,7 @@
         </div>
     </div>
 
-    <!-- iOS (iPhone) 专属安装引导提示条 -->
+    <!-- iOS 专属安装引导提示条 -->
     <div id="iosInstallBanner" class="hidden fixed top-3 left-3 right-3 max-w-md mx-auto z-50 bg-slate-900/95 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700/80 flex items-center justify-between transition-all">
         <div class="flex items-center space-x-3">
             <img src="logo-192.png" class="w-10 h-10 rounded-xl shadow-sm border border-slate-700 object-cover" alt="App Logo">
@@ -47,15 +47,12 @@
 
     <!-- Debug 状态提示条 -->
     <div id="debugBanner" class="hidden bg-red-600 text-white text-xs font-bold py-1.5 text-center shadow-md">
-        🚨 DEBUG MODE 开启中：已绕过真实日期限制，仅根据 Excel / Google Sheet Flag 判定菜单显示 🚨
+        🚨 DEBUG MODE 开启中 🚨
     </div>
 
     <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-lg cursor-grab active:cursor-grabbing bg-white">
-        <img id="carouselImage" src="cafe1.jpeg" 
-             class="w-full h-auto block transition-opacity duration-500 opacity-100 pointer-events-none" 
-             alt="GRC CAFE 展示">
-        <div id="carouselDots" class="absolute top-3 right-3 flex space-x-1.5 z-20 bg-white/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/50 shadow-sm">
-        </div>
+        <img id="carouselImage" src="cafe1.jpeg" class="w-full h-auto block transition-opacity duration-500 opacity-100 pointer-events-none" alt="GRC CAFE 展示">
+        <div id="carouselDots" class="absolute top-3 right-3 flex space-x-1.5 z-20 bg-white/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/50 shadow-sm"></div>
     </div>
 
     <div class="max-w-md mx-auto px-4 -mt-0.5 relative z-10 space-y-5">
@@ -67,7 +64,7 @@
                 </div>
                 <div class="text-right">
                     <span class="text-xs text-slate-400 block font-medium">截单规则 Cut-off</span>
-                    <span id="deadlineText" class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2 py-0.5 rounded-lg">周四/周五 8PM 截单 (Thu/Fri 8PM)</span>
+                    <span id="deadlineText" class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2 py-0.5 rounded-lg">周四/周五 8PM 截单</span>
                 </div>
             </div>
 
@@ -78,33 +75,18 @@
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
                 </div>
 
-                <!-- 选餐区域：可多选全部 -->
+                <!-- 选餐区域 -->
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-2">选择预订餐点 (可多选) / Select Meal <span class="text-rose-500">*</span></label>
                     <div class="space-y-3">
                         
-                        <!-- 星期五餐点卡片 -->
-                        <div id="cardFriday" class="p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50/50 transition-all space-y-3">
-                            <label class="flex items-start justify-between cursor-pointer">
-                                <div class="flex items-center space-x-3">
-                                    <input type="checkbox" id="chkFriMain" onchange="toggleCard('Fri')" class="w-5 h-5 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mt-0.5">
-                                    <div>
-                                        <div id="txtFriTitle" class="text-sm font-bold text-slate-800">星期五 Friday - 加载中...</div>
-                                        <div class="flex items-center space-x-2 mt-0.5">
-                                            <span id="txtFriPrice" class="text-xs font-medium text-amber-700">RM --.00 / portion</span>
-                                            <span id="badgeFriCount" class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full">已预订 0 份 (Booked: 0)</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </label>
-                            
-                            <div id="qtyFriBox" class="hidden flex items-center justify-between pt-2 border-t border-amber-200/50">
-                                <span class="text-xs font-bold text-slate-600">份数 Qty:</span>
-                                <div class="flex items-center space-x-3">
-                                    <button type="button" onclick="adjustQty('Fri', -1)" class="w-8 h-8 rounded-lg bg-white hover:bg-amber-50 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">-</button>
-                                    <input type="number" id="qtyFri" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
-                                    <button type="button" onclick="adjustQty('Fri', 1)" class="w-8 h-8 rounded-lg bg-white hover:bg-amber-50 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">+</button>
-                                </div>
+                        <!-- 星期五 菜单容器 -->
+                        <div id="sectionFriday" class="space-y-3">
+                            <div id="txtFriSectionHeader" class="text-xs font-bold text-amber-700 bg-amber-100/60 px-2.5 py-1 rounded-lg inline-block">
+                                📅 星期五晚餐 Friday Dinner
+                            </div>
+                            <div id="friDishesList" class="space-y-3">
+                                <!-- 由 JS 动态渲染菜色卡片 -->
                             </div>
                         </div>
 
@@ -117,7 +99,7 @@
                                         <div id="txtSatTitle" class="text-sm font-bold text-slate-800">星期六 Saturday - 加载中...</div>
                                         <div class="flex items-center space-x-2 mt-0.5">
                                             <span id="txtSatPrice" class="text-xs font-medium text-amber-700">RM --.00 / portion</span>
-                                            <span id="badgeSatCount" class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full">已预订 0 份 (Booked: 0)</span>
+                                            <span id="badgeSatCount" class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full">已预订 0 份</span>
                                         </div>
                                     </div>
                                 </div>
@@ -142,7 +124,7 @@
                                         <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">星期六 Dessert - 加载中...</div>
                                         <div class="flex items-center space-x-2 mt-0.5">
                                             <span id="txtDessertPrice" class="text-xs font-medium text-rose-600">RM --.00 / portion</span>
-                                            <span id="badgeDessertCount" class="text-[10px] bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded-full">已订 0 / 20 份 (Booked: 0/20)</span>
+                                            <span id="badgeDessertCount" class="text-[10px] bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded-full">已订 0 份</span>
                                         </div>
                                     </div>
                                 </div>
@@ -163,7 +145,7 @@
 
                 <div>
                     <label class="block text-sm font-bold text-slate-700 mb-1">特殊备注 / Special Remarks (Optional)</label>
-                    <input type="text" id="notes" placeholder="如 e.g. Less spicy / No scallions / Hot dessert" autocomplete="off"
+                    <input type="text" id="notes" placeholder="如 e.g. Less spicy / No scallions" autocomplete="off"
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
                 </div>
 
@@ -181,14 +163,14 @@
                 <i class="fa-solid fa-qrcode text-pink-600"></i>
                 <span>DuitNow / Touch 'n Go 付款 Payment</span>
             </h2>
-            <p class="text-xs text-slate-500">使用任何银行 App / TNG eWallet 扫描二维码付款：<br><span class="text-[11px] text-slate-400">Scan QR with any Bank App / TNG eWallet to pay:</span></p>
+            <p class="text-xs text-slate-500">使用任何银行 App / TNG eWallet 扫描二维码付款：</p>
             
             <div class="relative w-56 h-56 mx-auto bg-amber-50/30 rounded-2xl border-2 border-amber-100 p-2.5 flex items-center justify-center shadow-sm">
                 <img src="qrcode.jpeg" class="w-full h-full object-contain rounded-xl shadow-sm" alt="DuitNow 付款码">
             </div>
 
             <div class="bg-rose-50/80 p-3.5 rounded-xl border border-rose-100/80 shadow-sm">
-                <p class="text-xs text-rose-500 font-medium">扫码后请手动输入转账金额：<br><span class="text-[11px]">Please enter payment amount manually:</span></p>
+                <p class="text-xs text-rose-500 font-medium">扫码后请手动输入转账金额：</p>
                 <p id="qrAmountText" class="text-2xl font-black text-rose-600">RM 0.00</p>
             </div>
 
@@ -206,16 +188,14 @@
         </div>
     </div>
 
-    <!-- 底部固定栏 (精简版) -->
+    <!-- 底部固定栏 -->
     <div class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200/60 shadow-lg px-3 py-2">
         <div class="max-w-md mx-auto space-y-1.5">
-            <!-- 橙色提醒条 -->
             <div class="bg-amber-500 text-white text-[11px] font-bold py-1 px-3 rounded-lg flex items-center justify-center space-x-1.5 shadow-sm">
                 <i class="fa-regular fa-lightbulb text-xs"></i>
                 <span>请先付款再提交 / Pay before sending</span>
             </div>
 
-            <!-- 绿色 WhatsApp 提交按钮 -->
             <button type="button" onclick="document.getElementById('orderForm').requestSubmit()" id="submitBtn" 
                     class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 active:scale-[0.98] text-white font-bold py-2.5 rounded-xl shadow-md shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all">
                 <i class="fa-brands fa-whatsapp text-white text-xl"></i>
@@ -225,14 +205,11 @@
     </div>
 
     <script>
-        // ---------------- PWA 安装弹窗控制逻辑 ----------------
         let deferredPrompt = null;
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js')
-                    .then(reg => console.log('PWA Service Worker 注册成功:', reg))
-                    .catch(err => console.error('PWA 注册失败:', err));
+                navigator.serviceWorker.register('./sw.js').catch(err => console.error(err));
             });
         }
 
@@ -248,9 +225,7 @@
             if (!deferredPrompt) return;
             document.getElementById('pwaInstallBanner').classList.add('hidden');
             deferredPrompt.prompt();
-            deferredPrompt.userChoice.then((choiceResult) => {
-                deferredPrompt = null;
-            });
+            deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
         }
 
         function dismissPwaPrompt() {
@@ -271,28 +246,21 @@
             localStorage.setItem('ios_pwa_dismissed', 'true');
         }
 
-        window.addEventListener('appinstalled', () => {
-            document.getElementById('pwaInstallBanner').classList.add('hidden');
-            deferredPrompt = null;
-        });
-
-        // ---------------- 业务逻辑代码 ----------------
         const DEBUG_MODE = false; 
 
         let ENABLE_FRI_DINNER = true;
         let ENABLE_SAT_DINNER = true;
         let ENABLE_SAT_DESSERT = true;
 
-        let FRI_MENU_NAME = "🍲 古早味酿豆腐";
+        let FRI_DISHES = [];
+
         let SAT_MENU_NAME = "🍲 招牌卤肉饭";
         let SAT_DESSERT_NAME = "🥣 周六限定糖水";
 
-        let FRI_MAIN_PRICE = 13;
         let SAT_MAIN_PRICE = 15;
         let DESSERT_PRICE = 5;    
         let SAT_DESSERT_LIMIT = 20;
 
-        let FRI_ORDERED_QTY = 0;
         let SAT_ORDERED_QTY = 0;
         let DESSERT_ORDERED_QTY = 0;
 
@@ -312,7 +280,6 @@
         let currentTotal = "0.00";
         let slideIndex = 0;
         let carouselTimer = null;
-
         let touchStartX = 0;
         let touchEndX = 0;
 
@@ -320,18 +287,13 @@
             if (val === true || val === false) return val;
             if (typeof val === 'string') {
                 const clean = val.trim().toUpperCase();
-                return clean === 'TRUE' || clean === '开';
+                return clean === 'TRUE' || clean === '开' || clean === 'ON';
             }
             return false;
         }
 
         window.addEventListener('DOMContentLoaded', async () => {
             checkIosPrompt();
-
-            if (DEBUG_MODE) {
-                document.getElementById('debugBanner').classList.remove('hidden');
-            }
-
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 / Copy Phone (${DUITNOW_PHONE})`;
             
             await fetchRemoteConfig();
@@ -352,16 +314,17 @@
                     ENABLE_SAT_DINNER = parseBool(config.ENABLE_SAT_DINNER);
                     ENABLE_SAT_DESSERT = parseBool(config.ENABLE_SAT_DESSERT);
                     
-                    if (config.friMenuName) FRI_MENU_NAME = config.friMenuName;
+                    if (config.friDishes && Array.isArray(config.friDishes)) {
+                        FRI_DISHES = config.friDishes;
+                    }
+
                     if (config.satMenuName) SAT_MENU_NAME = config.satMenuName;
                     if (config.satDessertName) SAT_DESSERT_NAME = config.satDessertName;
                     
-                    if (config.friMainPrice) FRI_MAIN_PRICE = Number(config.friMainPrice);
                     if (config.satMainPrice) SAT_MAIN_PRICE = Number(config.satMainPrice);
                     if (config.dessertPrice) DESSERT_PRICE = Number(config.dessertPrice);
                     if (config.satDessertLimit) SAT_DESSERT_LIMIT = Number(config.satDessertLimit);
 
-                    if (config.friOrderedQty !== undefined) FRI_ORDERED_QTY = Number(config.friOrderedQty);
                     if (config.satOrderedQty !== undefined) SAT_ORDERED_QTY = Number(config.satOrderedQty);
                     if (config.dessertOrderedQty !== undefined) DESSERT_ORDERED_QTY = Number(config.dessertOrderedQty);
                 }
@@ -389,12 +352,10 @@
         function setupMenuUI() {
             const now = new Date();
             const currentDayOfWeek = now.getDay(); 
-            
             const distToMonday = currentDayOfWeek === 0 ? -6 : 1 - currentDayOfWeek;
             
             const thisMonday = new Date(now);
             thisMonday.setDate(now.getDate() + distToMonday);
-            thisMonday.setHours(0, 0, 0, 0);
 
             let targetFriday = new Date(thisMonday);
             targetFriday.setDate(thisMonday.getDate() + 4);
@@ -410,56 +371,68 @@
             const friDateStr = `${targetFriday.getMonth() + 1}/${targetFriday.getDate()}`;
             const satDateStr = `${targetSaturday.getMonth() + 1}/${targetSaturday.getDate()}`;
 
-            document.getElementById('txtFriTitle').innerText = `星期五 Fri (${friDateStr}) Main - ${FRI_MENU_NAME}`;
-            document.getElementById('txtFriPrice').innerText = `RM ${FRI_MAIN_PRICE}.00 / 份 portion`;
-            document.getElementById('badgeFriCount').innerText = `已预订 ${FRI_ORDERED_QTY} 份 (Booked: ${FRI_ORDERED_QTY})`;
+            const dishCountText = FRI_DISHES.length > 1 ? ` (${FRI_DISHES.length}款可选)` : '';
+            document.getElementById('txtFriSectionHeader').innerText = `📅 星期五晚餐 Friday (${friDateStr})${dishCountText}`;
+
+            // 动态渲染周五菜色卡片
+            const friListContainer = document.getElementById('friDishesList');
+            if (FRI_DISHES.length === 0) {
+                friListContainer.innerHTML = `<div class="text-xs text-slate-400 p-2">暂无可用菜品</div>`;
+            } else {
+                friListContainer.innerHTML = FRI_DISHES.map((dish, idx) => `
+                    <div id="cardFri_${idx}" class="p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50/50 transition-all space-y-3">
+                        <label class="flex items-start justify-between cursor-pointer">
+                            <div class="flex items-center space-x-3">
+                                <input type="checkbox" id="chkFri_${idx}" onchange="toggleFriDish(${idx})" class="w-5 h-5 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mt-0.5">
+                                <div>
+                                    <div class="text-sm font-bold text-slate-800">${dish.name}</div>
+                                    <div class="flex items-center space-x-2 mt-0.5">
+                                        <span class="text-xs font-medium text-amber-700">RM ${dish.price}.00 / portion</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </label>
+                        <div id="qtyFriBox_${idx}" class="hidden flex items-center justify-between pt-2 border-t border-amber-200/50">
+                            <span class="text-xs font-bold text-slate-600">份数 Qty:</span>
+                            <div class="flex items-center space-x-3">
+                                <button type="button" onclick="adjustFriQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-white hover:bg-amber-50 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">-</button>
+                                <input type="number" id="qtyFri_${idx}" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
+                                <button type="button" onclick="adjustFriQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-white hover:bg-amber-50 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">+</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
 
             document.getElementById('txtSatTitle').innerText = `星期六 Sat (${satDateStr}) Main - ${SAT_MENU_NAME}`;
             document.getElementById('txtSatPrice').innerText = `RM ${SAT_MAIN_PRICE}.00 / 份 portion`;
-            document.getElementById('badgeSatCount').innerText = `已预订 ${SAT_ORDERED_QTY} 份 (Booked: ${SAT_ORDERED_QTY})`;
+            document.getElementById('badgeSatCount').innerText = `已预订 ${SAT_ORDERED_QTY} 份`;
 
             document.getElementById('txtDessertTitle').innerText = `星期六 Sat (${satDateStr}) Dessert - ${SAT_DESSERT_NAME}`;
             document.getElementById('txtDessertPrice').innerText = `RM ${DESSERT_PRICE}.00 / 份 portion`;
-            document.getElementById('badgeDessertCount').innerText = `已订 ${DESSERT_ORDERED_QTY} / ${SAT_DESSERT_LIMIT} 份 (Booked: ${DESSERT_ORDERED_QTY}/${SAT_DESSERT_LIMIT})`;
-
-            let mainPrices = [];
-            if (ENABLE_FRI_DINNER) mainPrices.push(`RM${FRI_MAIN_PRICE}`);
-            if (ENABLE_SAT_DINNER) mainPrices.push(`RM${SAT_MAIN_PRICE}`);
+            document.getElementById('badgeDessertCount').innerText = `已订 ${DESSERT_ORDERED_QTY} / ${SAT_DESSERT_LIMIT} 份`;
 
             let priceParts = [];
-            if (mainPrices.length > 0) {
-                priceParts.push(`主餐 Main ${mainPrices.join('/')}`);
-            }
-            if (ENABLE_SAT_DESSERT) {
-                priceParts.push(`糖水 Dessert RM${DESSERT_PRICE}`);
-            }
+            if (ENABLE_FRI_DINNER && FRI_DISHES.length > 0) priceParts.push(`周五晚餐 Fri RM${FRI_DISHES[0].price}`);
+            if (ENABLE_SAT_DINNER) priceParts.push(`周六主餐 Sat RM${SAT_MAIN_PRICE}`);
+            if (ENABLE_SAT_DESSERT) priceParts.push(`糖水 Dessert RM${DESSERT_PRICE}`);
 
             document.getElementById('priceHeader').innerText = priceParts.join(' | ') || "暂无可选餐点 No Meals Available";
 
-            if (!ENABLE_FRI_DINNER) {
-                document.getElementById('cardFriday').classList.add('hidden');
-            }
-            if (!ENABLE_SAT_DINNER) {
-                document.getElementById('cardSaturday').classList.add('hidden');
-            }
-            if (!ENABLE_SAT_DESSERT) {
-                document.getElementById('cardDessert').classList.add('hidden');
-            }
+            if (!ENABLE_FRI_DINNER) document.getElementById('sectionFriday').classList.add('hidden');
+            if (!ENABLE_SAT_DINNER) document.getElementById('cardSaturday').classList.add('hidden');
+            if (!ENABLE_SAT_DESSERT) document.getElementById('cardDessert').classList.add('hidden');
 
             calculateTotal();
         }
 
-        function toggleCard(type) {
-            const chk = document.getElementById(`chk${type === 'Fri' ? 'FriMain' : type === 'Sat' ? 'SatMain' : 'Dessert'}`);
-            const card = document.getElementById(`card${type === 'Fri' ? 'Friday' : type === 'Sat' ? 'Saturday' : 'Dessert'}`);
-            const qtyBox = document.getElementById(`qty${type}Box`);
+        function toggleFriDish(idx) {
+            const chk = document.getElementById(`chkFri_${idx}`);
+            const card = document.getElementById(`cardFri_${idx}`);
+            const qtyBox = document.getElementById(`qtyFriBox_${idx}`);
 
             if (chk.checked) {
-                if (type === 'Dessert') {
-                    card.className = "p-3.5 rounded-xl border-2 border-rose-500 bg-rose-50/60 shadow-sm transition-all space-y-3";
-                } else {
-                    card.className = "p-3.5 rounded-xl border-2 border-amber-500 bg-amber-50/60 shadow-sm transition-all space-y-3";
-                }
+                card.className = "p-3.5 rounded-xl border-2 border-amber-500 bg-amber-50/60 shadow-sm transition-all space-y-3";
                 qtyBox.classList.remove('hidden');
             } else {
                 card.className = "p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50/50 transition-all space-y-3";
@@ -468,16 +441,34 @@
             calculateTotal();
         }
 
+        function toggleCard(type) {
+            const chk = document.getElementById(`chk${type === 'Sat' ? 'SatMain' : 'Dessert'}`);
+            const card = document.getElementById(`card${type === 'Sat' ? 'Saturday' : 'Dessert'}`);
+            const qtyBox = document.getElementById(`qty${type}Box`);
+
+            if (chk.checked) {
+                card.className = `p-3.5 rounded-xl border-2 ${type === 'Dessert' ? 'border-rose-500 bg-rose-50/60' : 'border-amber-500 bg-amber-50/60'} shadow-sm transition-all space-y-3`;
+                qtyBox.classList.remove('hidden');
+            } else {
+                card.className = "p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50/50 transition-all space-y-3";
+                qtyBox.classList.add('hidden');
+            }
+            calculateTotal();
+        }
+
+        function adjustFriQty(idx, amount) {
+            const input = document.getElementById(`qtyFri_${idx}`);
+            let val = (parseInt(input.value) || 1) + amount;
+            if (val < 1) val = 1;
+            input.value = val;
+            calculateTotal();
+        }
+
         function adjustQty(type, amount) {
             const input = document.getElementById(`qty${type}`);
-            let val = parseInt(input.value) || 1;
-            val += amount;
+            let val = (parseInt(input.value) || 1) + amount;
             if (val < 1) val = 1;
-            
-            if (type === 'Dessert' && val > SAT_DESSERT_LIMIT) {
-                val = SAT_DESSERT_LIMIT;
-            }
-            
+            if (type === 'Dessert' && val > SAT_DESSERT_LIMIT) val = SAT_DESSERT_LIMIT;
             input.value = val;
             calculateTotal();
         }
@@ -485,35 +476,34 @@
         function calculateTotal() {
             let total = 0;
 
-            const friChecked = document.getElementById('chkFriMain').checked;
-            const satChecked = document.getElementById('chkSatMain').checked;
-            const dessertChecked = document.getElementById('chkDessert').checked;
-
-            if (friChecked && ENABLE_FRI_DINNER) {
-                const qty = parseInt(document.getElementById('qtyFri').value) || 1;
-                total += qty * FRI_MAIN_PRICE;
+            if (ENABLE_FRI_DINNER) {
+                FRI_DISHES.forEach((dish, idx) => {
+                    const chk = document.getElementById(`chkFri_${idx}`);
+                    if (chk && chk.checked) {
+                        const qty = parseInt(document.getElementById(`qtyFri_${idx}`).value) || 1;
+                        total += qty * dish.price;
+                    }
+                });
             }
 
-            if (satChecked && ENABLE_SAT_DINNER) {
+            if (ENABLE_SAT_DINNER && document.getElementById('chkSatMain').checked) {
                 const qty = parseInt(document.getElementById('qtySat').value) || 1;
                 total += qty * SAT_MAIN_PRICE;
             }
 
-            if (dessertChecked && ENABLE_SAT_DESSERT) {
+            if (ENABLE_SAT_DESSERT && document.getElementById('chkDessert').checked) {
                 const qty = parseInt(document.getElementById('qtyDessert').value) || 1;
                 total += qty * DESSERT_PRICE;
             }
 
             currentTotal = total.toFixed(2);
-
             document.getElementById('totalText').innerText = `RM ${currentTotal}`;
             document.getElementById('qrAmountText').innerText = `RM ${currentTotal}`;
             document.getElementById('copyAmountText').innerText = `复制转账金额 Copy Amount (${currentTotal})`;
         }
 
         function renderDots() {
-            const dotsContainer = document.getElementById('carouselDots');
-            dotsContainer.innerHTML = SLIDES.map((_, i) => 
+            document.getElementById('carouselDots').innerHTML = SLIDES.map((_, i) => 
                 `<button type="button" onclick="goToSlide(${i})" id="dot${i}" class="w-2 h-2 rounded-full ${i === 0 ? 'bg-amber-500' : 'bg-slate-300'} transition-all focus:outline-none"></button>`
             ).join('');
         }
@@ -537,64 +527,32 @@
             startCarousel();
         }
 
-        function nextSlide() {
-            slideIndex = (slideIndex + 1) % SLIDES.length;
-            showSlide(slideIndex);
-            startCarousel();
-        }
-
         function showSlide(index) {
             if (!SLIDES[index]) return;
             const img = document.getElementById('carouselImage');
             img.style.opacity = '0.3';
-
             setTimeout(() => {
-                const current = SLIDES[index];
-                img.src = current.image;
-
-                for (let i = 0; i < SLIDES.length; i++) {
+                img.src = SLIDES[index].image;
+                SLIDES.forEach((_, i) => {
                     const dot = document.getElementById(`dot${i}`);
-                    if (dot) {
-                        dot.className = (i === index) 
-                            ? "w-2 h-2 rounded-full bg-amber-500 transition-all focus:outline-none" 
-                            : "w-2 h-2 rounded-full bg-slate-300 transition-all focus:outline-none";
-                    }
-                }
+                    if (dot) dot.className = (i === index) ? "w-2 h-2 rounded-full bg-amber-500 transition-all focus:outline-none" : "w-2 h-2 rounded-full bg-slate-300 transition-all focus:outline-none";
+                });
                 img.style.opacity = '1';
             }, 200);
         }
 
         function initSwipeEvents() {
             const container = document.getElementById('carouselContainer');
-
-            container.addEventListener('touchstart', (e) => {
-                touchStartX = e.changedTouches[0].screenX;
-            }, { passive: true });
-
-            container.addEventListener('touchend', (e) => {
-                touchEndX = e.changedTouches[0].screenX;
-                handleSwipe();
-            }, { passive: true });
-
-            let isDragging = false;
-            container.addEventListener('mousedown', (e) => {
-                isDragging = true;
-                touchStartX = e.screenX;
-            });
-
-            container.addEventListener('mouseup', (e) => {
-                if (!isDragging) return;
-                isDragging = false;
-                touchEndX = e.screenX;
-                handleSwipe();
-            });
+            container.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+            container.addEventListener('touchend', (e) => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); }, { passive: true });
         }
 
         function handleSwipe() {
-            const threshold = 40;
-            if (touchStartX - touchEndX > threshold) {
-                nextSlide();
-            } else if (touchEndX - touchStartX > threshold) {
+            if (touchStartX - touchEndX > 40) {
+                slideIndex = (slideIndex + 1) % SLIDES.length;
+                showSlide(slideIndex);
+                startCarousel();
+            } else if (touchEndX - touchStartX > 40) {
                 slideIndex = (slideIndex - 1 + SLIDES.length) % SLIDES.length;
                 showSlide(slideIndex);
                 startCarousel();
@@ -603,55 +561,60 @@
 
         function safeCopyText(text, successCallback) {
             if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(text).then(successCallback).catch(() => fallbackCopy(text, successCallback));
+                navigator.clipboard.writeText(text).then(successCallback);
             } else {
-                fallbackCopy(text, successCallback);
-            }
-        }
-
-        function fallbackCopy(text, successCallback) {
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.style.position = "fixed";
-            textArea.style.left = "-9999px";
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            try {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.select();
                 document.execCommand('copy');
+                document.body.removeChild(textArea);
                 successCallback();
-            } catch (err) {
-                alert("复制失败，请手动复制 / Copy failed: " + text);
             }
-            document.body.removeChild(textArea);
         }
 
         function copyAmount() {
             safeCopyText(currentTotal, () => {
                 const span = document.getElementById('copyAmountText');
-                const originalText = span.innerText;
+                const orig = span.innerText;
                 span.innerText = `✅ 已复制金额 Copied RM ${currentTotal}！`;
-                setTimeout(() => { span.innerText = originalText; }, 2500);
+                setTimeout(() => { span.innerText = orig; }, 2500);
             });
         }
 
         function copyPhone() {
             safeCopyText(DUITNOW_PHONE, () => {
                 const span = document.getElementById('copyPhoneText');
-                const originalText = span.innerText;
+                const orig = span.innerText;
                 span.innerText = `✅ 已复制号码 Copied ${DUITNOW_PHONE}！`;
-                setTimeout(() => { span.innerText = originalText; }, 2500);
+                setTimeout(() => { span.innerText = orig; }, 2500);
             });
         }
 
         async function handleOrder(event) {
             event.preventDefault();
 
-            const friChecked = document.getElementById('chkFriMain').checked;
+            let friSelectedOrders = [];
+            if (ENABLE_FRI_DINNER) {
+                FRI_DISHES.forEach((dish, idx) => {
+                    const chk = document.getElementById(`chkFri_${idx}`);
+                    if (chk && chk.checked) {
+                        const q = parseInt(document.getElementById(`qtyFri_${idx}`).value) || 1;
+                        friSelectedOrders.push({
+                            name: dish.name,
+                            qty: q,
+                            subtotal: q * dish.price
+                        });
+                    }
+                });
+            }
+
             const satChecked = document.getElementById('chkSatMain').checked;
             const dessertChecked = document.getElementById('chkDessert').checked;
 
-            if (!friChecked && !satChecked && !dessertChecked) {
+            if (friSelectedOrders.length === 0 && !satChecked && !dessertChecked) {
                 alert("⚠️ 请至少勾选一项餐点！ / Please select at least one item!");
                 return;
             }
@@ -665,53 +628,41 @@
             const total = currentTotal;
 
             let selectedItems = [];
-            
             const payload = { 
                 timestamp: new Date().toLocaleString("zh-CN", { timeZone: "Asia/Kuala_Lumpur" }),
                 name: name, 
                 notes: notes,
-                friOrder: null,
+                friOrders: friSelectedOrders,
                 satOrder: null,
                 dessertOrder: null
             };
 
-            if (friChecked && ENABLE_FRI_DINNER) {
-                const q = parseInt(document.getElementById('qtyFri').value) || 1;
-                const subtotal = q * FRI_MAIN_PRICE;
-                selectedItems.push(`星期五 Friday: ${FRI_MENU_NAME} x ${q}份/portion(s)`);
-                payload.friOrder = { checked: true, detail: FRI_MENU_NAME, qty: q, subtotal: subtotal };
-            }
+            friSelectedOrders.forEach(item => {
+                selectedItems.push(`星期五 Friday: ${item.name} x ${item.qty}份/portion(s)`);
+            });
 
             if (satChecked && ENABLE_SAT_DINNER) {
                 const q = parseInt(document.getElementById('qtySat').value) || 1;
-                const subtotal = q * SAT_MAIN_PRICE;
                 selectedItems.push(`星期六 Saturday: ${SAT_MENU_NAME} x ${q}份/portion(s)`);
-                payload.satOrder = { checked: true, detail: SAT_MENU_NAME, qty: q, subtotal: subtotal };
+                payload.satOrder = { checked: true, detail: SAT_MENU_NAME, qty: q, subtotal: q * SAT_MAIN_PRICE };
             }
 
             if (dessertChecked && ENABLE_SAT_DESSERT) {
                 const q = parseInt(document.getElementById('qtyDessert').value) || 1;
-                const subtotal = q * DESSERT_PRICE;
                 selectedItems.push(`星期六 Dessert: ${SAT_DESSERT_NAME} x ${q}份/portion(s)`);
-                payload.dessertOrder = { checked: true, detail: SAT_DESSERT_NAME, qty: q, subtotal: subtotal };
+                payload.dessertOrder = { checked: true, detail: SAT_DESSERT_NAME, qty: q, subtotal: q * DESSERT_PRICE };
             }
 
             if (GOOGLE_SCRIPT_URL) {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 5000);
-
                 try {
                     await fetch(GOOGLE_SCRIPT_URL, {
                         method: 'POST',
                         mode: 'no-cors',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload),
-                        signal: controller.signal
+                        body: JSON.stringify(payload)
                     });
                 } catch (e) {
-                    console.log("Sheet 请求超时或跳过:", e);
-                } finally {
-                    clearTimeout(timeoutId);
+                    console.log("Sheet 请求跳过或失败:", e);
                 }
             }
 
@@ -727,12 +678,10 @@
             waMessage += `💰 *总计 Total*：RM ${total}%0A` +
                          `📝 *备注 Remarks*：${encodeURIComponent(notes)}%0A` +
                          `--------------------------------%0A` +
-                         `已下单，已按照 RM ${total} 完成转账/准备付款，请查收！%0APayment of RM ${total} is completed/ready. Please check!`;
-
-            const waUrl = `https://wa.me/${MY_PHONE_NUMBER}?text=${waMessage}`;
+                         `已下单，已按照 RM ${total} 完成转账/准备付款，请查收！`;
 
             setTimeout(() => {
-                window.location.href = waUrl;
+                window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${waMessage}`;
             }, 300);
         }
     </script>
