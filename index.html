@@ -75,67 +75,80 @@
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
                 </div>
 
-                <!-- 选餐区域 -->
+                <!-- 选餐区域 (已经重构优化结构) -->
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-2">选择预订餐点 (可多选) / Select Meal <span class="text-rose-500">*</span></label>
-                    <div class="space-y-3">
+                    <label class="block text-sm font-bold text-slate-700 mb-3">选择预订餐点 (可多选) / Select Meal <span class="text-rose-500">*</span></label>
+                    
+                    <div class="space-y-4">
                         
-                        <!-- 星期五 菜单容器 -->
-                        <div id="sectionFriday" class="space-y-3">
-                            <div id="txtFriSectionHeader" class="text-xs font-bold text-amber-700 bg-amber-100/60 px-2.5 py-1 rounded-lg inline-block">
+                        <!-- 星期五 独立模块 -->
+                        <div id="sectionFriday" class="p-3.5 rounded-2xl border border-amber-200/70 bg-amber-50/30 space-y-3">
+                            <div id="txtFriSectionHeader" class="text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1.5 rounded-xl inline-flex items-center space-x-1 shadow-sm">
                                 📅 星期五晚餐 / Friday Dinner
                             </div>
-                            <div id="friDishesList" class="space-y-3">
+                            <div id="friDishesList" class="space-y-2.5">
                                 <!-- 由 JS 动态渲染菜色卡片 -->
                             </div>
                         </div>
 
-                        <!-- 星期六主餐卡片 -->
-                        <div id="cardSaturday" class="p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50/50 transition-all space-y-3">
-                            <label class="flex items-start justify-between cursor-pointer">
-                                <div class="flex items-center space-x-3">
-                                    <input type="checkbox" id="chkSatMain" onchange="toggleCard('Sat')" class="w-5 h-5 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mt-0.5">
-                                    <div>
-                                        <div id="txtSatTitle" class="text-sm font-bold text-slate-800">星期六 Saturday - 加载中 Loading...</div>
-                                        <div class="flex items-center space-x-2 mt-0.5">
-                                            <span id="txtSatPrice" class="text-xs font-medium text-amber-700">RM --.00 / portion</span>
-                                            <span id="badgeSatCount" class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full">已预订 / Booked 0 份</span>
+                        <!-- 星期六主餐 独立模块 -->
+                        <div id="sectionSaturday" class="p-3.5 rounded-2xl border border-indigo-100 bg-indigo-50/30 space-y-3">
+                            <div id="headerSat" class="text-xs font-bold text-indigo-900 bg-indigo-100 px-3 py-1.5 rounded-xl inline-flex items-center space-x-1 shadow-sm">
+                                🗓️ 星期六晚餐 / Saturday Dinner
+                            </div>
+
+                            <div id="cardSaturday" class="p-3.5 rounded-xl border-2 border-slate-200 bg-white transition-all space-y-3">
+                                <label class="flex items-start justify-between cursor-pointer">
+                                    <div class="flex items-center space-x-3">
+                                        <input type="checkbox" id="chkSatMain" onchange="toggleCard('Sat')" class="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 mt-0.5">
+                                        <div>
+                                            <div id="txtSatTitle" class="text-sm font-bold text-slate-800">加载中 Loading...</div>
+                                            <div class="flex items-center space-x-2 mt-1">
+                                                <span id="txtSatPrice" class="text-xs font-bold text-indigo-600">RM --.00 / portion</span>
+                                                <span id="badgeSatCount" class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full">已预订 / Booked 0 份</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </label>
+                                </label>
 
-                            <div id="qtySatBox" class="hidden flex items-center justify-between pt-2 border-t border-amber-200/50">
-                                <span class="text-xs font-bold text-slate-600">份数 / Qty:</span>
-                                <div class="flex items-center space-x-3">
-                                    <button type="button" onclick="adjustQty('Sat', -1)" class="w-8 h-8 rounded-lg bg-white hover:bg-amber-50 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">-</button>
-                                    <input type="number" id="qtySat" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
-                                    <button type="button" onclick="adjustQty('Sat', 1)" class="w-8 h-8 rounded-lg bg-white hover:bg-amber-50 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">+</button>
+                                <div id="qtySatBox" class="hidden flex items-center justify-between pt-2.5 border-t border-indigo-100">
+                                    <span class="text-xs font-bold text-slate-600">份数 / Qty:</span>
+                                    <div class="flex items-center space-x-3">
+                                        <button type="button" onclick="adjustQty('Sat', -1)" class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold text-base flex items-center justify-center border border-indigo-200 shadow-sm active:scale-95 transition">-</button>
+                                        <input type="number" id="qtySat" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
+                                        <button type="button" onclick="adjustQty('Sat', 1)" class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold text-base flex items-center justify-center border border-indigo-200 shadow-sm active:scale-95 transition">+</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
 
-                        <!-- 周六糖水卡片 -->
-                        <div id="cardDessert" class="p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50/50 transition-all space-y-3">
-                            <label class="flex items-start justify-between cursor-pointer">
-                                <div class="flex items-center space-x-3">
-                                    <input type="checkbox" id="chkDessert" onchange="toggleCard('Dessert')" class="w-5 h-5 text-rose-600 rounded border-slate-300 focus:ring-rose-500 mt-0.5">
-                                    <div>
-                                        <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">星期六 Dessert - 加载中 Loading...</div>
-                                        <div class="flex items-center space-x-2 mt-0.5">
-                                            <span id="txtDessertPrice" class="text-xs font-medium text-rose-600">RM --.00 / portion</span>
-                                            <span id="badgeDessertCount" class="text-[10px] bg-rose-100 text-rose-800 font-bold px-1.5 py-0.5 rounded-full">已订 / Booked 0 份</span>
+                        <!-- 周六糖水 独立模块 -->
+                        <div id="sectionDessert" class="p-3.5 rounded-2xl border border-rose-100 bg-rose-50/30 space-y-3">
+                            <div id="headerDessert" class="text-xs font-bold text-rose-900 bg-rose-100 px-3 py-1.5 rounded-xl inline-flex items-center space-x-1 shadow-sm">
+                                🥣 星期六限定糖水 / Saturday Dessert
+                            </div>
+
+                            <div id="cardDessert" class="p-3.5 rounded-xl border-2 border-slate-200 bg-white transition-all space-y-3">
+                                <label class="flex items-start justify-between cursor-pointer">
+                                    <div class="flex items-center space-x-3">
+                                        <input type="checkbox" id="chkDessert" onchange="toggleCard('Dessert')" class="w-5 h-5 text-rose-600 rounded border-slate-300 focus:ring-rose-500 mt-0.5">
+                                        <div>
+                                            <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">加载中 Loading...</div>
+                                            <div class="flex items-center space-x-2 mt-1">
+                                                <span id="txtDessertPrice" class="text-xs font-bold text-rose-600">RM --.00 / portion</span>
+                                                <span id="badgeDessertCount" class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full">已订 / Booked 0 份</span>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </label>
+                                </label>
 
-                            <div id="qtyDessertBox" class="hidden flex items-center justify-between pt-2 border-t border-rose-200/50">
-                                <span class="text-xs font-bold text-slate-600">份数 / Qty:</span>
-                                <div class="flex items-center space-x-3">
-                                    <button type="button" onclick="adjustQty('Dessert', -1)" class="w-8 h-8 rounded-lg bg-white hover:bg-rose-50 text-rose-800 font-bold text-base flex items-center justify-center border border-rose-200 shadow-sm active:scale-95 transition">-</button>
-                                    <input type="number" id="qtyDessert" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
-                                    <button type="button" onclick="adjustQty('Dessert', 1)" class="w-8 h-8 rounded-lg bg-white hover:bg-rose-50 text-rose-800 font-bold text-base flex items-center justify-center border border-rose-200 shadow-sm active:scale-95 transition">+</button>
+                                <div id="qtyDessertBox" class="hidden flex items-center justify-between pt-2.5 border-t border-rose-100">
+                                    <span class="text-xs font-bold text-slate-600">份数 / Qty:</span>
+                                    <div class="flex items-center space-x-3">
+                                        <button type="button" onclick="adjustQty('Dessert', -1)" class="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 font-bold text-base flex items-center justify-center border border-rose-200 shadow-sm active:scale-95 transition">-</button>
+                                        <input type="number" id="qtyDessert" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
+                                        <button type="button" onclick="adjustQty('Dessert', 1)" class="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 font-bold text-base flex items-center justify-center border border-rose-200 shadow-sm active:scale-95 transition">+</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -261,8 +274,8 @@
 
         let FRI_DISHES = [];
 
-        let SAT_MENU_NAME = "🍲 招牌卤肉饭 / Signature Braised Pork Rice";
-        let SAT_DESSERT_NAME = "🥣 周六限定糖水 / Saturday Special Dessert";
+        let SAT_MENU_NAME = "招牌卤肉饭 / Signature Braised Pork Rice";
+        let SAT_DESSERT_NAME = "周六限定糖水 / Saturday Special Dessert";
 
         let SAT_MAIN_PRICE = 15;
         let DESSERT_PRICE = 5;    
@@ -386,14 +399,14 @@
                 friListContainer.innerHTML = `<div class="text-xs text-slate-400 p-2">暂无可用菜品 / No dishes available</div>`;
             } else {
                 friListContainer.innerHTML = FRI_DISHES.map((dish, idx) => `
-                    <div id="cardFri_${idx}" class="p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50/50 transition-all space-y-3">
+                    <div id="cardFri_${idx}" class="p-3 rounded-xl border-2 border-slate-200 bg-white transition-all space-y-3">
                         <label class="flex items-start justify-between cursor-pointer">
                             <div class="flex items-center space-x-3">
                                 <input type="checkbox" id="chkFri_${idx}" onchange="toggleFriDish(${idx})" class="w-5 h-5 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mt-0.5">
                                 <div>
                                     <div class="text-sm font-bold text-slate-800">${dish.name}</div>
                                     <div class="flex items-center space-x-2 mt-0.5">
-                                        <span class="text-xs font-medium text-amber-700">RM ${dish.price}.00 / portion</span>
+                                        <span class="text-xs font-bold text-amber-700">RM ${dish.price}.00 / portion</span>
                                         <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full">已预订 / Booked ${dish.booked || 0} 份</span>
                                     </div>
                                 </div>
@@ -402,20 +415,22 @@
                         <div id="qtyFriBox_${idx}" class="hidden flex items-center justify-between pt-2 border-t border-amber-200/50">
                             <span class="text-xs font-bold text-slate-600">份数 / Qty:</span>
                             <div class="flex items-center space-x-3">
-                                <button type="button" onclick="adjustFriQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-white hover:bg-amber-50 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">-</button>
+                                <button type="button" onclick="adjustFriQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">-</button>
                                 <input type="number" id="qtyFri_${idx}" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
-                                <button type="button" onclick="adjustFriQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-white hover:bg-amber-50 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">+</button>
+                                <button type="button" onclick="adjustFriQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">+</button>
                             </div>
                         </div>
                     </div>
                 `).join('');
             }
 
-            document.getElementById('txtSatTitle').innerText = `星期六 Sat (${satDateStr}) Main - ${SAT_MENU_NAME}`;
+            document.getElementById('headerSat').innerText = `🗓️ 星期六晚餐 Saturday (${satDateStr})`;
+            document.getElementById('txtSatTitle').innerText = SAT_MENU_NAME;
             document.getElementById('txtSatPrice').innerText = `RM ${SAT_MAIN_PRICE}.00 / 份 portion`;
             document.getElementById('badgeSatCount').innerText = `已预订 / Booked ${SAT_ORDERED_QTY} 份`;
 
-            document.getElementById('txtDessertTitle').innerText = `星期六 Sat (${satDateStr}) Dessert - ${SAT_DESSERT_NAME}`;
+            document.getElementById('headerDessert').innerText = `🥣 周六限定糖水 Saturday Dessert (${satDateStr})`;
+            document.getElementById('txtDessertTitle').innerText = SAT_DESSERT_NAME;
             document.getElementById('txtDessertPrice').innerText = `RM ${DESSERT_PRICE}.00 / 份 portion`;
             document.getElementById('badgeDessertCount').innerText = `已订 / Booked ${DESSERT_ORDERED_QTY} / ${SAT_DESSERT_LIMIT} 份`;
 
@@ -427,8 +442,8 @@
             document.getElementById('priceHeader').innerText = priceParts.join(' | ') || "暂无可选餐点 / No Meals Available";
 
             if (!ENABLE_FRI_DINNER) document.getElementById('sectionFriday').classList.add('hidden');
-            if (!ENABLE_SAT_DINNER) document.getElementById('cardSaturday').classList.add('hidden');
-            if (!ENABLE_SAT_DESSERT) document.getElementById('cardDessert').classList.add('hidden');
+            if (!ENABLE_SAT_DINNER) document.getElementById('sectionSaturday').classList.add('hidden');
+            if (!ENABLE_SAT_DESSERT) document.getElementById('sectionDessert').classList.add('hidden');
 
             calculateTotal();
         }
@@ -439,10 +454,10 @@
             const qtyBox = document.getElementById(`qtyFriBox_${idx}`);
 
             if (chk.checked) {
-                card.className = "p-3.5 rounded-xl border-2 border-amber-500 bg-amber-50/60 shadow-sm transition-all space-y-3";
+                card.className = "p-3 rounded-xl border-2 border-amber-500 bg-amber-50/70 shadow-sm transition-all space-y-3";
                 qtyBox.classList.remove('hidden');
             } else {
-                card.className = "p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50/50 transition-all space-y-3";
+                card.className = "p-3 rounded-xl border-2 border-slate-200 bg-white transition-all space-y-3";
                 qtyBox.classList.add('hidden');
             }
             calculateTotal();
@@ -454,10 +469,10 @@
             const qtyBox = document.getElementById(`qty${type}Box`);
 
             if (chk.checked) {
-                card.className = `p-3.5 rounded-xl border-2 ${type === 'Dessert' ? 'border-rose-500 bg-rose-50/60' : 'border-amber-500 bg-amber-50/60'} shadow-sm transition-all space-y-3`;
+                card.className = `p-3.5 rounded-xl border-2 ${type === 'Dessert' ? 'border-rose-500 bg-rose-50/70' : 'border-indigo-500 bg-indigo-50/70'} shadow-sm transition-all space-y-3`;
                 qtyBox.classList.remove('hidden');
             } else {
-                card.className = "p-3.5 rounded-xl border-2 border-slate-200 bg-slate-50/50 transition-all space-y-3";
+                card.className = "p-3.5 rounded-xl border-2 border-slate-200 bg-white transition-all space-y-3";
                 qtyBox.classList.add('hidden');
             }
             calculateTotal();
