@@ -374,7 +374,7 @@
             const dishCountText = FRI_DISHES.length > 1 ? ` (${FRI_DISHES.length}款可选)` : '';
             document.getElementById('txtFriSectionHeader').innerText = `📅 星期五晚餐 Friday (${friDateStr})${dishCountText}`;
 
-            // 动态渲染周五菜色卡片
+            // 动态渲染周五菜色卡片（包含显示各自已预订数量）
             const friListContainer = document.getElementById('friDishesList');
             if (FRI_DISHES.length === 0) {
                 friListContainer.innerHTML = `<div class="text-xs text-slate-400 p-2">暂无可用菜品</div>`;
@@ -388,6 +388,7 @@
                                     <div class="text-sm font-bold text-slate-800">${dish.name}</div>
                                     <div class="flex items-center space-x-2 mt-0.5">
                                         <span class="text-xs font-medium text-amber-700">RM ${dish.price}.00 / portion</span>
+                                        <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full">已预订 ${dish.booked || 0} 份</span>
                                     </div>
                                 </div>
                             </div>
