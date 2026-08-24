@@ -360,13 +360,11 @@
 
         function updateCarouselSlides() {
             SLIDES = ALL_SLIDES.filter(slide => {
-                // pwa.jpeg 和 instruction.jpeg 永远显示，不受 dish1-3 开关影响
                 const imgName = slide.image.toLowerCase();
                 if (slide.isInstruction || imgName.includes('pwa')) {
                     return true;
                 }
 
-                // 其他菜品图片根据后台开关进行过滤
                 if (slide.isFriday && !ENABLE_FRI_DINNER) return false;
                 if (slide.isSaturdayMain && !ENABLE_SAT_DINNER) return false;
                 if (slide.isDessert && !ENABLE_SAT_DESSERT) return false;
@@ -702,23 +700,26 @@
                 }
             }
 
-            let waMessage = `🛒 *【晚餐/糖水预订订单 Dinner & Dessert Order】*%0A` +
-                            `--------------------------------%0A` +
-                            `👤 *名字 Name*：${encodeURIComponent(name)}%0A` +
-                            `🍱 *已选餐点 Items*：%0A`;
+            // 【已修复】先构建完整的纯文本消息，再整体编码，防止中途由于特殊符号或换行导致 URL 被截断不完整
+            let rawMessage = `🛒 *【晚餐/糖水预订订单 Dinner & Dessert Order】*\n` +
+                             `--------------------------------\n` +
+                             `👤 *名字 Name*：${name}\n` +
+                             `🍱 *已选餐点 Items*：\n`;
 
             selectedItems.forEach(item => {
-                waMessage += `• ${encodeURIComponent(item)}%0A`;
+                rawMessage += `• ${item}\n`;
             });
 
-            waMessage += `💰 *总计 Total*：RM ${total}%0A` +
-                         `📝 *备注 Remarks*：${encodeURIComponent(notes)}%0A` +
-                         `--------------------------------%0A` +
-                         `已下单，已按照 RM ${total} 完成转账/准备付款，请查收！%0A` +
-                         `Order placed. Transferred/Ready to pay RM ${total}, please check!`;
+            rawMessage += `💰 *总计 Total*：RM ${total}\n` +
+                          `📝 *备注 Remarks*：${notes}\n` +
+                          `--------------------------------\n` +
+                          `已下单，已按照 RM ${total} 完成转账/准备付款，请查收！\n` +
+                          `Order placed. Transferred/Ready to pay RM ${total}, please check!`;
+
+            const encodedMessage = encodeURIComponent(rawMessage);
 
             setTimeout(() => {
-                window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${waMessage}`;
+                window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodedMessage}`;
             }, 300);
         }
     </script>
