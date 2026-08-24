@@ -50,8 +50,10 @@
         🚨 DEBUG MODE 开启中 / Debug Mode Active 🚨
     </div>
 
+    <!-- 封面及轮播区域 -->
     <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-lg cursor-grab active:cursor-grabbing bg-white">
         <img id="carouselImage" src="cafe1.jpeg" class="w-full h-auto block transition-opacity duration-500 opacity-100 pointer-events-none" alt="GRC CAFE 展示">
+        
         <div id="carouselDots" class="absolute top-3 right-3 flex space-x-1.5 z-20 bg-white/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/50 shadow-sm"></div>
     </div>
 
@@ -291,10 +293,11 @@
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw-t99KLkdMEcFzto_gfkosudLT3ElFVOqndO3KHZImHgx71hUqr9CDNSRg2Km45-j9Mw/exec"; 
 
         const ALL_SLIDES = [
-            { image: "cafe1.jpeg", isFriday: false, isSaturdayMain: false, isDessert: false },
-            { image: "dish1.jpeg", isFriday: true,  isSaturdayMain: false, isDessert: false },
-            { image: "dish2.jpeg", isFriday: false, isSaturdayMain: true,  isDessert: false },
-            { image: "dish3.jpeg", isFriday: false, isSaturdayMain: false, isDessert: true }
+            { image: "cafe1.jpeg", isFriday: false, isSaturdayMain: false, isDessert: false, isInstruction: false },
+            { image: "dish1.jpeg", isFriday: true,  isSaturdayMain: false, isDessert: false, isInstruction: false },
+            { image: "dish2.jpeg", isFriday: false, isSaturdayMain: true,  isDessert: false, isInstruction: false },
+            { image: "dish3.jpeg", isFriday: false, isSaturdayMain: false, isDessert: true,  isInstruction: false },
+            { image: "instruction.jpeg", isFriday: false, isSaturdayMain: false, isDessert: false, isInstruction: true }
         ];
 
         let SLIDES = [];
@@ -363,7 +366,7 @@
             });
 
             if (SLIDES.length === 0) {
-                SLIDES = [{ image: "cafe1.jpeg", isFriday: false, isSaturdayMain: false, isDessert: false }];
+                SLIDES = [{ image: "cafe1.jpeg", isFriday: false, isSaturdayMain: false, isDessert: false, isInstruction: false }];
             }
 
             renderDots();
@@ -553,9 +556,11 @@
         function showSlide(index) {
             if (!SLIDES[index]) return;
             const img = document.getElementById('carouselImage');
+
             img.style.opacity = '0.3';
             setTimeout(() => {
                 img.src = SLIDES[index].image;
+                
                 SLIDES.forEach((_, i) => {
                     const dot = document.getElementById(`dot${i}`);
                     if (dot) dot.className = (i === index) ? "w-2 h-2 rounded-full bg-amber-500 transition-all focus:outline-none" : "w-2 h-2 rounded-full bg-slate-300 transition-all focus:outline-none";
