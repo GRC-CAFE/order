@@ -45,11 +45,6 @@
         <button type="button" onclick="dismissIosPrompt()" class="text-slate-400 hover:text-white text-xs px-2 py-1"><i class="fa-solid fa-xmark text-sm"></i></button>
     </div>
 
-    <!-- Debug 状态提示条 -->
-    <div id="debugBanner" class="hidden bg-red-600 text-white text-xs font-bold py-1.5 text-center shadow-md">
-        🚨 DEBUG MODE 开启中 / Debug Mode Active 🚨
-    </div>
-
     <!-- 封面及轮播区域 -->
     <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-lg cursor-grab active:cursor-grabbing bg-white">
         <img id="carouselImage" src="cafe1.jpeg" class="w-full h-auto block transition-opacity duration-500 opacity-100 pointer-events-none" alt="GRC CAFE 展示">
@@ -173,6 +168,28 @@
             </form>
         </div>
 
+        <!-- 社交媒体分享模块 -->
+        <div class="bg-white rounded-2xl shadow-lg p-5 border border-amber-100/60 text-center space-y-3">
+            <h3 class="text-xs font-bold text-slate-700">将菜单分享给好友 / Share Menu with Friends</h3>
+            <div class="flex items-center space-x-2">
+                <!-- 原生系统分享 -->
+                <button type="button" onclick="nativeShare()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2.5 px-2 rounded-xl flex items-center justify-center space-x-1 transition">
+                    <i class="fa-solid fa-share-nodes text-slate-600"></i>
+                    <span>系统分享</span>
+                </button>
+                <!-- WhatsApp 分享 -->
+                <button type="button" onclick="shareToWhatsApp()" class="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold py-2.5 px-2 rounded-xl flex items-center justify-center space-x-1 transition">
+                    <i class="fa-brands fa-whatsapp text-emerald-600 text-base"></i>
+                    <span>WhatsApp</span>
+                </button>
+                <!-- Messenger 稳定分享 -->
+                <button type="button" onclick="shareToMessenger()" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold py-2.5 px-2 rounded-xl flex items-center justify-center space-x-1 transition">
+                    <i class="fa-brands fa-facebook-messenger text-blue-600 text-base"></i>
+                    <span>Messenger</span>
+                </button>
+            </div>
+        </div>
+
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-amber-100/60 text-center space-y-4">
             <h2 class="text-lg font-bold text-slate-800 flex items-center justify-center space-x-2">
                 <i class="fa-solid fa-qrcode text-pink-600"></i>
@@ -206,7 +223,6 @@
     <!-- 底部固定栏 -->
     <div class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200/60 shadow-lg px-3 py-2">
         <div class="max-w-md mx-auto space-y-1.5">
-            <!-- 已添加收据提示的橙色条 -->
             <div class="bg-amber-500 text-white text-[11px] font-bold py-1 px-3 rounded-lg flex items-center justify-center space-x-1.5 shadow-sm">
                 <i class="fa-solid fa-receipt text-xs"></i>
                 <span>请付款并附上凭证 / Pay & send receipt</span>
@@ -268,8 +284,6 @@
             document.getElementById('iosInstallBanner').classList.add('hidden');
             localStorage.setItem('ios_pwa_dismissed_time', Date.now().toString());
         }
-
-        const DEBUG_MODE = false; 
 
         let ENABLE_FRI_DINNER = true;
         let ENABLE_SAT_DINNER = true;
@@ -627,6 +641,41 @@
             });
         }
 
+        // ==================== 社交媒体分享功能函数 (稳定版) ====================
+        const shareUrl = window.location.href;
+        const shareTitle = "GRC CAFE - 晚餐与糖水预订";
+        const shareDescription = "来看看这周的美味晚餐和糖水菜单，支持在线预订！Delicious dinner & dessert pre-order menu!";
+
+        function nativeShare() {
+            if (navigator.share) {
+                navigator.share({
+                    title: shareTitle,
+                    text: shareDescription,
+                    url: shareUrl,
+                }).catch((error) => console.log('分享取消或失败:', error));
+            } else {
+                safeCopyText(shareUrl, () => {
+                    alert("✅ 链接已复制，您可以发给好友了！\nLink copied to clipboard!");
+                });
+            }
+        }
+
+        function shareToWhatsApp() {
+            const text = `${shareTitle}\n${shareDescription}\n👉 点击链接查看菜单并预订: ${shareUrl}`;
+            const encodedText = encodeURIComponent(text);
+            window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
+        }
+
+        function shareToMessenger() {
+            const shareText = `来一起看看 GRC CAFE 这周的美味晚餐和糖水菜单，支持在线预订哦！\n👉 ${shareUrl}`;
+            
+            safeCopyText(shareText, () => {
+                alert("✅ 菜单文案已复制！\n\n即将为您打开 Messenger，您可以直接【粘贴】发给好友或群组！");
+                window.open("https://www.messenger.com/", "_blank");
+            });
+        }
+        // ==============================================================================
+
         async function handleOrder(event) {
             event.preventDefault();
 
@@ -700,7 +749,6 @@
                 }
             }
 
-            // 【已修复】先构建完整的纯文本消息，再整体编码，防止中途由于特殊符号或换行导致 URL 被截断不完整
             let rawMessage = `🛒 *【晚餐/糖水预订订单 Dinner & Dessert Order】*\n` +
                              `--------------------------------\n` +
                              `👤 *名字 Name*：${name}\n` +
