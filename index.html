@@ -67,7 +67,14 @@
 
             <form id="orderForm" onsubmit="handleOrder(event)" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">您的名字 / Your Name <span class="text-rose-500">*</span></label>
+                    <!-- 方案一优化：将查订单改为右上角的小文字链接，与输入框解耦 -->
+                    <div class="flex justify-between items-center mb-1">
+                        <label class="block text-sm font-bold text-slate-700">您的名字 / Your Name <span class="text-rose-500">*</span></label>
+                        <button type="button" onclick="openOrderQueryModal()" class="text-xs text-amber-700 hover:text-amber-900 font-semibold underline flex items-center space-x-1 transition">
+                            <i class="fa-solid fa-search text-[10px]"></i>
+                            <span>查看我已下的订单</span>
+                        </button>
+                    </div>
                     <input type="text" id="name" required placeholder="例如 e.g. Tan / Ah Beng" autocomplete="off"
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
                 </div>
@@ -172,17 +179,14 @@
         <div class="bg-white rounded-2xl shadow-lg p-5 border border-amber-100/60 text-center space-y-3">
             <h3 class="text-xs font-bold text-slate-700">将菜单分享给好友 / Share Menu with Friends</h3>
             <div class="flex items-center space-x-2">
-                <!-- 原生系统分享 -->
                 <button type="button" onclick="nativeShare()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2.5 px-2 rounded-xl flex items-center justify-center space-x-1 transition">
                     <i class="fa-solid fa-share-nodes text-slate-600"></i>
                     <span>系统分享</span>
                 </button>
-                <!-- WhatsApp 分享 -->
                 <button type="button" onclick="shareToWhatsApp()" class="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold py-2.5 px-2 rounded-xl flex items-center justify-center space-x-1 transition">
                     <i class="fa-brands fa-whatsapp text-emerald-600 text-base"></i>
                     <span>WhatsApp</span>
                 </button>
-                <!-- Messenger 稳定分享 -->
                 <button type="button" onclick="shareToMessenger()" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold py-2.5 px-2 rounded-xl flex items-center justify-center space-x-1 transition">
                     <i class="fa-brands fa-facebook-messenger text-blue-600 text-base"></i>
                     <span>Messenger</span>
@@ -236,6 +240,44 @@
         </div>
     </div>
 
+    <!-- 订单查询弹窗 (Modal) -->
+    <div id="queryModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 space-y-4 border border-amber-100">
+            <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+                <h3 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                    <i class="fa-solid fa-receipt text-amber-600"></i>
+                    <span>查询我的预订记录 / My Orders</span>
+                </h3>
+                <button type="button" onclick="closeOrderQueryModal()" class="text-slate-400 hover:text-slate-600 p-1">
+                    <i class="fa-solid fa-xmark text-lg"></i>
+                </button>
+            </div>
+
+            <div class="space-y-3">
+                <p class="text-xs text-slate-500">输入您下单时填写的名字即可查询当前有效预订：</p>
+                <div class="flex space-x-2">
+                    <input type="text" id="queryNameInput" placeholder="输入名字 (如 Tan)" 
+                           class="flex-1 px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
+                    <button type="button" onclick="submitQueryOrders()" id="queryBtn"
+                            class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition">
+                        查询
+                    </button>
+                </div>
+            </div>
+
+            <!-- 查询结果展示区域 -->
+            <div id="queryResultsContainer" class="max-h-64 overflow-y-auto space-y-2.5 pt-2 text-left">
+                <div class="text-center text-xs text-slate-400 py-6">请输入名字后点击查询</div>
+            </div>
+
+            <div class="pt-2 border-t border-slate-100 text-right">
+                <button type="button" onclick="closeOrderQueryModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-xl">
+                    关闭 / Close
+                </button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let deferredPrompt = null;
         const PROMPT_COOLDOWN = 24 * 60 * 60 * 1000; 
@@ -249,7 +291,6 @@
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
             deferredPrompt = e;
-            
             const lastDismissed = localStorage.getItem('pwa_prompt_dismissed_time');
             if (!lastDismissed || (Date.now() - parseInt(lastDismissed)) > PROMPT_COOLDOWN) {
                 document.getElementById('pwaInstallBanner').classList.remove('hidden');
@@ -271,7 +312,6 @@
         function checkIosPrompt() {
             const isIos = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
             const isStandalone = window.navigator.standalone || window.matchMedia('(display-mode: standalone)').matches;
-            
             const lastDismissed = localStorage.getItem('ios_pwa_dismissed_time');
             const isExpired = !lastDismissed || (Date.now() - parseInt(lastDismissed)) > PROMPT_COOLDOWN;
 
@@ -288,7 +328,6 @@
         let ENABLE_FRI_DINNER = true;
         let ENABLE_SAT_DINNER = true;
         let ENABLE_SAT_DESSERT = true;
-
         let FRI_DISHES = [];
 
         let SAT_MENU_NAME = "招牌卤肉饭 / Signature Braised Pork Rice";
@@ -378,7 +417,6 @@
                 if (slide.isInstruction || imgName.includes('pwa')) {
                     return true;
                 }
-
                 if (slide.isFriday && !ENABLE_FRI_DINNER) return false;
                 if (slide.isSaturdayMain && !ENABLE_SAT_DINNER) return false;
                 if (slide.isDessert && !ENABLE_SAT_DESSERT) return false;
@@ -580,7 +618,6 @@
             img.style.opacity = '0.3';
             setTimeout(() => {
                 img.src = SLIDES[index].image;
-                
                 SLIDES.forEach((_, i) => {
                     const dot = document.getElementById(`dot${i}`);
                     if (dot) dot.className = (i === index) ? "w-2 h-2 rounded-full bg-amber-500 transition-all focus:outline-none" : "w-2 h-2 rounded-full bg-slate-300 transition-all focus:outline-none";
@@ -641,40 +678,92 @@
             });
         }
 
-        // ==================== 社交媒体分享功能函数 (稳定版) ====================
+        // ==================== 社交媒体分享功能 ====================
         const shareUrl = window.location.href;
         const shareTitle = "GRC CAFE - 晚餐与糖水预订";
         const shareDescription = "来看看这周的美味晚餐和糖水菜单，支持在线预订！Delicious dinner & dessert pre-order menu!";
 
         function nativeShare() {
             if (navigator.share) {
-                navigator.share({
-                    title: shareTitle,
-                    text: shareDescription,
-                    url: shareUrl,
-                }).catch((error) => console.log('分享取消或失败:', error));
+                navigator.share({ title: shareTitle, text: shareDescription, url: shareUrl }).catch((error) => console.log('分享取消:', error));
             } else {
-                safeCopyText(shareUrl, () => {
-                    alert("✅ 链接已复制，您可以发给好友了！\nLink copied to clipboard!");
-                });
+                safeCopyText(shareUrl, () => { alert("✅ 链接已复制！\nLink copied to clipboard!"); });
             }
         }
 
         function shareToWhatsApp() {
             const text = `${shareTitle}\n${shareDescription}\n👉 点击链接查看菜单并预订: ${shareUrl}`;
-            const encodedText = encodeURIComponent(text);
-            window.open(`https://api.whatsapp.com/send?text=${encodedText}`, '_blank');
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
         }
 
         function shareToMessenger() {
             const shareText = `来一起看看 GRC CAFE 这周的美味晚餐和糖水菜单，支持在线预订哦！\n👉 ${shareUrl}`;
-            
             safeCopyText(shareText, () => {
                 alert("✅ 菜单文案已复制！\n\n即将为您打开 Messenger，您可以直接【粘贴】发给好友或群组！");
                 window.open("https://www.messenger.com/", "_blank");
             });
         }
-        // ==============================================================================
+        // ==========================================================
+
+        // ==================== 客户订单查询交互函数 ====================
+        function openOrderQueryModal() {
+            const currentName = document.getElementById('name').value.trim();
+            if (currentName) {
+                document.getElementById('queryNameInput').value = currentName;
+            }
+            document.getElementById('queryModal').classList.remove('hidden');
+            if (currentName) {
+                submitQueryOrders();
+            }
+        }
+
+        function closeOrderQueryModal() {
+            document.getElementById('queryModal').classList.add('hidden');
+        }
+
+        async function submitQueryOrders() {
+            const nameInput = document.getElementById('queryNameInput').value.trim();
+            const container = document.getElementById('queryResultsContainer');
+            
+            if (!nameInput) {
+                alert("请输入要查询的名字！");
+                return;
+            }
+
+            container.innerHTML = `<div class="text-center text-xs text-slate-400 py-6"><i class="fa-solid fa-spinner animate-spin"></i> 正在查询当前有效订单...</div>`;
+
+            try {
+                const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=query&name=${encodeURIComponent(nameInput)}`);
+                const data = await res.json();
+
+                if (data.success) {
+                    if (data.orders.length === 0) {
+                        container.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-xl">没有找到关于 "${nameInput}" 的当前活动订单。</div>`;
+                    } else {
+                        container.innerHTML = data.orders.map(order => `
+                            <div class="p-3 rounded-xl border border-amber-200/65 bg-amber-50/30 text-xs space-y-1 shadow-sm">
+                                <div class="flex justify-between font-bold text-slate-800">
+                                    <span>📦 ${order.category}</span>
+                                    <span class="text-amber-600 font-black">RM ${order.subtotal}</span>
+                                </div>
+                                <div class="text-slate-600">明细: <span class="font-semibold">${order.detail}</span> (数量: ${order.qty})</div>
+                                <div class="flex justify-between text-[10px] text-slate-400 pt-1 border-t border-amber-100">
+                                    <span>下单人: ${order.name}</span>
+                                    <span>${order.timestamp}</span>
+                                </div>
+                                ${order.notes && order.notes !== '无 None' ? `<div class="text-[10px] text-rose-500">备注: ${order.notes}</div>` : ''}
+                            </div>
+                        `).join('');
+                    }
+                } else {
+                    container.innerHTML = `<div class="text-center text-xs text-rose-500 py-4">查询失败: ${data.message || '未知错误'}</div>`;
+                }
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = `<div class="text-center text-xs text-rose-500 py-4">网络错误，无法连接服务器。</div>`;
+            }
+        }
+        // ============================================================
 
         async function handleOrder(event) {
             event.preventDefault();
@@ -685,11 +774,7 @@
                     const chk = document.getElementById(`chkFri_${idx}`);
                     if (chk && chk.checked) {
                         const q = parseInt(document.getElementById(`qtyFri_${idx}`).value) || 1;
-                        friSelectedOrders.push({
-                            name: dish.name,
-                            qty: q,
-                            subtotal: q * dish.price
-                        });
+                        friSelectedOrders.push({ name: dish.name, qty: q, subtotal: q * dish.price });
                     }
                 });
             }
@@ -754,9 +839,7 @@
                              `👤 *名字 Name*：${name}\n` +
                              `🍱 *已选餐点 Items*：\n`;
 
-            selectedItems.forEach(item => {
-                rawMessage += `• ${item}\n`;
-            });
+            selectedItems.forEach(item => { rawMessage += `• ${item}\n`; });
 
             rawMessage += `💰 *总计 Total*：RM ${total}\n` +
                           `📝 *备注 Remarks*：${notes}\n` +
@@ -764,10 +847,8 @@
                           `已下单，已按照 RM ${total} 完成转账/准备付款，请查收！\n` +
                           `Order placed. Transferred/Ready to pay RM ${total}, please check!`;
 
-            const encodedMessage = encodeURIComponent(rawMessage);
-
             setTimeout(() => {
-                window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodedMessage}`;
+                window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
             }, 300);
         }
     </script>
