@@ -23,13 +23,21 @@
         <div class="flex items-center space-x-3">
             <img src="logo-192.png" class="w-10 h-10 rounded-xl shadow-sm border border-slate-700 object-cover" alt="App Logo">
             <div>
-                <div class="text-xs font-bold text-white">安装 GRC CAFE 应用 / Install App</div>
-                <div class="text-[11px] text-slate-300">添加到桌面，预订更快捷！ / Add to home screen!</div>
+                <div class="text-xs font-bold text-white leading-tight">安装 GRC CAFE 应用</div>
+                <div class="text-[10px] text-white/70 mt-0.5">Install App</div>
+                <div class="text-[11px] text-slate-300 mt-1 leading-tight">添加到桌面，预订更快捷！</div>
+                <div class="text-[10px] text-slate-400">Add to home screen!</div>
             </div>
         </div>
         <div class="flex items-center space-x-2">
-            <button type="button" onclick="dismissPwaPrompt()" class="text-slate-400 hover:text-white text-xs px-2 py-1">下次 / Later</button>
-            <button type="button" id="btnInstallPwa" onclick="triggerPwaInstall()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-md active:scale-95 transition">立即安装 / Install</button>
+            <button type="button" onclick="dismissPwaPrompt()" class="text-slate-400 hover:text-white text-xs px-2 py-1 flex flex-col items-center">
+                <span>下次</span>
+                <span class="text-[9px] text-slate-500">Later</span>
+            </button>
+            <button type="button" id="btnInstallPwa" onclick="triggerPwaInstall()" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-md active:scale-95 transition flex flex-col items-center">
+                <span>立即安装</span>
+                <span class="text-[9px] text-slate-900/80">Install</span>
+            </button>
         </div>
     </div>
 
@@ -38,8 +46,10 @@
         <div class="flex items-center space-x-3">
             <img src="logo-192.png" class="w-10 h-10 rounded-xl shadow-sm border border-slate-700 object-cover" alt="App Logo">
             <div>
-                <div class="text-xs font-bold text-white">安装 GRC CAFE 应用 / Install App</div>
-                <div class="text-[11px] text-amber-300">点击 Safari 底部 <i class="fa-solid fa-arrow-up-from-bracket mx-0.5"></i> 再选“添加到主屏幕” / Tap Share then 'Add to Home Screen'</div>
+                <div class="text-xs font-bold text-white leading-tight">安装 GRC CAFE 应用</div>
+                <div class="text-[10px] text-white/70 mt-0.5">Install App</div>
+                <div class="text-[11px] text-amber-300 mt-1 leading-tight">点击 Safari 底部 <i class="fa-solid fa-arrow-up-from-bracket mx-0.5"></i> 再选“添加到主屏幕”</div>
+                <div class="text-[10px] text-amber-200/70">Tap Share then 'Add to Home Screen'</div>
             </div>
         </div>
         <button type="button" onclick="dismissIosPrompt()" class="text-slate-400 hover:text-white text-xs px-2 py-1"><i class="fa-solid fa-xmark text-sm"></i></button>
@@ -56,39 +66,54 @@
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-amber-100/60 space-y-5">
             <div class="flex justify-between items-center pb-4 border-b border-slate-100">
                 <div>
-                    <span class="text-xs text-slate-400 block font-medium">菜单价格 / Price</span>
-                    <span class="text-xs font-bold text-slate-800" id="priceHeader">加载中 Loading...</span>
+                    <span class="text-xs text-slate-400 block font-medium leading-tight">菜单价格</span>
+                    <span class="text-[10px] text-slate-400 block font-normal">Price</span>
+                    <span class="text-xs font-bold text-slate-800 mt-0.5 block" id="priceHeader">加载中 Loading...</span>
                 </div>
                 <div class="text-right">
-                    <span class="text-xs text-slate-400 block font-medium">截单规则 / Cut-off</span>
-                    <span id="deadlineText" class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2 py-0.5 rounded-lg">周四/周五 8PM 截单 / Cut-off Thu/Fri 8PM</span>
+                    <span class="text-xs text-slate-400 block font-medium leading-tight">截单规则</span>
+                    <span class="text-[10px] text-slate-400 block font-normal">Cut-off</span>
+                    <span id="deadlineText" class="text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/60 px-2 py-1 rounded-lg mt-0.5 inline-block text-left">
+                        <div>周四/周五 8PM 截单</div>
+                        <div class="text-[10px] text-amber-700/80">Cut-off Thu/Fri 8PM</div>
+                    </span>
                 </div>
             </div>
 
             <form id="orderForm" onsubmit="handleOrder(event)" class="space-y-4">
-                <!-- 名字与订单查询区块（右上方轻量标签式排版，整洁优雅） -->
+                <!-- 名字与订单查询区块 -->
                 <div class="space-y-1.5">
                     <div class="flex justify-between items-center">
-                        <label class="block text-sm font-bold text-slate-700">您的名字 / Your Name <span class="text-rose-500">*</span></label>
-                        <button type="button" onclick="openOrderQueryModal()" class="text-[11px] text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-2.5 py-1 rounded-lg font-semibold flex items-center space-x-1 transition border border-amber-200/50 shadow-sm">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-700 leading-tight">您的名字 <span class="text-rose-500">*</span></label>
+                            <span class="text-[10px] text-slate-400 font-normal">Your Name</span>
+                        </div>
+                        <button type="button" onclick="openOrderQueryModal()" class="text-amber-700 hover:text-amber-900 bg-amber-50 hover:bg-amber-100 px-2.5 py-1.5 rounded-lg font-semibold flex items-center space-x-1.5 transition border border-amber-200/50 shadow-sm">
                             <i class="fa-solid fa-search text-[10px]"></i>
-                            <span>查看我的订单 / My Orders</span>
+                            <span class="flex flex-col text-left leading-tight">
+                                <span class="text-[11px] font-bold">查看我的订单</span>
+                                <span class="text-[9px] font-normal text-amber-800/70">My Orders</span>
+                            </span>
                         </button>
                     </div>
-                    <input type="text" id="name" required placeholder="例如 e.g. Tan / Ah Beng" autocomplete="off"
+                    <input type="text" id="name" required placeholder="例如: Tan / Ah Beng (e.g. Tan)" autocomplete="off"
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
                 </div>
 
                 <!-- 选餐区域 -->
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-3">选择预订餐点 (可多选) / Select Meal <span class="text-rose-500">*</span></label>
+                    <div class="mb-3">
+                        <label class="block text-sm font-bold text-slate-700 leading-tight">选择预订餐点 (可多选) <span class="text-rose-500">*</span></label>
+                        <span class="text-[10px] text-slate-400 font-normal">Select Meal (Multiple options available)</span>
+                    </div>
                     
                     <div class="space-y-4">
                         
                         <!-- 星期五 独立模块 -->
                         <div id="sectionFriday" class="p-3.5 rounded-2xl border border-amber-200/70 bg-amber-50/30 space-y-3">
-                            <div id="txtFriSectionHeader" class="text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1.5 rounded-xl inline-flex items-center space-x-1 shadow-sm">
-                                📅 星期五晚餐 / Friday Dinner
+                            <div id="txtFriSectionHeader" class="text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1.5 rounded-xl inline-flex flex-col shadow-sm">
+                                <span>📅 星期五晚餐</span>
+                                <span class="text-[10px] font-normal text-amber-700">Friday Dinner</span>
                             </div>
                             <div id="friDishesList" class="space-y-2.5">
                                 <!-- 由 JS 动态渲染菜色卡片 -->
@@ -97,8 +122,9 @@
 
                         <!-- 星期六主餐 独立模块 -->
                         <div id="sectionSaturday" class="p-3.5 rounded-2xl border border-indigo-100 bg-indigo-50/30 space-y-3">
-                            <div id="headerSat" class="text-xs font-bold text-indigo-900 bg-indigo-100 px-3 py-1.5 rounded-xl inline-flex items-center space-x-1 shadow-sm">
-                                🗓️ 星期六晚餐 / Saturday Dinner
+                            <div id="headerSat" class="text-xs font-bold text-indigo-900 bg-indigo-100 px-3 py-1.5 rounded-xl inline-flex flex-col shadow-sm">
+                                <span>🗓️ 星期六晚餐</span>
+                                <span class="text-[10px] font-normal text-indigo-700">Saturday Dinner</span>
                             </div>
 
                             <div id="cardSaturday" class="p-3.5 rounded-xl border-2 border-slate-200 bg-white transition-all space-y-3">
@@ -107,16 +133,22 @@
                                         <input type="checkbox" id="chkSatMain" onchange="toggleCard('Sat')" class="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 mt-0.5">
                                         <div>
                                             <div id="txtSatTitle" class="text-sm font-bold text-slate-800">加载中 Loading...</div>
-                                            <div class="flex items-center space-x-2 mt-1">
-                                                <span id="txtSatPrice" class="text-xs font-bold text-indigo-600">RM --.00 / portion</span>
-                                                <span id="badgeSatCount" class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full">已预订 / Booked 0 份</span>
+                                            <div class="mt-1 space-y-0.5">
+                                                <div id="txtSatPrice" class="text-xs font-bold text-indigo-600">RM --.00 / 份</div>
+                                                <div class="text-[10px] text-indigo-500/80">portion</div>
+                                                <div>
+                                                    <span id="badgeSatCount" class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-2 py-0.5 rounded-full inline-block mt-1">已预订 0 份 (Booked 0)</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </label>
 
                                 <div id="qtySatBox" class="hidden flex items-center justify-between pt-2.5 border-t border-indigo-100">
-                                    <span class="text-xs font-bold text-slate-600">份数 / Qty:</span>
+                                    <div>
+                                        <span class="text-xs font-bold text-slate-600 block leading-tight">份数</span>
+                                        <span class="text-[10px] text-slate-400">Qty</span>
+                                    </div>
                                     <div class="flex items-center space-x-3">
                                         <button type="button" onclick="adjustQty('Sat', -1)" class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold text-base flex items-center justify-center border border-indigo-200 shadow-sm active:scale-95 transition">-</button>
                                         <input type="number" id="qtySat" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
@@ -128,8 +160,9 @@
 
                         <!-- 周六糖水 独立模块 -->
                         <div id="sectionDessert" class="p-3.5 rounded-2xl border border-rose-100 bg-rose-50/30 space-y-3">
-                            <div id="headerDessert" class="text-xs font-bold text-rose-900 bg-rose-100 px-3 py-1.5 rounded-xl inline-flex items-center space-x-1 shadow-sm">
-                                🥣 星期六限定糖水 / Saturday Dessert
+                            <div id="headerDessert" class="text-xs font-bold text-rose-900 bg-rose-100 px-3 py-1.5 rounded-xl inline-flex flex-col shadow-sm">
+                                <span>🥣 星期六限定糖水</span>
+                                <span class="text-[10px] font-normal text-rose-700">Saturday Dessert</span>
                             </div>
 
                             <div id="cardDessert" class="p-3.5 rounded-xl border-2 border-slate-200 bg-white transition-all space-y-3">
@@ -138,16 +171,22 @@
                                         <input type="checkbox" id="chkDessert" onchange="toggleCard('Dessert')" class="w-5 h-5 text-rose-600 rounded border-slate-300 focus:ring-rose-500 mt-0.5">
                                         <div>
                                             <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">加载中 Loading...</div>
-                                            <div class="flex items-center space-x-2 mt-1">
-                                                <span id="txtDessertPrice" class="text-xs font-bold text-rose-600">RM --.00 / portion</span>
-                                                <span id="badgeDessertCount" class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full">已订 / Booked 0 份</span>
+                                            <div class="mt-1 space-y-0.5">
+                                                <div id="txtDessertPrice" class="text-xs font-bold text-rose-600">RM --.00 / 份</div>
+                                                <div class="text-[10px] text-rose-500/80">portion</div>
+                                                <div>
+                                                    <span id="badgeDessertCount" class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full inline-block mt-1">已订 0 份 (Booked 0)</span>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </label>
 
                                 <div id="qtyDessertBox" class="hidden flex items-center justify-between pt-2.5 border-t border-rose-100">
-                                    <span class="text-xs font-bold text-slate-600">份数 / Qty:</span>
+                                    <div>
+                                        <span class="text-xs font-bold text-slate-600 block leading-tight">份数</span>
+                                        <span class="text-[10px] text-slate-400">Qty</span>
+                                    </div>
                                     <div class="flex items-center space-x-3">
                                         <button type="button" onclick="adjustQty('Dessert', -1)" class="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 font-bold text-base flex items-center justify-center border border-rose-200 shadow-sm active:scale-95 transition">-</button>
                                         <input type="number" id="qtyDessert" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
@@ -161,14 +200,20 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold text-slate-700 mb-1">特殊备注 / Special Remarks (Optional)</label>
-                    <input type="text" id="notes" placeholder="如 e.g. Less spicy / No scallions" autocomplete="off"
+                    <div class="mb-1">
+                        <label class="block text-sm font-bold text-slate-700 leading-tight">特殊备注 (可选)</label>
+                        <span class="text-[10px] text-slate-400 font-normal">Special Remarks (Optional)</span>
+                    </div>
+                    <input type="text" id="notes" placeholder="如: 少辣 / 不要葱 (e.g. Less spicy / No scallions)" autocomplete="off"
                            class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
                 </div>
 
                 <div class="pt-2">
                     <div class="flex justify-between items-center mb-3 px-1">
-                        <span class="text-sm font-bold text-slate-600">预估总额 / Est. Total:</span>
+                        <div>
+                            <span class="text-sm font-bold text-slate-600 block leading-tight">预估总额</span>
+                            <span class="text-[10px] text-slate-400">Est. Total</span>
+                        </div>
                         <span id="totalText" class="text-2xl font-black text-amber-600">RM 0.00</span>
                     </div>
                 </div>
@@ -177,48 +222,75 @@
 
         <!-- 社交媒体分享模块 -->
         <div class="bg-white rounded-2xl shadow-lg p-5 border border-amber-100/60 text-center space-y-3">
-            <h3 class="text-xs font-bold text-slate-700">将菜单分享给好友 / Share Menu with Friends</h3>
+            <div>
+                <h3 class="text-xs font-bold text-slate-700 leading-tight">将菜单分享给好友</h3>
+                <p class="text-[10px] text-slate-400">Share Menu with Friends</p>
+            </div>
             <div class="flex items-center space-x-2">
-                <button type="button" onclick="nativeShare()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2.5 px-2 rounded-xl flex items-center justify-center space-x-1 transition">
-                    <i class="fa-solid fa-share-nodes text-slate-600"></i>
-                    <span>系统分享</span>
+                <button type="button" onclick="nativeShare()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold py-2.5 px-2 rounded-xl flex flex-col items-center justify-center transition">
+                    <div class="flex items-center space-x-1">
+                        <i class="fa-solid fa-share-nodes text-slate-600"></i>
+                        <span>系统分享</span>
+                    </div>
+                    <span class="text-[9px] font-normal text-slate-500 mt-0.5">Share</span>
                 </button>
-                <button type="button" onclick="shareToWhatsApp()" class="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold py-2.5 px-2 rounded-xl flex items-center justify-center space-x-1 transition">
-                    <i class="fa-brands fa-whatsapp text-emerald-600 text-base"></i>
-                    <span>WhatsApp</span>
+                <button type="button" onclick="shareToWhatsApp()" class="flex-1 bg-emerald-50 hover:bg-emerald-100 text-emerald-700 text-xs font-bold py-2.5 px-2 rounded-xl flex flex-col items-center justify-center transition">
+                    <div class="flex items-center space-x-1">
+                        <i class="fa-brands fa-whatsapp text-emerald-600 text-base"></i>
+                        <span>WhatsApp</span>
+                    </div>
+                    <span class="text-[9px] font-normal text-emerald-600/80 mt-0.5">WhatsApp</span>
                 </button>
-                <button type="button" onclick="shareToMessenger()" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold py-2.5 px-2 rounded-xl flex items-center justify-center space-x-1 transition">
-                    <i class="fa-brands fa-facebook-messenger text-blue-600 text-base"></i>
-                    <span>Messenger</span>
+                <button type="button" onclick="shareToMessenger()" class="flex-1 bg-blue-50 hover:bg-blue-100 text-blue-700 text-xs font-bold py-2.5 px-2 rounded-xl flex flex-col items-center justify-center transition">
+                    <div class="flex items-center space-x-1">
+                        <i class="fa-brands fa-facebook-messenger text-blue-600 text-base"></i>
+                        <span>Messenger</span>
+                    </div>
+                    <span class="text-[9px] font-normal text-blue-600/80 mt-0.5">Messenger</span>
                 </button>
             </div>
         </div>
 
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-amber-100/60 text-center space-y-4">
-            <h2 class="text-lg font-bold text-slate-800 flex items-center justify-center space-x-2">
-                <i class="fa-solid fa-qrcode text-pink-600"></i>
-                <span>DuitNow / Touch 'n Go 付款 Payment</span>
-            </h2>
-            <p class="text-xs text-slate-500">使用任何银行 App / TNG eWallet 扫描二维码付款：<br><span class="text-[11px] text-slate-400">Scan QR code using any Banking App / TNG eWallet:</span></p>
+            <div>
+                <h2 class="text-lg font-bold text-slate-800 flex items-center justify-center space-x-2">
+                    <i class="fa-solid fa-qrcode text-pink-600"></i>
+                    <span>DuitNow / Touch 'n Go 付款</span>
+                </h2>
+                <p class="text-[11px] text-pink-600 font-semibold mt-0.5">Payment</p>
+            </div>
+            <p class="text-xs text-slate-500 leading-relaxed">
+                使用任何银行 App / TNG eWallet 扫描二维码付款：<br>
+                <span class="text-[11px] text-slate-400">Scan QR code using any Banking App / TNG eWallet</span>
+            </p>
             
             <div class="relative w-56 h-56 mx-auto bg-amber-50/30 rounded-2xl border-2 border-amber-100 p-2.5 flex items-center justify-center shadow-sm">
                 <img src="qrcode.jpeg" class="w-full h-full object-contain rounded-xl shadow-sm" alt="DuitNow 付款码">
             </div>
 
             <div class="bg-rose-50/80 p-3.5 rounded-xl border border-rose-100/80 shadow-sm">
-                <p class="text-xs text-rose-500 font-medium">扫码后请手动输入转账金额：<br><span class="text-[11px] text-rose-400">Please enter transfer amount manually after scanning:</span></p>
-                <p id="qrAmountText" class="text-2xl font-black text-rose-600">RM 0.00</p>
+                <p class="text-xs text-rose-500 font-medium leading-relaxed">
+                    扫码后请手动输入转账金额：<br>
+                    <span class="text-[11px] text-rose-400">Please enter transfer amount manually after scanning</span>
+                </p>
+                <p id="qrAmountText" class="text-2xl font-black text-rose-600 mt-1">RM 0.00</p>
             </div>
 
             <div class="space-y-2 pt-1">
-                <button type="button" onclick="copyAmount()" id="copyAmountBtn" class="w-full bg-amber-50 hover:bg-amber-100/80 active:scale-[0.98] text-amber-900 text-xs font-bold py-3 rounded-xl border border-amber-200/60 flex items-center justify-center space-x-2 transition-all">
-                    <i class="fa-regular fa-copy"></i>
-                    <span id="copyAmountText">复制转账金额 / Copy Amount</span>
+                <button type="button" onclick="copyAmount()" id="copyAmountBtn" class="w-full bg-amber-50 hover:bg-amber-100/80 active:scale-[0.98] text-amber-900 text-xs font-bold py-3 rounded-xl border border-amber-200/60 flex flex-col items-center justify-center transition-all">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-regular fa-copy"></i>
+                        <span id="copyAmountText">复制转账金额</span>
+                    </div>
+                    <span class="text-[10px] font-normal text-amber-800/70 mt-0.5">Copy Amount</span>
                 </button>
 
-                <button type="button" onclick="copyPhone()" id="copyPhoneBtn" class="w-full bg-amber-50 hover:bg-amber-100/80 active:scale-[0.98] text-amber-900 text-xs font-bold py-3 rounded-xl border border-amber-200/60 flex items-center justify-center space-x-2 transition-all">
-                    <i class="fa-regular fa-copy"></i>
-                    <span id="copyPhoneText">复制 DuitNow 手机号 / Copy Phone (0162207137)</span>
+                <button type="button" onclick="copyPhone()" id="copyPhoneBtn" class="w-full bg-amber-50 hover:bg-amber-100/80 active:scale-[0.98] text-amber-900 text-xs font-bold py-3 rounded-xl border border-amber-200/60 flex flex-col items-center justify-center transition-all">
+                    <div class="flex items-center space-x-2">
+                        <i class="fa-regular fa-copy"></i>
+                        <span id="copyPhoneText">复制 DuitNow 手机号 (0162207137)</span>
+                    </div>
+                    <span id="copyPhoneSubText" class="text-[10px] font-normal text-amber-800/70 mt-0.5">Copy Phone (0162207137)</span>
                 </button>
             </div>
         </div>
@@ -227,15 +299,21 @@
     <!-- 底部固定栏 -->
     <div class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200/60 shadow-lg px-3 py-2">
         <div class="max-w-md mx-auto space-y-1.5">
-            <div class="bg-amber-500 text-white text-[11px] font-bold py-1 px-3 rounded-lg flex items-center justify-center space-x-1.5 shadow-sm">
-                <i class="fa-solid fa-receipt text-xs"></i>
-                <span>请付款并附上凭证 / Pay & send receipt</span>
+            <div class="bg-amber-500 text-white text-[11px] font-bold py-1 px-3 rounded-lg flex flex-col items-center justify-center shadow-sm">
+                <div class="flex items-center space-x-1.5">
+                    <i class="fa-solid fa-receipt text-xs"></i>
+                    <span>请付款并附上凭证</span>
+                </div>
+                <span class="text-[9px] font-normal text-amber-100">Pay & send receipt</span>
             </div>
 
             <button type="button" onclick="document.getElementById('orderForm').requestSubmit()" id="submitBtn" 
                     class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 active:scale-[0.98] text-white font-bold py-2.5 rounded-xl shadow-md shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all">
                 <i class="fa-brands fa-whatsapp text-white text-xl"></i>
-                <span class="text-sm">确认已付款 / Confirm & Send</span>
+                <div class="flex flex-col text-left leading-tight">
+                    <span class="text-sm font-bold">确认已付款</span>
+                    <span class="text-[9px] font-normal text-emerald-100">Confirm & Send</span>
+                </div>
             </button>
         </div>
     </div>
@@ -244,35 +322,43 @@
     <div id="queryModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 space-y-4 border border-amber-100">
             <div class="flex justify-between items-center pb-3 border-b border-slate-100">
-                <h3 class="text-base font-bold text-slate-800 flex items-center space-x-2">
-                    <i class="fa-solid fa-receipt text-amber-600"></i>
-                    <span>查询我的预订记录 / View My Orders</span>
-                </h3>
+                <div>
+                    <h3 class="text-base font-bold text-slate-800 flex items-center space-x-2">
+                        <i class="fa-solid fa-receipt text-amber-600"></i>
+                        <span>查询我的预订记录</span>
+                    </h3>
+                    <p class="text-[10px] text-slate-400 font-normal mt-0.5">View My Orders</p>
+                </div>
                 <button type="button" onclick="closeOrderQueryModal()" class="text-slate-400 hover:text-slate-600 p-1">
                     <i class="fa-solid fa-xmark text-lg"></i>
                 </button>
             </div>
 
             <div class="space-y-3">
-                <p class="text-xs text-slate-500">输入您下单时填写的名字即可查询当前有效预订：<br><span class="text-[11px] text-slate-400">Enter the name used when ordering to check active bookings:</span></p>
+                <p class="text-xs text-slate-500 leading-relaxed">
+                    输入您下单时填写的名字即可查询当前有效预订：<br>
+                    <span class="text-[11px] text-slate-400">Enter the name used when ordering to check active bookings</span>
+                </p>
                 <div class="flex space-x-2">
                     <input type="text" id="queryNameInput" placeholder="输入名字 (如 Tan) / Enter Name (e.g. Tan)" 
                            class="flex-1 px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400">
                     <button type="button" onclick="submitQueryOrders()" id="queryBtn"
-                            class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition">
-                        查询 / Search
+                            class="bg-amber-500 hover:bg-amber-600 text-white font-bold px-4 py-2.5 rounded-xl text-xs shadow-sm transition flex flex-col items-center justify-center leading-tight">
+                        <span>查询</span>
+                        <span class="text-[9px] font-normal text-amber-100">Search</span>
                     </button>
                 </div>
             </div>
 
             <!-- 查询结果展示区域 -->
             <div id="queryResultsContainer" class="max-h-64 overflow-y-auto space-y-2.5 pt-2 text-left">
-                <div class="text-center text-xs text-slate-400 py-6">请输入名字后点击查询 / Enter name to search</div>
+                <div class="text-center text-xs text-slate-400 py-6">请输入名字后点击查询<br><span class="text-[10px]">Enter name to search</span></div>
             </div>
 
             <div class="pt-2 border-t border-slate-100 text-right">
-                <button type="button" onclick="closeOrderQueryModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-xl">
-                    关闭 / Close
+                <button type="button" onclick="closeOrderQueryModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-4 py-2 rounded-xl flex flex-col items-center inline-block">
+                    <span>关闭</span>
+                    <span class="text-[9px] font-normal text-slate-500">Close</span>
                 </button>
             </div>
         </div>
@@ -372,7 +458,8 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             checkIosPrompt();
-            document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 / Copy Phone (${DUITNOW_PHONE})`;
+            document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
+            document.getElementById('copyPhoneSubText').innerText = `Copy Phone (${DUITNOW_PHONE})`;
             
             await fetchRemoteConfig();
             updateCarouselSlides();
@@ -453,12 +540,16 @@
             const friDateStr = `${targetFriday.getMonth() + 1}/${targetFriday.getDate()}`;
             const satDateStr = `${targetSaturday.getMonth() + 1}/${targetSaturday.getDate()}`;
 
-            const dishCountText = FRI_DISHES.length > 1 ? ` (${FRI_DISHES.length}款可选 / ${FRI_DISHES.length} items available)` : '';
-            document.getElementById('txtFriSectionHeader').innerText = `📅 星期五晚餐 Friday (${friDateStr})${dishCountText}`;
+            const friHeaderEl = document.getElementById('txtFriSectionHeader');
+            if (FRI_DISHES.length > 1) {
+                friHeaderEl.innerHTML = `<span>📅 星期五晚餐 (${friDateStr}) - ${FRI_DISHES.length}款可选</span><span class="text-[10px] font-normal text-amber-700">Friday Dinner (${friDateStr}) - ${FRI_DISHES.length} items available</span>`;
+            } else {
+                friHeaderEl.innerHTML = `<span>📅 星期五晚餐 (${friDateStr})</span><span class="text-[10px] font-normal text-amber-700">Friday Dinner (${friDateStr})</span>`;
+            }
 
             const friListContainer = document.getElementById('friDishesList');
             if (FRI_DISHES.length === 0) {
-                friListContainer.innerHTML = `<div class="text-xs text-slate-400 p-2">暂无可用菜品 / No dishes available</div>`;
+                friListContainer.innerHTML = `<div class="text-xs text-slate-400 p-2">暂无可用菜品<br><span class="text-[10px]">No dishes available</span></div>`;
             } else {
                 friListContainer.innerHTML = FRI_DISHES.map((dish, idx) => `
                     <div id="cardFri_${idx}" class="p-3 rounded-xl border-2 border-slate-200 bg-white transition-all space-y-3">
@@ -467,15 +558,21 @@
                                 <input type="checkbox" id="chkFri_${idx}" onchange="toggleFriDish(${idx})" class="w-5 h-5 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mt-0.5">
                                 <div>
                                     <div class="text-sm font-bold text-slate-800">${dish.name}</div>
-                                    <div class="flex items-center space-x-2 mt-0.5">
-                                        <span class="text-xs font-bold text-amber-700">RM ${dish.price}.00 / portion</span>
-                                        <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full">已预订 / Booked ${dish.booked || 0} 份</span>
+                                    <div class="mt-1 space-y-0.5">
+                                        <div class="text-xs font-bold text-amber-700">RM ${dish.price}.00 / 份</div>
+                                        <div class="text-[10px] text-amber-600/80">portion</div>
+                                        <div>
+                                            <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full inline-block mt-1">已预订 ${dish.booked || 0} 份 (Booked ${dish.booked || 0})</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </label>
                         <div id="qtyFriBox_${idx}" class="hidden flex items-center justify-between pt-2 border-t border-amber-200/50">
-                            <span class="text-xs font-bold text-slate-600">份数 / Qty:</span>
+                            <div>
+                                <span class="text-xs font-bold text-slate-600 block leading-tight">份数</span>
+                                <span class="text-[10px] text-slate-400">Qty</span>
+                            </div>
                             <div class="flex items-center space-x-3">
                                 <button type="button" onclick="adjustFriQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">-</button>
                                 <input type="number" id="qtyFri_${idx}" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
@@ -486,22 +583,22 @@
                 `).join('');
             }
 
-            document.getElementById('headerSat').innerText = `🗓️ 星期六晚餐 Saturday (${satDateStr})`;
+            document.getElementById('headerSat').innerHTML = `<span>🗓️ 星期六晚餐 (${satDateStr})</span><span class="text-[10px] font-normal text-indigo-700">Saturday Dinner (${satDateStr})</span>`;
             document.getElementById('txtSatTitle').innerText = SAT_MENU_NAME;
-            document.getElementById('txtSatPrice').innerText = `RM ${SAT_MAIN_PRICE}.00 / 份 portion`;
-            document.getElementById('badgeSatCount').innerText = `已预订 / Booked ${SAT_ORDERED_QTY} 份`;
+            document.getElementById('txtSatPrice').innerText = `RM ${SAT_MAIN_PRICE}.00 / 份`;
+            document.getElementById('badgeSatCount').innerText = `已预订 ${SAT_ORDERED_QTY} 份 (Booked ${SAT_ORDERED_QTY})`;
 
-            document.getElementById('headerDessert').innerText = `🥣 周六限定糖水 Saturday Dessert (${satDateStr})`;
+            document.getElementById('headerDessert').innerHTML = `<span>🥣 周六限定糖水 (${satDateStr})</span><span class="text-[10px] font-normal text-rose-700">Saturday Dessert (${satDateStr})</span>`;
             document.getElementById('txtDessertTitle').innerText = SAT_DESSERT_NAME;
-            document.getElementById('txtDessertPrice').innerText = `RM ${DESSERT_PRICE}.00 / 份 portion`;
-            document.getElementById('badgeDessertCount').innerText = `已订 / Booked ${DESSERT_ORDERED_QTY} / ${SAT_DESSERT_LIMIT} 份`;
+            document.getElementById('txtDessertPrice').innerText = `RM ${DESSERT_PRICE}.00 / 份`;
+            document.getElementById('badgeDessertCount').innerText = `已订 ${DESSERT_ORDERED_QTY} / ${SAT_DESSERT_LIMIT} 份 (Booked ${DESSERT_ORDERED_QTY}/${SAT_DESSERT_LIMIT})`;
 
             let priceParts = [];
             if (ENABLE_FRI_DINNER && FRI_DISHES.length > 0) priceParts.push(`周五晚餐 Fri RM${FRI_DISHES[0].price}`);
             if (ENABLE_SAT_DINNER) priceParts.push(`周六主餐 Sat RM${SAT_MAIN_PRICE}`);
             if (ENABLE_SAT_DESSERT) priceParts.push(`糖水 Dessert RM${DESSERT_PRICE}`);
 
-            document.getElementById('priceHeader').innerText = priceParts.join(' | ') || "暂无可选餐点 / No Meals Available";
+            document.getElementById('priceHeader').innerText = priceParts.join(' | ') || "暂无可选餐点 (No Meals Available)";
 
             if (!ENABLE_FRI_DINNER) document.getElementById('sectionFriday').classList.add('hidden');
             if (!ENABLE_SAT_DINNER) document.getElementById('sectionSaturday').classList.add('hidden');
@@ -583,7 +680,7 @@
             currentTotal = total.toFixed(2);
             document.getElementById('totalText').innerText = `RM ${currentTotal}`;
             document.getElementById('qrAmountText').innerText = `RM ${currentTotal}`;
-            document.getElementById('copyAmountText').innerText = `复制转账金额 / Copy Amount (${currentTotal})`;
+            document.getElementById('copyAmountText').innerText = `复制转账金额 (${currentTotal})`;
         }
 
         function renderDots() {
@@ -664,7 +761,7 @@
             safeCopyText(currentTotal, () => {
                 const span = document.getElementById('copyAmountText');
                 const orig = span.innerText;
-                span.innerText = `✅ 已复制金额 / Copied RM ${currentTotal}！`;
+                span.innerText = `✅ 已复制金额 (RM ${currentTotal})`;
                 setTimeout(() => { span.innerText = orig; }, 2500);
             });
         }
@@ -673,7 +770,7 @@
             safeCopyText(DUITNOW_PHONE, () => {
                 const span = document.getElementById('copyPhoneText');
                 const orig = span.innerText;
-                span.innerText = `✅ 已复制号码 / Copied ${DUITNOW_PHONE}！`;
+                span.innerText = `✅ 已复制号码 (${DUITNOW_PHONE})`;
                 setTimeout(() => { span.innerText = orig; }, 2500);
             });
         }
@@ -738,7 +835,7 @@
 
                 if (data.success) {
                     if (data.orders.length === 0) {
-                        container.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-xl">没有找到关于 "${nameInput}" 的当前活动订单。<br>No active orders found.</div>`;
+                        container.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-xl">没有找到关于 "${nameInput}" 的当前活动订单。<br><span class="text-[10px]">No active orders found.</span></div>`;
                     } else {
                         container.innerHTML = data.orders.map(order => `
                             <div class="p-3 rounded-xl border border-amber-200/65 bg-amber-50/30 text-xs space-y-1 shadow-sm">
@@ -760,7 +857,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                container.innerHTML = `<div class="text-center text-xs text-rose-500 py-4">网络错误，无法连接服务器。<br>Network error.</div>`;
+                container.innerHTML = `<div class="text-center text-xs text-rose-500 py-4">网络错误，无法连接服务器。<br><span class="text-[10px]">Network error.</span></div>`;
             }
         }
         // ============================================================
