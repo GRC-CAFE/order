@@ -844,6 +844,19 @@
         }
         // ==========================================================
 
+        // ==================== 本地时间格式化函数 ====================
+        function formatLocalTimestamp(isoString) {
+            if (!isoString) return '';
+            if (!isoString.includes('T') && !isoString.endsWith('Z')) {
+                return isoString;
+            }
+            const date = new Date(isoString);
+            return date.toLocaleString("zh-CN", { 
+                timeZone: "Asia/Kuala_Lumpur",
+                hour12: false 
+            }).replace(/\//g, '-');
+        }
+
         // ==================== 客户订单查询交互函数 ====================
         function openOrderQueryModal() {
             const currentName = document.getElementById('name').value.trim();
@@ -888,7 +901,7 @@
                                 <div class="text-slate-600">明细: <span class="font-semibold">${order.detail}</span> (数量: ${order.qty})</div>
                                 <div class="flex justify-between text-[10px] text-slate-400 pt-1 border-t border-amber-100">
                                     <span>下单人: ${order.name}</span>
-                                    <span>${order.timestamp}</span>
+                                    <span>${formatLocalTimestamp(order.timestamp)}</span>
                                 </div>
                                 ${order.notes && order.notes !== '无 None' ? `<div class="text-[10px] text-rose-500">备注: ${order.notes}</div>` : ''}
                             </div>
