@@ -603,7 +603,7 @@
 
             let priceParts = [];
             if (ENABLE_FRI_DINNER && FRI_DISHES.length > 0) priceParts.push(`周五晚餐 Fri RM${FRI_DISHES[0].price}`);
-            if (ENABLE_SAT_DINNER && SAT_DISHES.length > 0) priceParts.push(`周六主餐 Sat RM${SAT_DISHES[0].price}`);
+            if (ENABLE_SAT_DINNER && SAT_DISHES.length > 0) priceParts.push(`周六晚餐 Sat RM${SAT_DISHES[0].price}`);
             if (ENABLE_SAT_DESSERT) priceParts.push(`糖水 Dessert RM${DESSERT_PRICE}`);
 
             document.getElementById('priceHeader').innerText = priceParts.join(' | ') || "暂无可选餐点 (No Meals Available)";
