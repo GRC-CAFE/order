@@ -55,9 +55,9 @@
         <button type="button" onclick="dismissIosPrompt()" class="text-slate-400 hover:text-white text-xs px-2 py-1"><i class="fa-solid fa-xmark text-sm"></i></button>
     </div>
 
-    <!-- 封面及轮播区域 -->
-    <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-lg cursor-grab active:cursor-grabbing bg-white">
-        <img id="carouselImage" src="cafe1.jpeg" class="w-full h-auto block transition-opacity duration-500 opacity-100 pointer-events-none" alt="GRC CAFE 展示">
+    <!-- 封面及轮播区域（加入 transform-gpu 优化硬件加速） -->
+    <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-lg cursor-grab active:cursor-grabbing bg-white transform-gpu">
+        <img id="carouselImage" src="cafe1.jpeg" class="w-full h-auto block transition-opacity duration-500 opacity-100 pointer-events-none will-change-[opacity]" alt="GRC CAFE 展示">
         
         <div id="carouselDots" class="absolute top-3 right-3 flex space-x-1.5 z-20 bg-white/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/50 shadow-sm"></div>
     </div>
@@ -109,7 +109,7 @@
                     
                     <div class="space-y-4">
                         
-                        <!-- 星期五 独立模块 (动态 1~5 款) -->
+                        <!-- 星期五 独立模块 -->
                         <div id="sectionFriday" class="p-3.5 rounded-2xl border border-amber-200/70 bg-amber-50/30 space-y-3">
                             <div id="txtFriSectionHeader" class="text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1.5 rounded-xl inline-flex flex-col shadow-sm">
                                 <span>📅 星期五晚餐</span>
@@ -120,7 +120,7 @@
                             </div>
                         </div>
 
-                        <!-- 星期六主餐 独立模块 (动态 1~5 款) -->
+                        <!-- 星期六主餐 独立模块 -->
                         <div id="sectionSaturday" class="p-3.5 rounded-2xl border border-indigo-100 bg-indigo-50/30 space-y-3">
                             <div id="headerSat" class="text-xs font-bold text-indigo-900 bg-indigo-100 px-3 py-1.5 rounded-xl inline-flex flex-col shadow-sm">
                                 <span>🗓️ 星期六晚餐</span>
@@ -430,6 +430,13 @@
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             document.getElementById('copyPhoneSubText').innerText = `Copy Phone (${DUITNOW_PHONE})`;
             
+            // 预加载所有轮盘图片，彻底解决第一次切换卡顿问题
+            const imagesToPreload = ["cafe1.jpeg", "dish1.jpeg", "dish2.jpeg", "dish3.jpeg", "instruction.jpeg", "pwa.jpeg"];
+            imagesToPreload.forEach(src => {
+                const img = new Image();
+                img.src = src;
+            });
+
             await fetchRemoteConfig();
             updateCarouselSlides();
             setupMenuUI();
@@ -507,7 +514,7 @@
             const friDateStr = `${targetFriday.getMonth() + 1}/${targetFriday.getDate()}`;
             const satDateStr = `${targetSaturday.getMonth() + 1}/${targetSaturday.getDate()}`;
 
-            // 1. 渲染星期五多菜单（已加入 limit 显示）
+            // 1. 渲染星期五多菜单
             const friHeaderEl = document.getElementById('txtFriSectionHeader');
             if (FRI_DISHES.length > 1) {
                 friHeaderEl.innerHTML = `<span>📅 星期五晚餐 (${friDateStr}) - ${FRI_DISHES.length}款可选</span><span class="text-[10px] font-normal text-amber-700">Friday Dinner (${friDateStr}) - ${FRI_DISHES.length} items available</span>`;
@@ -551,7 +558,7 @@
                 `).join('');
             }
 
-            // 2. 渲染星期六多菜单（已加入 limit 显示）
+            // 2. 渲染星期六多菜单
             const satHeaderEl = document.getElementById('headerSat');
             if (SAT_DISHES.length > 1) {
                 satHeaderEl.innerHTML = `<span>🗓️ 星期六晚餐 (${satDateStr}) - ${SAT_DISHES.length}款可选</span><span class="text-[10px] font-normal text-indigo-700">Saturday Dinner (${satDateStr}) - ${SAT_DISHES.length} items available</span>`;
@@ -660,7 +667,6 @@
             calculateTotal();
         }
 
-        // 周五主餐数量调整（带限量校验）
         function adjustFriQty(idx, amount) {
             const input = document.getElementById(`qtyFri_${idx}`);
             let val = (parseInt(input.value) || 1) + amount;
@@ -671,7 +677,6 @@
             calculateTotal();
         }
 
-        // 周六主餐数量调整（带限量校验）
         function adjustSatQty(idx, amount) {
             const input = document.getElementById(`qtySat_${idx}`);
             let val = (parseInt(input.value) || 1) + amount;
@@ -771,7 +776,6 @@
         function initSwipeEvents() {
             const container = document.getElementById('carouselContainer');
             
-            // 手机端：按下时暂停，松开时恢复
             container.addEventListener('touchstart', (e) => { 
                 stopCarousel(); 
                 touchStartX = e.changedTouches[0].screenX; 
@@ -783,7 +787,6 @@
                 startCarousel(); 
             }, { passive: true });
 
-            // 电脑端：鼠标按下时暂停，松开或移出时恢复
             container.addEventListener('mousedown', () => {
                 stopCarousel();
             });
@@ -839,7 +842,6 @@
             });
         }
 
-        // ==================== 社交媒体分享功能 ====================
         const shareUrl = window.location.href;
         const shareTitle = "GRC CAFE - 晚餐与糖水预订";
         const shareDescription = "来看看这周的美味晚餐和糖水菜单，支持在线预订！Delicious dinner & dessert pre-order menu!";
@@ -864,9 +866,7 @@
                 window.open("https://www.messenger.com/", "_blank");
             });
         }
-        // ==========================================================
 
-        // ==================== 本地时间格式化函数 ====================
         function formatLocalTimestamp(isoString) {
             if (!isoString) return '';
             if (!isoString.includes('T') && !isoString.endsWith('Z')) {
@@ -879,7 +879,6 @@
             }).replace(/\//g, '-');
         }
 
-        // ==================== 客户订单查询交互函数 ====================
         function openOrderQueryModal() {
             const currentName = document.getElementById('name').value.trim();
             if (currentName) {
@@ -937,7 +936,6 @@
                 container.innerHTML = `<div class="text-center text-xs text-rose-500 py-4">网络错误，无法连接服务器。<br><span class="text-[10px]">Network error.</span></div>`;
             }
         }
-        // ============================================================
 
         async function handleOrder(event) {
             event.preventDefault();
