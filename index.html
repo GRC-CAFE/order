@@ -55,10 +55,9 @@
         <button type="button" onclick="dismissIosPrompt()" class="text-slate-400 hover:text-white text-xs px-2 py-1"><i class="fa-solid fa-xmark text-sm"></i></button>
     </div>
 
-    <!-- 封面及轮播区域（加入 transform-gpu 优化硬件加速） -->
+    <!-- 封面及轮播区域 -->
     <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-lg cursor-grab active:cursor-grabbing bg-white transform-gpu">
         <img id="carouselImage" src="cafe1.jpeg" class="w-full h-auto block transition-opacity duration-500 opacity-100 pointer-events-none will-change-[opacity]" alt="GRC CAFE 展示">
-        
         <div id="carouselDots" class="absolute top-3 right-3 flex space-x-1.5 z-20 bg-white/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/50 shadow-sm"></div>
     </div>
 
@@ -108,16 +107,13 @@
                     </div>
                     
                     <div class="space-y-4">
-                        
                         <!-- 星期五 独立模块 -->
                         <div id="sectionFriday" class="p-3.5 rounded-2xl border border-amber-200/70 bg-amber-50/30 space-y-3">
                             <div id="txtFriSectionHeader" class="text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1.5 rounded-xl inline-flex flex-col shadow-sm">
                                 <span>📅 星期五晚餐</span>
                                 <span class="text-[10px] font-normal text-amber-700">Friday Dinner</span>
                             </div>
-                            <div id="friDishesList" class="space-y-2.5">
-                                <!-- 由 JS 动态渲染菜色卡片 -->
-                            </div>
+                            <div id="friDishesList" class="space-y-2.5"></div>
                         </div>
 
                         <!-- 星期六主餐 独立模块 -->
@@ -126,9 +122,7 @@
                                 <span>🗓️ 星期六晚餐</span>
                                 <span class="text-[10px] font-normal text-indigo-700">Saturday Dinner</span>
                             </div>
-                            <div id="satDishesList" class="space-y-2.5">
-                                <!-- 由 JS 动态渲染星期六多菜色卡片 -->
-                            </div>
+                            <div id="satDishesList" class="space-y-2.5"></div>
                         </div>
 
                         <!-- 周六糖水 独立模块 -->
@@ -168,7 +162,6 @@
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
 
@@ -430,7 +423,6 @@
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             document.getElementById('copyPhoneSubText').innerText = `Copy Phone (${DUITNOW_PHONE})`;
             
-            // 预加载所有轮盘图片，彻底解决第一次切换卡顿问题
             const imagesToPreload = ["cafe1.jpeg", "dish1.jpeg", "dish2.jpeg", "dish3.jpeg", "instruction.jpeg", "pwa.jpeg"];
             imagesToPreload.forEach(src => {
                 const img = new Image();
@@ -514,7 +506,6 @@
             const friDateStr = `${targetFriday.getMonth() + 1}/${targetFriday.getDate()}`;
             const satDateStr = `${targetSaturday.getMonth() + 1}/${targetSaturday.getDate()}`;
 
-            // 1. 渲染星期五多菜单
             const friHeaderEl = document.getElementById('txtFriSectionHeader');
             if (FRI_DISHES.length > 1) {
                 friHeaderEl.innerHTML = `<span>📅 星期五晚餐 (${friDateStr}) - ${FRI_DISHES.length}款可选</span><span class="text-[10px] font-normal text-amber-700">Friday Dinner (${friDateStr}) - ${FRI_DISHES.length} items available</span>`;
@@ -558,7 +549,6 @@
                 `).join('');
             }
 
-            // 2. 渲染星期六多菜单
             const satHeaderEl = document.getElementById('headerSat');
             if (SAT_DISHES.length > 1) {
                 satHeaderEl.innerHTML = `<span>🗓️ 星期六晚餐 (${satDateStr}) - ${SAT_DISHES.length}款可选</span><span class="text-[10px] font-normal text-indigo-700">Saturday Dinner (${satDateStr}) - ${SAT_DISHES.length} items available</span>`;
@@ -602,7 +592,6 @@
                 `).join('');
             }
 
-            // 3. 渲染周六糖水
             document.getElementById('headerDessert').innerHTML = `<span>🥣 周六限定糖水 (${satDateStr})</span><span class="text-[10px] font-normal text-rose-700">Saturday Dessert (${satDateStr})</span>`;
             document.getElementById('txtDessertTitle').innerText = SAT_DESSERT_NAME;
             document.getElementById('txtDessertPrice').innerText = `RM ${DESSERT_PRICE}.00 / 份`;
@@ -787,15 +776,9 @@
                 startCarousel(); 
             }, { passive: true });
 
-            container.addEventListener('mousedown', () => {
-                stopCarousel();
-            });
-            container.addEventListener('mouseup', () => {
-                startCarousel();
-            });
-            container.addEventListener('mouseleave', () => {
-                startCarousel();
-            });
+            container.addEventListener('mousedown', () => { stopCarousel(); });
+            container.addEventListener('mouseup', () => { startCarousel(); });
+            container.addEventListener('mouseleave', () => { startCarousel(); });
         }
 
         function handleSwipe() {
@@ -937,6 +920,9 @@
             }
         }
 
+        // ==========================================
+        // 双保险核心：修改后的 handleOrder 异步提交与跳转逻辑
+        // ==========================================
         async function handleOrder(event) {
             event.preventDefault();
 
@@ -971,7 +957,7 @@
 
             const btn = document.getElementById('submitBtn');
             btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin text-white"></i><span>正在提交订单 Submitting...</span>`;
+            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin text-white"></i><span>正在同步订单并提交...</span>`;
 
             const name = document.getElementById('name').value.trim();
             const notes = document.getElementById('notes').value.trim() || '无 None';
@@ -1001,19 +987,6 @@
                 payload.dessertOrder = { checked: true, detail: SAT_DESSERT_NAME, qty: q, subtotal: q * DESSERT_PRICE };
             }
 
-            if (GOOGLE_SCRIPT_URL) {
-                try {
-                    await fetch(GOOGLE_SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'no-cors',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                } catch (e) {
-                    console.log("Sheet 请求跳过或失败 / Sheet request failed:", e);
-                }
-            }
-
             let rawMessage = `🛒 *【晚餐/糖水预订订单 Dinner & Dessert Order】*\n` +
                              `--------------------------------\n` +
                              `👤 *名字 Name*：${name}\n` +
@@ -1027,9 +1000,33 @@
                           `已下单，已按照 RM ${total} 完成转账/准备付款，请查收！\n` +
                           `Order placed. Transferred/Ready to pay RM ${total}, please check!`;
 
+            // 双保险核心：发送请求并等待响应（带 4 秒超时保护，彻底杜绝因为跳转过快导致的漏单）
+            if (GOOGLE_SCRIPT_URL) {
+                try {
+                    const controller = new AbortController();
+                    const timeoutId = setTimeout(() => controller.abort(), 4000); // 4秒超时
+
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify(payload),
+                        signal: controller.signal
+                    });
+                    clearTimeout(timeoutId);
+                } catch (e) {
+                    console.log("Sheet 同步超时或网络中断，启用降级保护，继续跳转 WhatsApp:", e);
+                }
+            }
+
+            btn.innerHTML = `<i class="fa-solid fa-check text-white"></i><span>提交成功！正在打开 WhatsApp...</span>`;
+            
             setTimeout(() => {
                 window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
-            }, 300);
+                setTimeout(() => {
+                    btn.disabled = false;
+                    btn.innerHTML = `<i class="fa-brands fa-whatsapp text-white text-xl"></i><div class="flex flex-col text-left leading-tight"><span class="text-sm font-bold">确认已付款</span><span class="text-[9px] font-normal text-emerald-100">Confirm & Send</span></div>`;
+                }, 2000);
+            }, 500);
         }
     </script>
 </body>
