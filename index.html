@@ -737,11 +737,14 @@
             carouselTimer = setInterval(() => {
                 slideIndex = (slideIndex + 1) % SLIDES.length;
                 showSlide(slideIndex);
-            }, 9000);
+            }, 10000);
         }
 
         function stopCarousel() {
-            if (carouselTimer) clearInterval(carouselTimer);
+            if (carouselTimer) {
+                clearInterval(carouselTimer);
+                carouselTimer = null;
+            }
         }
 
         function goToSlide(index) {
@@ -767,19 +770,38 @@
 
         function initSwipeEvents() {
             const container = document.getElementById('carouselContainer');
-            container.addEventListener('touchstart', (e) => { touchStartX = e.changedTouches[0].screenX; }, { passive: true });
-            container.addEventListener('touchend', (e) => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); }, { passive: true });
+            
+            // 手机端：按下时暂停，松开时恢复
+            container.addEventListener('touchstart', (e) => { 
+                stopCarousel(); 
+                touchStartX = e.changedTouches[0].screenX; 
+            }, { passive: true });
+            
+            container.addEventListener('touchend', (e) => { 
+                touchEndX = e.changedTouches[0].screenX; 
+                handleSwipe(); 
+                startCarousel(); 
+            }, { passive: true });
+
+            // 电脑端：鼠标按下时暂停，松开或移出时恢复
+            container.addEventListener('mousedown', () => {
+                stopCarousel();
+            });
+            container.addEventListener('mouseup', () => {
+                startCarousel();
+            });
+            container.addEventListener('mouseleave', () => {
+                startCarousel();
+            });
         }
 
         function handleSwipe() {
             if (touchStartX - touchEndX > 40) {
                 slideIndex = (slideIndex + 1) % SLIDES.length;
                 showSlide(slideIndex);
-                startCarousel();
             } else if (touchEndX - touchStartX > 40) {
                 slideIndex = (slideIndex - 1 + SLIDES.length) % SLIDES.length;
                 showSlide(slideIndex);
-                startCarousel();
             }
         }
 
