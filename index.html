@@ -430,17 +430,15 @@
             });
 
             await fetchRemoteConfig();
+            updateCarouselSlides();
+            setupMenuUI();
             
             startCarousel();
             initSwipeEvents();
         });
 
         async function fetchRemoteConfig() {
-            if (!GOOGLE_SCRIPT_URL) {
-                updateCarouselSlides();
-                setupMenuUI();
-                return;
-            }
+            if (!GOOGLE_SCRIPT_URL) return;
             try {
                 const res = await fetch(GOOGLE_SCRIPT_URL);
                 const config = await res.json();
@@ -456,25 +454,13 @@
                         SAT_DISHES = config.satDishes;
                     }
 
-                    // 正确解析后端返回的糖水配置对象
-                    if (config.dessert) {
-                        if (config.dessert.name) SAT_DESSERT_NAME = config.dessert.name;
-                        if (config.dessert.price !== undefined) DESSERT_PRICE = Number(config.dessert.price);
-                        if (config.dessert.limit !== undefined) SAT_DESSERT_LIMIT = Number(config.dessert.limit);
-                        if (config.dessert.booked !== undefined) DESSERT_ORDERED_QTY = Number(config.dessert.booked);
-                    } else {
-                        if (config.satDessertName) SAT_DESSERT_NAME = config.satDessertName;
-                        if (config.dessertPrice) DESSERT_PRICE = Number(config.dessertPrice);
-                        if (config.satDessertLimit) SAT_DESSERT_LIMIT = Number(config.satDessertLimit);
-                        if (config.dessertOrderedQty !== undefined) DESSERT_ORDERED_QTY = Number(config.dessertOrderedQty);
-                    }
+                    if (config.satDessertName) SAT_DESSERT_NAME = config.satDessertName;
+                    if (config.dessertPrice) DESSERT_PRICE = Number(config.dessertPrice);
+                    if (config.satDessertLimit) SAT_DESSERT_LIMIT = Number(config.satDessertLimit);
+                    if (config.dessertOrderedQty !== undefined) DESSERT_ORDERED_QTY = Number(config.dessertOrderedQty);
                 }
             } catch (err) {
                 console.log("无法连接后台 API，使用默认配置 / Cannot connect to API, using defaults", err);
-            } finally {
-                // 确保无论请求成功或失败，都进行视图渲染，消除加载中
-                updateCarouselSlides();
-                setupMenuUI();
             }
         }
 
@@ -934,6 +920,9 @@
             }
         }
 
+        // ==========================================
+        // 双保险核心：修改后的 handleOrder 异步提交与跳转逻辑
+        // ==========================================
         async function handleOrder(event) {
             event.preventDefault();
 
@@ -1011,10 +1000,11 @@
                           `已下单，已按照 RM ${total} 完成转账/准备付款，请查收！\n` +
                           `Order placed. Transferred/Ready to pay RM ${total}, please check!`;
 
+            // 双保险核心：发送请求并等待响应（带 4 秒超时保护，彻底杜绝因为跳转过快导致的漏单）
             if (GOOGLE_SCRIPT_URL) {
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 4000);
+                    const timeoutId = setTimeout(() => controller.abort(), 4000); // 4秒超时
 
                     await fetch(GOOGLE_SCRIPT_URL, {
                         method: 'POST',
