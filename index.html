@@ -67,7 +67,7 @@
                 <div>
                     <span class="text-xs text-slate-400 block font-medium leading-tight">菜单价格</span>
                     <span class="text-[10px] text-slate-400 block font-normal">Price</span>
-                    <span class="text-xs font-bold text-slate-800 mt-0.5 block" id="priceHeader">加载中 Loading...</span>
+                    <span class="text-xs font-bold text-slate-800 mt-0.5 block" id="priceHeader">周五/周六晚餐与糖水预订</span>
                 </div>
                 <div class="text-right">
                     <span class="text-xs text-slate-400 block font-medium leading-tight">截单规则</span>
@@ -137,12 +137,12 @@
                                     <div class="flex items-center space-x-3">
                                         <input type="checkbox" id="chkDessert" onchange="toggleCard('Dessert')" class="w-5 h-5 text-rose-600 rounded border-slate-300 focus:ring-rose-500 mt-0.5">
                                         <div>
-                                            <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">加载中 Loading...</div>
+                                            <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">周六限定糖水 / Saturday Special Dessert</div>
                                             <div class="mt-1 space-y-0.5">
-                                                <div id="txtDessertPrice" class="text-xs font-bold text-rose-600">RM --.00 / 份</div>
+                                                <div id="txtDessertPrice" class="text-xs font-bold text-rose-600">RM 5.00 / 份</div>
                                                 <div class="text-[10px] text-rose-500/80">portion</div>
                                                 <div>
-                                                    <span id="badgeDessertCount" class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full inline-block mt-1">已订 0 份 (Booked 0)</span>
+                                                    <span id="badgeDessertCount" class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full inline-block mt-1">已订 0 / 20 份 (Booked 0/20)</span>
                                                 </div>
                                             </div>
                                         </div>
@@ -458,6 +458,8 @@
                     if (config.dessertPrice) DESSERT_PRICE = Number(config.dessertPrice);
                     if (config.satDessertLimit) SAT_DESSERT_LIMIT = Number(config.satDessertLimit);
                     if (config.dessertOrderedQty !== undefined) DESSERT_ORDERED_QTY = Number(config.dessertOrderedQty);
+
+                    setupMenuUI();
                 }
             } catch (err) {
                 console.log("无法连接后台 API，使用默认配置 / Cannot connect to API, using defaults", err);
@@ -602,7 +604,7 @@
             if (ENABLE_SAT_DINNER && SAT_DISHES.length > 0) priceParts.push(`周六晚餐 Sat RM${SAT_DISHES[0].price}`);
             if (ENABLE_SAT_DESSERT) priceParts.push(`糖水 Dessert RM${DESSERT_PRICE}`);
 
-            document.getElementById('priceHeader').innerText = priceParts.join(' | ') || "暂无可选餐点 (No Meals Available)";
+            document.getElementById('priceHeader').innerText = priceParts.join(' | ') || "周五/周六晚餐与糖水预订";
 
             if (!ENABLE_FRI_DINNER) document.getElementById('sectionFriday').classList.add('hidden');
             if (!ENABLE_SAT_DINNER) document.getElementById('sectionSaturday').classList.add('hidden');
@@ -920,9 +922,6 @@
             }
         }
 
-        // ==========================================
-        // 双保险核心：修改后的 handleOrder 异步提交与跳转逻辑
-        // ==========================================
         async function handleOrder(event) {
             event.preventDefault();
 
@@ -1000,11 +999,10 @@
                           `已下单，已按照 RM ${total} 完成转账/准备付款，请查收！\n` +
                           `Order placed. Transferred/Ready to pay RM ${total}, please check!`;
 
-            // 双保险核心：发送请求并等待响应（带 4 秒超时保护，彻底杜绝因为跳转过快导致的漏单）
             if (GOOGLE_SCRIPT_URL) {
                 try {
                     const controller = new AbortController();
-                    const timeoutId = setTimeout(() => controller.abort(), 4000); // 4秒超时
+                    const timeoutId = setTimeout(() => controller.abort(), 4000);
 
                     await fetch(GOOGLE_SCRIPT_URL, {
                         method: 'POST',
