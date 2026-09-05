@@ -18,6 +18,16 @@
 </head>
 <body class="bg-gradient-to-b from-amber-50/80 via-orange-50/30 to-amber-50/60 min-h-screen pb-32 select-none relative font-sans text-slate-800">
 
+    <!-- Toast 动态提示浮层 -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] hidden max-w-xs w-full px-4 py-3 rounded-xl shadow-xl text-xs font-bold text-center transition-all duration-300 pointer-events-none transform -translate-y-2"></div>
+
+    <!-- 全屏提交加载 Overlay 遮罩 -->
+    <div id="loadingOverlay" class="fixed inset-0 z-[90] bg-slate-900/60 backdrop-blur-sm hidden flex flex-col items-center justify-center text-white space-y-3">
+        <div class="w-12 h-12 border-4 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+        <div id="loadingText" class="text-sm font-bold tracking-wide">正在保存订单到云端...</div>
+        <div class="text-xs text-amber-200/80">请稍候，请勿关闭页面</div>
+    </div>
+
     <!-- 自定义 PWA 安装提示弹窗 -->
     <div id="pwaInstallBanner" class="hidden fixed top-3 left-3 right-3 max-w-md mx-auto z-50 bg-slate-900/95 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700/80 flex items-center justify-between transition-all">
         <div class="flex items-center space-x-3">
@@ -95,8 +105,8 @@
                             </span>
                         </button>
                     </div>
-                    <input type="text" id="name" required placeholder="例如: Tan / Ah Beng (e.g. Tan)" autocomplete="off"
-                           class="w-full px-2 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
+                    <input type="text" id="name" required placeholder="例如: Tan / Ah Beng (e.g. Tan)" autocomplete="off" oninput="saveCustomerName(this.value)"
+                           class="w-full px-3 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
                 </div>
 
                 <!-- 选餐区域 -->
@@ -142,7 +152,7 @@
                         <span class="text-[10px] text-slate-400 font-normal">Special Remarks (Optional)</span>
                     </div>
                     <input type="text" id="notes" placeholder="如: 少辣 / 不要葱 (e.g. Less spicy / No scallions)" autocomplete="off"
-                           class="w-full px-2 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
+                           class="w-full px-3 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
                 </div>
 
                 <div class="pt-2">
@@ -280,7 +290,7 @@
                     <input type="text" id="queryNameInput" placeholder="输入名字 (如 Tan) / Enter Name (e.g. Tan)" 
                            class="flex-1 px-3 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400">
                     <button type="button" onclick="submitQueryOrders()" id="queryBtn"
-                            class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-2 py-2.5 rounded-xl text-xs shadow-sm transition flex flex-col items-center justify-center leading-tight">
+                            class="bg-emerald-600 hover:bg-emerald-700 text-white font-bold px-3 py-2.5 rounded-xl text-xs shadow-sm transition flex flex-col items-center justify-center leading-tight">
                         <span>查询</span>
                         <span class="text-[9px] font-normal text-emerald-100">Search</span>
                     </button>
@@ -293,7 +303,7 @@
             </div>
 
             <div class="pt-2 border-t border-slate-100 text-right">
-                <button type="button" onclick="closeOrderQueryModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-2 py-2 rounded-xl flex flex-col items-center inline-block">
+                <button type="button" onclick="closeOrderQueryModal()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2 rounded-xl inline-flex flex-col items-center">
                     <span>关闭</span>
                     <span class="text-[9px] font-normal text-slate-500">Close</span>
                 </button>
@@ -348,6 +358,46 @@
             localStorage.setItem('ios_pwa_dismissed_time', Date.now().toString());
         }
 
+        // --- 核心 Toast 浮态提示系统 ---
+        let toastTimer = null;
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+
+            toast.innerText = msg;
+            toast.className = "fixed top-5 left-1/2 -translate-x-1/2 z-[100] max-w-xs w-full px-4 py-3 rounded-xl shadow-xl text-xs font-bold text-center transition-all duration-300 pointer-events-none transform translate-y-0 opacity-100 ";
+            
+            if (type === 'error') {
+                toast.className += "bg-rose-600 text-white shadow-rose-600/30";
+            } else if (type === 'success') {
+                toast.className += "bg-emerald-600 text-white shadow-emerald-600/30";
+            } else if (type === 'warning') {
+                toast.className += "bg-amber-500 text-slate-950 shadow-amber-500/30";
+            } else {
+                toast.className += "bg-slate-800 text-white shadow-slate-800/30";
+            }
+
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.className = toast.className.replace('translate-y-0 opacity-100', '-translate-y-2 opacity-0');
+            }, 3000);
+        }
+
+        // --- 本地姓名记忆逻辑 ---
+        function loadSavedCustomerName() {
+            const savedName = localStorage.getItem('grc_customer_name');
+            if (savedName) {
+                const nameInput = document.getElementById('name');
+                if (nameInput) nameInput.value = savedName;
+            }
+        }
+
+        function saveCustomerName(val) {
+            if (val && val.trim()) {
+                localStorage.setItem('grc_customer_name', val.trim());
+            }
+        }
+
         let ENABLE_FRI_DINNER = true;
         let ENABLE_SAT_DINNER = true;
         let ENABLE_SAT_DESSERT = true;
@@ -391,6 +441,8 @@
 
         window.addEventListener('DOMContentLoaded', async () => {
             checkIosPrompt();
+            loadSavedCustomerName();
+
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             document.getElementById('copyPhoneSubText').innerText = `Copy Phone (${DUITNOW_PHONE})`;
             
@@ -489,20 +541,29 @@
                 friListContainer.innerHTML = `<div class="text-xs text-slate-400 p-2">暂无可用菜品<br><span class="text-[10px]">No dishes available</span></div>`;
             } else {
                 friListContainer.innerHTML = FRI_DISHES.map((dish, idx) => {
-                    const isSoldOut = (dish.booked || 0) >= (dish.limit || 0);
+                    const limit = dish.limit || 0;
+                    const booked = dish.booked || 0;
+                    const isSoldOut = booked >= limit;
+                    const remaining = Math.max(0, limit - booked);
+                    const isLowStock = !isSoldOut && remaining <= 3;
+
                     return `
                         <div id="cardFri_${idx}" class="p-3 rounded-xl border-2 ${isSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200 bg-white'} transition-all space-y-3">
                             <label class="flex items-start justify-between ${isSoldOut ? 'cursor-not-allowed' : 'cursor-pointer'}">
                                 <div class="flex items-center space-x-3">
                                     <input type="checkbox" id="chkFri_${idx}" ${isSoldOut ? 'disabled' : 'onchange="toggleFriDish(' + idx + ')"'} class="w-5 h-5 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mt-0.5">
                                     <div>
-                                        <div class="text-sm font-bold text-slate-800">${dish.name} ${isSoldOut ? '<span class="text-rose-500 text-xs font-semibold">(已售罄 Sold Out)</span>' : ''}</div>
+                                        <div class="text-sm font-bold text-slate-800">
+                                            ${dish.name} 
+                                            ${isSoldOut ? '<span class="text-rose-500 text-xs font-semibold">(已售罄 Sold Out)</span>' : ''}
+                                            ${isLowStock ? `<span class="text-amber-600 text-[11px] font-bold ml-1 bg-amber-100 px-1.5 py-0.5 rounded-md">🔥 仅剩 ${remaining} 份</span>` : ''}
+                                        </div>
                                         <div class="mt-1 flex items-center space-x-1.5">
                                             <span class="text-xs font-bold text-amber-700">RM ${dish.price}.00</span>
                                             <span class="text-[10px] text-amber-600/80">/ 份 (portion)</span>
                                         </div>
                                         <div class="mt-1">
-                                            <span class="text-[10px] ${isSoldOut ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'} font-bold px-1.5 py-0.5 rounded-full inline-block">已订 ${dish.booked || 0} / ${dish.limit || 0} 份 (Booked ${dish.booked || 0}/${dish.limit || 0})</span>
+                                            <span class="text-[10px] ${isSoldOut ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'} font-bold px-1.5 py-0.5 rounded-full inline-block">已订 ${booked} / ${limit} 份 (Booked ${booked}/${limit})</span>
                                         </div>
                                     </div>
                                 </div>
@@ -513,9 +574,9 @@
                                     <span class="text-[10px] text-slate-400">Qty</span>
                                 </div>
                                 <div class="flex items-center space-x-3">
-                                    <button type="button" onclick="adjustFriQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">-</button>
+                                    <button type="button" id="btnFriMinus_${idx}" onclick="adjustFriQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed">-</button>
                                     <input type="number" id="qtyFri_${idx}" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
-                                    <button type="button" onclick="adjustFriQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">+</button>
+                                    <button type="button" id="btnFriPlus_${idx}" onclick="adjustFriQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed">+</button>
                                 </div>
                             </div>
                         </div>
@@ -535,20 +596,29 @@
                 satListContainer.innerHTML = `<div class="text-xs text-slate-400 p-2">暂无可用菜品<br><span class="text-[10px]">No dishes available</span></div>`;
             } else {
                 satListContainer.innerHTML = SAT_DISHES.map((dish, idx) => {
-                    const isSoldOut = (dish.booked || 0) >= (dish.limit || 0);
+                    const limit = dish.limit || 0;
+                    const booked = dish.booked || 0;
+                    const isSoldOut = booked >= limit;
+                    const remaining = Math.max(0, limit - booked);
+                    const isLowStock = !isSoldOut && remaining <= 3;
+
                     return `
                         <div id="cardSat_${idx}" class="p-3 rounded-xl border-2 ${isSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200 bg-white'} transition-all space-y-3">
                             <label class="flex items-start justify-between ${isSoldOut ? 'cursor-not-allowed' : 'cursor-pointer'}">
                                 <div class="flex items-center space-x-3">
                                     <input type="checkbox" id="chkSat_${idx}" ${isSoldOut ? 'disabled' : 'onchange="toggleSatDish(' + idx + ')"'} class="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 mt-0.5">
                                     <div>
-                                        <div class="text-sm font-bold text-slate-800">${dish.name} ${isSoldOut ? '<span class="text-rose-500 text-xs font-semibold">(已售罄 Sold Out)</span>' : ''}</div>
+                                        <div class="text-sm font-bold text-slate-800">
+                                            ${dish.name} 
+                                            ${isSoldOut ? '<span class="text-rose-500 text-xs font-semibold">(已售罄 Sold Out)</span>' : ''}
+                                            ${isLowStock ? `<span class="text-indigo-600 text-[11px] font-bold ml-1 bg-indigo-100 px-1.5 py-0.5 rounded-md">🔥 仅剩 ${remaining} 份</span>` : ''}
+                                        </div>
                                         <div class="mt-1 flex items-center space-x-1.5">
                                             <span class="text-xs font-bold text-indigo-600">RM ${dish.price}.00</span>
                                             <span class="text-[10px] text-indigo-500/80">/ 份 (portion)</span>
                                         </div>
                                         <div class="mt-1">
-                                            <span class="text-[10px] ${isSoldOut ? 'bg-rose-100 text-rose-800' : 'bg-indigo-100 text-indigo-800'} font-bold px-1.5 py-0.5 rounded-full inline-block">已订 ${dish.booked || 0} / ${dish.limit || 0} 份 (Booked ${dish.booked || 0}/${dish.limit || 0})</span>
+                                            <span class="text-[10px] ${isSoldOut ? 'bg-rose-100 text-rose-800' : 'bg-indigo-100 text-indigo-800'} font-bold px-1.5 py-0.5 rounded-full inline-block">已订 ${booked} / ${limit} 份 (Booked ${booked}/${limit})</span>
                                         </div>
                                     </div>
                                 </div>
@@ -559,9 +629,9 @@
                                     <span class="text-[10px] text-slate-400">Qty</span>
                                 </div>
                                 <div class="flex items-center space-x-3">
-                                    <button type="button" onclick="adjustSatQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold text-base flex items-center justify-center border border-indigo-200 shadow-sm active:scale-95 transition">-</button>
+                                    <button type="button" id="btnSatMinus_${idx}" onclick="adjustSatQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold text-base flex items-center justify-center border border-indigo-200 shadow-sm active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed">-</button>
                                     <input type="number" id="qtySat_${idx}" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
-                                    <button type="button" onclick="adjustSatQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold text-base flex items-center justify-center border border-indigo-200 shadow-sm active:scale-95 transition">+</button>
+                                    <button type="button" id="btnSatPlus_${idx}" onclick="adjustSatQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold text-base flex items-center justify-center border border-indigo-200 shadow-sm active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed">+</button>
                                 </div>
                             </div>
                         </div>
@@ -577,13 +647,20 @@
                 document.getElementById('headerDessert').innerHTML = `<span>🥣 周六限定糖水 (${satDateStr})</span><span class="text-[10px] font-normal text-rose-700">Saturday Dessert (${satDateStr})</span>`;
                 
                 const isDessertSoldOut = DESSERT_ORDERED_QTY >= SAT_DESSERT_LIMIT;
+                const dessertRemaining = Math.max(0, SAT_DESSERT_LIMIT - DESSERT_ORDERED_QTY);
+                const isDessertLowStock = !isDessertSoldOut && dessertRemaining <= 3;
+
                 dessertContainer.innerHTML = `
                     <div id="cardDessert" class="p-3.5 rounded-xl border-2 ${isDessertSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200 bg-white'} transition-all space-y-3">
                         <label class="flex items-start justify-between ${isDessertSoldOut ? 'cursor-not-allowed' : 'cursor-pointer'}">
                             <div class="flex items-center space-x-3">
                                 <input type="checkbox" id="chkDessert" ${isDessertSoldOut ? 'disabled' : 'onchange="toggleCard(\'Dessert\')"'} class="w-5 h-5 text-rose-600 rounded border-slate-300 focus:ring-rose-500 mt-0.5">
                                 <div>
-                                    <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">${SAT_DESSERT_NAME} ${isDessertSoldOut ? '<span class="text-rose-500 text-xs font-semibold">(已售罄 Sold Out)</span>' : ''}</div>
+                                    <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">
+                                        ${SAT_DESSERT_NAME} 
+                                        ${isDessertSoldOut ? '<span class="text-rose-500 text-xs font-semibold">(已售罄 Sold Out)</span>' : ''}
+                                        ${isDessertLowStock ? `<span class="text-rose-600 text-[11px] font-bold ml-1 bg-rose-100 px-1.5 py-0.5 rounded-md">🔥 仅剩 ${dessertRemaining} 份</span>` : ''}
+                                    </div>
                                     <div class="mt-1 flex items-center space-x-1.5">
                                         <span id="txtDessertPrice" class="text-xs font-bold text-rose-600">RM ${DESSERT_PRICE}.00</span>
                                         <span class="text-[10px] text-rose-500/80">/ 份 (portion)</span>
@@ -601,9 +678,9 @@
                                 <span class="text-[10px] text-slate-400">Qty</span>
                             </div>
                             <div class="flex items-center space-x-3">
-                                <button type="button" onclick="adjustQty('Dessert', -1)" class="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 font-bold text-base flex items-center justify-center border border-rose-200 shadow-sm active:scale-95 transition">-</button>
+                                <button type="button" id="btnDessertMinus" onclick="adjustQty('Dessert', -1)" class="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 font-bold text-base flex items-center justify-center border border-rose-200 shadow-sm active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed">-</button>
                                 <input type="number" id="qtyDessert" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
-                                <button type="button" onclick="adjustQty('Dessert', 1)" class="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 font-bold text-base flex items-center justify-center border border-rose-200 shadow-sm active:scale-95 transition">+</button>
+                                <button type="button" id="btnDessertPlus" onclick="adjustQty('Dessert', 1)" class="w-8 h-8 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-800 font-bold text-base flex items-center justify-center border border-rose-200 shadow-sm active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed">+</button>
                             </div>
                         </div>
                     </div>
@@ -631,6 +708,7 @@
             if (chk.checked) {
                 card.className = "p-3 rounded-xl border-2 border-amber-500 bg-amber-50/70 shadow-sm transition-all space-y-3";
                 qtyBox.classList.remove('hidden');
+                updateFriButtonStates(idx);
             } else {
                 card.className = "p-3 rounded-xl border-2 border-slate-200 bg-white transition-all space-y-3";
                 qtyBox.classList.add('hidden');
@@ -646,6 +724,7 @@
             if (chk.checked) {
                 card.className = "p-3 rounded-xl border-2 border-indigo-500 bg-indigo-50/70 shadow-sm transition-all space-y-3";
                 qtyBox.classList.remove('hidden');
+                updateSatButtonStates(idx);
             } else {
                 card.className = "p-3 rounded-xl border-2 border-slate-200 bg-white transition-all space-y-3";
                 qtyBox.classList.add('hidden');
@@ -661,11 +740,59 @@
             if (chk.checked) {
                 card.className = `p-3.5 rounded-xl border-2 border-rose-500 bg-rose-50/70 shadow-sm transition-all space-y-3`;
                 qtyBox.classList.remove('hidden');
+                updateDessertButtonStates();
             } else {
                 card.className = "p-3.5 rounded-xl border-2 border-slate-200 bg-white transition-all space-y-3";
                 qtyBox.classList.add('hidden');
             }
             calculateTotal();
+        }
+
+        function updateFriButtonStates(idx) {
+            const dish = FRI_DISHES[idx];
+            const limit = Number(dish.limit) || 0;
+            const booked = Number(dish.booked) || 0;
+            const remaining = Math.max(0, limit - booked);
+
+            const input = document.getElementById(`qtyFri_${idx}`);
+            const btnMinus = document.getElementById(`btnFriMinus_${idx}`);
+            const btnPlus = document.getElementById(`btnFriPlus_${idx}`);
+
+            const currentVal = parseInt(input.value) || 1;
+
+            if (btnMinus) btnMinus.disabled = currentVal <= 1;
+            if (btnPlus) btnPlus.disabled = currentVal >= remaining;
+        }
+
+        function updateSatButtonStates(idx) {
+            const dish = SAT_DISHES[idx];
+            const limit = Number(dish.limit) || 0;
+            const booked = Number(dish.booked) || 0;
+            const remaining = Math.max(0, limit - booked);
+
+            const input = document.getElementById(`qtySat_${idx}`);
+            const btnMinus = document.getElementById(`btnSatMinus_${idx}`);
+            const btnPlus = document.getElementById(`btnSatPlus_${idx}`);
+
+            const currentVal = parseInt(input.value) || 1;
+
+            if (btnMinus) btnMinus.disabled = currentVal <= 1;
+            if (btnPlus) btnPlus.disabled = currentVal >= remaining;
+        }
+
+        function updateDessertButtonStates() {
+            const remaining = Math.max(0, SAT_DESSERT_LIMIT - DESSERT_ORDERED_QTY);
+
+            const input = document.getElementById('qtyDessert');
+            const btnMinus = document.getElementById('btnDessertMinus');
+            const btnPlus = document.getElementById('btnDessertPlus');
+
+            if (!input) return;
+
+            const currentVal = parseInt(input.value) || 1;
+
+            if (btnMinus) btnMinus.disabled = currentVal <= 1;
+            if (btnPlus) btnPlus.disabled = currentVal >= remaining;
         }
 
         function adjustFriQty(idx, amount) {
@@ -675,21 +802,23 @@
             const dish = FRI_DISHES[idx];
             const limit = Number(dish.limit) || 0;
             const booked = Number(dish.booked) || 0;
+            const remaining = Math.max(0, limit - booked);
 
             if (booked >= limit) {
-                alert("⚠️ 该菜品名额已满，无法再选！");
+                showToast("⚠️ 该菜品名额已满，无法再选！", "warning");
                 input.value = 1;
+                updateFriButtonStates(idx);
                 return;
             }
 
-            const remaining = limit - booked;
             if (val < 1) val = 1;
             if (val > remaining) {
                 val = remaining;
-                alert(`⚠️ 剩余名额不足！最多只能再预订 ${remaining} 份。`);
+                showToast(`⚠️ 剩余名额不足！最多只能预订 ${remaining} 份。`, "warning");
             }
 
             input.value = val;
+            updateFriButtonStates(idx);
             calculateTotal();
         }
 
@@ -700,21 +829,23 @@
             const dish = SAT_DISHES[idx];
             const limit = Number(dish.limit) || 0;
             const booked = Number(dish.booked) || 0;
+            const remaining = Math.max(0, limit - booked);
 
             if (booked >= limit) {
-                alert("⚠️ 该菜品名额已满，无法再选！");
+                showToast("⚠️ 该菜品名额已满，无法再选！", "warning");
                 input.value = 1;
+                updateSatButtonStates(idx);
                 return;
             }
 
-            const remaining = limit - booked;
             if (val < 1) val = 1;
             if (val > remaining) {
                 val = remaining;
-                alert(`⚠️ 剩余名额不足！最多只能再预订 ${remaining} 份。`);
+                showToast(`⚠️ 剩余名额不足！最多只能预订 ${remaining} 份。`, "warning");
             }
 
             input.value = val;
+            updateSatButtonStates(idx);
             calculateTotal();
         }
 
@@ -723,20 +854,23 @@
             let val = (parseInt(input.value) || 1) + amount;
             
             if (type === 'Dessert') {
+                const remaining = Math.max(0, SAT_DESSERT_LIMIT - DESSERT_ORDERED_QTY);
+
                 if (DESSERT_ORDERED_QTY >= SAT_DESSERT_LIMIT) {
-                    alert("⚠️ 该糖水名额已满，无法再选！");
+                    showToast("⚠️ 该糖水名额已满，无法再选！", "warning");
                     input.value = 1;
+                    updateDessertButtonStates();
                     return;
                 }
-                const remaining = SAT_DESSERT_LIMIT - DESSERT_ORDERED_QTY;
                 if (val < 1) val = 1;
                 if (val > remaining) {
                     val = remaining;
-                    alert(`⚠️ 剩余名额不足！最多只能再预订 ${remaining} 份。`);
+                    showToast(`⚠️ 剩余名额不足！最多只能预订 ${remaining} 份。`, "warning");
                 }
+                input.value = val;
+                updateDessertButtonStates();
             }
 
-            input.value = val;
             calculateTotal();
         }
 
@@ -865,6 +999,7 @@
 
         function copyAmount() {
             safeCopyText(currentTotal, () => {
+                showToast(`✅ 已复制金额 (RM ${currentTotal})`, "success");
                 const span = document.getElementById('copyAmountText');
                 const orig = span.innerText;
                 span.innerText = `✅ 已复制金额 (RM ${currentTotal})`;
@@ -874,6 +1009,7 @@
 
         function copyPhone() {
             safeCopyText(DUITNOW_PHONE, () => {
+                showToast(`✅ 已复制 DuitNow 手机号 (${DUITNOW_PHONE})`, "success");
                 const span = document.getElementById('copyPhoneText');
                 const orig = span.innerText;
                 span.innerText = `✅ 已复制号码 (${DUITNOW_PHONE})`;
@@ -889,7 +1025,7 @@
             if (navigator.share) {
                 navigator.share({ title: shareTitle, text: shareDescription, url: shareUrl }).catch((error) => console.log('分享取消:', error));
             } else {
-                safeCopyText(shareUrl, () => { alert("✅ 链接已复制！\nLink copied to clipboard!"); });
+                safeCopyText(shareUrl, () => { showToast("✅ 链接已复制！\nLink copied to clipboard!", "success"); });
             }
         }
 
@@ -901,8 +1037,10 @@
         function shareToMessenger() {
             const shareText = `来一起看看 GRC CAFE 这周的美味晚餐和糖水菜单，支持在线预订哦！\n👉 ${shareUrl}`;
             safeCopyText(shareText, () => {
-                alert("✅ 菜单文案已复制！\n\n即将为您打开 Messenger，您可以直接【粘贴】发给好友或群组！");
-                window.open("https://www.messenger.com/", "_blank");
+                showToast("✅ 菜单文案已复制！即将打开 Messenger", "info");
+                setTimeout(() => {
+                    window.open("https://www.messenger.com/", "_blank");
+                }, 1000);
             });
         }
 
@@ -919,7 +1057,7 @@
         }
 
         function openOrderQueryModal() {
-            const currentName = document.getElementById('name').value.trim();
+            const currentName = document.getElementById('name').value.trim() || localStorage.getItem('grc_customer_name') || '';
             if (currentName) {
                 document.getElementById('queryNameInput').value = currentName;
             }
@@ -938,7 +1076,7 @@
             const container = document.getElementById('queryResultsContainer');
             
             if (!nameInput) {
-                alert("请输入要查询的名字！ / Please enter your name!");
+                showToast("请输入要查询的名字！", "warning");
                 return;
             }
 
@@ -1005,15 +1143,21 @@
             const dessertChecked = chkDessert ? chkDessert.checked : false;
 
             if (friSelectedOrders.length === 0 && satSelectedOrders.length === 0 && !dessertChecked) {
-                alert("⚠️ 请至少勾选一项餐点！ / Please select at least one item!");
+                showToast("⚠️ 请至少勾选一项餐点！", "warning");
                 return;
             }
 
             const btn = document.getElementById('submitBtn');
+            const overlay = document.getElementById('loadingOverlay');
+            const loadingText = document.getElementById('loadingText');
+
+            // 激活提交防重与全屏遮罩
             btn.disabled = true;
-            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin text-white"></i><span>正在保存订单到云端...</span>`;
+            if (overlay) overlay.classList.remove('hidden');
 
             const name = document.getElementById('name').value.trim();
+            saveCustomerName(name); // 保存名字到本地缓存
+
             const notes = document.getElementById('notes').value.trim() || '无 None';
             const total = currentTotal;
 
@@ -1055,15 +1199,15 @@
                           `Order placed. Transferred/Ready to pay RM ${total}, please check!`;
 
             if (!GOOGLE_SCRIPT_URL) {
-                alert("错误：未配置后端 API 地址。");
+                showToast("错误：未配置后端 API 地址。", "error");
                 btn.disabled = false;
-                btn.innerHTML = `<i class="fa-brands fa-whatsapp text-white text-xl"></i><div class="flex flex-col text-left leading-tight"><span class="text-sm font-bold">确认已付款</span><span class="text-[9px] font-normal text-emerald-100">Confirm & Send</span></div>`;
+                if (overlay) overlay.classList.add('hidden');
                 return;
             }
 
             try {
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000);
+                const timeoutId = setTimeout(() => controller.abort(), 12000);
 
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -1076,9 +1220,8 @@
                 const result = await response.json();
 
                 if (result && result.success) {
-                    btn.innerHTML = `<i class="fa-solid fa-check text-white"></i><span>保存成功！正在打开 WhatsApp...</span>`;
+                    if (loadingText) loadingText.innerText = "保存成功！正在打开 WhatsApp...";
                     
-                    // 下单成功后跳转 WhatsApp，并在切回网页时自动刷新页面获取最新库存
                     setTimeout(() => {
                         window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
                         
@@ -1101,9 +1244,9 @@
 
             } catch (err) {
                 console.error("提交失败:", err);
-                alert(`❌ 订单提交失败，请检查库存或网络后重试！\n原因: ${err.message || '网络连接超时'}`);
+                if (overlay) overlay.classList.add('hidden');
                 btn.disabled = false;
-                btn.innerHTML = `<i class="fa-brands fa-whatsapp text-white text-xl"></i><div class="flex flex-col text-left leading-tight"><span class="text-sm font-bold">确认已付款</span><span class="text-[9px] font-normal text-emerald-100">Confirm & Send</span></div>`;
+                showToast(`❌ 提交失败: ${err.message || '网络连接超时'}`, "error");
             }
         }
     </script>
