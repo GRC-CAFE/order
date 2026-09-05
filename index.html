@@ -665,8 +665,19 @@
             const input = document.getElementById(`qtyFri_${idx}`);
             let val = (parseInt(input.value) || 1) + amount;
             if (val < 1) val = 1;
-            const limit = FRI_DISHES[idx].limit || 0;
-            if (limit > 0 && val > limit) val = limit;
+
+            const dish = FRI_DISHES[idx];
+            const limit = Number(dish.limit) || 0;
+            const booked = Number(dish.booked) || 0;
+
+            if (limit > 0) {
+                const maxAllowed = Math.max(1, limit - booked);
+                if (val > maxAllowed) {
+                    val = maxAllowed;
+                    alert(`⚠️ 该菜品剩余名额不足！最多只能预订 ${maxAllowed} 份。\n(Only ${maxAllowed} portions left.)`);
+                }
+            }
+
             input.value = val;
             calculateTotal();
         }
@@ -675,8 +686,19 @@
             const input = document.getElementById(`qtySat_${idx}`);
             let val = (parseInt(input.value) || 1) + amount;
             if (val < 1) val = 1;
-            const limit = SAT_DISHES[idx].limit || 0;
-            if (limit > 0 && val > limit) val = limit;
+
+            const dish = SAT_DISHES[idx];
+            const limit = Number(dish.limit) || 0;
+            const booked = Number(dish.booked) || 0;
+
+            if (limit > 0) {
+                const maxAllowed = Math.max(1, limit - booked);
+                if (val > maxAllowed) {
+                    val = maxAllowed;
+                    alert(`⚠️ 该菜品剩余名额不足！最多只能预订 ${maxAllowed} 份。\n(Only ${maxAllowed} portions left.)`);
+                }
+            }
+
             input.value = val;
             calculateTotal();
         }
@@ -685,7 +707,15 @@
             const input = document.getElementById(`qty${type}`);
             let val = (parseInt(input.value) || 1) + amount;
             if (val < 1) val = 1;
-            if (type === 'Dessert' && val > SAT_DESSERT_LIMIT) val = SAT_DESSERT_LIMIT;
+
+            if (type === 'Dessert') {
+                const maxAllowed = Math.max(1, SAT_DESSERT_LIMIT - DESSERT_ORDERED_QTY);
+                if (val > maxAllowed) {
+                    val = maxAllowed;
+                    alert(`⚠️ 该糖水剩余名额不足！最多只能预订 ${maxAllowed} 份。`);
+                }
+            }
+
             input.value = val;
             calculateTotal();
         }
@@ -926,7 +956,6 @@
             }
         }
 
-        // --- 核心修改：改为“严格等待服务器明确成功返回后，再安全跳转”的交互逻辑 ---
         async function handleOrder(event) {
             event.preventDefault();
 
@@ -962,7 +991,6 @@
 
             const btn = document.getElementById('submitBtn');
             btn.disabled = true;
-            // 步骤 1：明确提示用户正在安全写入
             btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin text-white"></i><span>正在保存订单到云端...</span>`;
 
             const name = document.getElementById('name').value.trim();
@@ -1014,9 +1042,8 @@
             }
 
             try {
-                // 步骤 2：发起网络请求并等待明确成功返回
                 const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒超时保护
+                const timeoutId = setTimeout(() => controller.abort(), 10000);
 
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
@@ -1028,11 +1055,9 @@
 
                 const result = await response.json();
 
-                // 步骤 3：严格校验后台返回的 success 状态
                 if (result && result.success) {
                     btn.innerHTML = `<i class="fa-solid fa-check text-white"></i><span>保存成功！正在打开 WhatsApp...</span>`;
                     
-                    // 只有在明确成功后才执行跳转
                     setTimeout(() => {
                         window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
                         setTimeout(() => {
@@ -1041,13 +1066,12 @@
                         }, 2000);
                     }, 400);
                 } else {
-                    // 后端返回错误（例如名额超限等），拦截跳转并弹出提示
                     throw new Error(result.message || "服务器返回未知错误");
                 }
 
             } catch (err) {
                 console.error("提交失败:", err);
-                alert(`❌ 订单提交失败，请检查网络后重试！\n原因: ${err.message || '网络连接超时'}`);
+                alert(`❌ 订单提交失败，请检查库存或网络后重试！\n原因: ${err.message || '网络连接超时'}`);
                 btn.disabled = false;
                 btn.innerHTML = `<i class="fa-brands fa-whatsapp text-white text-xl"></i><div class="flex flex-col text-left leading-tight"><span class="text-sm font-bold">确认已付款</span><span class="text-[9px] font-normal text-emerald-100">Confirm & Send</span></div>`;
             }
