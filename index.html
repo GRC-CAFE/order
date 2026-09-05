@@ -497,12 +497,12 @@
                                     <input type="checkbox" id="chkFri_${idx}" ${isSoldOut ? 'disabled' : 'onchange="toggleFriDish(' + idx + ')"'} class="w-5 h-5 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mt-0.5">
                                     <div>
                                         <div class="text-sm font-bold text-slate-800">${dish.name} ${isSoldOut ? '<span class="text-rose-500 text-xs font-semibold">(已售罄 Sold Out)</span>' : ''}</div>
-                                        <div class="mt-1 space-y-0.5">
-                                            <div class="text-xs font-bold text-amber-700">RM ${dish.price}.00 / 份</div>
-                                            <div class="text-[10px] text-amber-600/80">portion</div>
-                                            <div>
-                                                <span class="text-[10px] ${isSoldOut ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'} font-bold px-1.5 py-0.5 rounded-full inline-block mt-1">已订 ${dish.booked || 0} / ${dish.limit || 0} 份 (Booked ${dish.booked || 0}/${dish.limit || 0})</span>
-                                            </div>
+                                        <div class="mt-1 flex items-center space-x-1.5">
+                                            <span class="text-xs font-bold text-amber-700">RM ${dish.price}.00</span>
+                                            <span class="text-[10px] text-amber-600/80">/ 份 (portion)</span>
+                                        </div>
+                                        <div class="mt-1">
+                                            <span class="text-[10px] ${isSoldOut ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'} font-bold px-1.5 py-0.5 rounded-full inline-block">已订 ${dish.booked || 0} / ${dish.limit || 0} 份 (Booked ${dish.booked || 0}/${dish.limit || 0})</span>
                                         </div>
                                     </div>
                                 </div>
@@ -543,12 +543,12 @@
                                     <input type="checkbox" id="chkSat_${idx}" ${isSoldOut ? 'disabled' : 'onchange="toggleSatDish(' + idx + ')"'} class="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 mt-0.5">
                                     <div>
                                         <div class="text-sm font-bold text-slate-800">${dish.name} ${isSoldOut ? '<span class="text-rose-500 text-xs font-semibold">(已售罄 Sold Out)</span>' : ''}</div>
-                                        <div class="mt-1 space-y-0.5">
-                                            <div class="text-xs font-bold text-indigo-600">RM ${dish.price}.00 / 份</div>
-                                            <div class="text-[10px] text-indigo-500/80">portion</div>
-                                            <div>
-                                                <span class="text-[10px] ${isSoldOut ? 'bg-rose-100 text-rose-800' : 'bg-indigo-100 text-indigo-800'} font-bold px-1.5 py-0.5 rounded-full inline-block mt-1">已订 ${dish.booked || 0} / ${dish.limit || 0} 份 (Booked ${dish.booked || 0}/${dish.limit || 0})</span>
-                                            </div>
+                                        <div class="mt-1 flex items-center space-x-1.5">
+                                            <span class="text-xs font-bold text-indigo-600">RM ${dish.price}.00</span>
+                                            <span class="text-[10px] text-indigo-500/80">/ 份 (portion)</span>
+                                        </div>
+                                        <div class="mt-1">
+                                            <span class="text-[10px] ${isSoldOut ? 'bg-rose-100 text-rose-800' : 'bg-indigo-100 text-indigo-800'} font-bold px-1.5 py-0.5 rounded-full inline-block">已订 ${dish.booked || 0} / ${dish.limit || 0} 份 (Booked ${dish.booked || 0}/${dish.limit || 0})</span>
                                         </div>
                                     </div>
                                 </div>
@@ -584,12 +584,12 @@
                                 <input type="checkbox" id="chkDessert" ${isDessertSoldOut ? 'disabled' : 'onchange="toggleCard(\'Dessert\')"'} class="w-5 h-5 text-rose-600 rounded border-slate-300 focus:ring-rose-500 mt-0.5">
                                 <div>
                                     <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">${SAT_DESSERT_NAME} ${isDessertSoldOut ? '<span class="text-rose-500 text-xs font-semibold">(已售罄 Sold Out)</span>' : ''}</div>
-                                    <div class="mt-1 space-y-0.5">
-                                        <div id="txtDessertPrice" class="text-xs font-bold text-rose-600">RM ${DESSERT_PRICE}.00 / 份</div>
-                                        <div class="text-[10px] text-rose-500/80">portion</div>
-                                        <div>
-                                            <span id="badgeDessertCount" class="text-[10px] ${isDessertSoldOut ? 'bg-rose-100 text-rose-800' : 'bg-rose-100 text-rose-800'} font-bold px-2 py-0.5 rounded-full inline-block mt-1">已订 ${DESSERT_ORDERED_QTY} / ${SAT_DESSERT_LIMIT} 份 (Booked ${DESSERT_ORDERED_QTY}/${SAT_DESSERT_LIMIT})</span>
-                                        </div>
+                                    <div class="mt-1 flex items-center space-x-1.5">
+                                        <span id="txtDessertPrice" class="text-xs font-bold text-rose-600">RM ${DESSERT_PRICE}.00</span>
+                                        <span class="text-[10px] text-rose-500/80">/ 份 (portion)</span>
+                                    </div>
+                                    <div class="mt-1">
+                                        <span id="badgeDessertCount" class="text-[10px] ${isDessertSoldOut ? 'bg-rose-100 text-rose-800' : 'bg-rose-100 text-rose-800'} font-bold px-2 py-0.5 rounded-full inline-block">已订 ${DESSERT_ORDERED_QTY} / ${SAT_DESSERT_LIMIT} 份 (Booked ${DESSERT_ORDERED_QTY}/${SAT_DESSERT_LIMIT})</span>
                                     </div>
                                 </div>
                             </div>
