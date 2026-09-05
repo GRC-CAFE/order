@@ -488,36 +488,39 @@
             if (FRI_DISHES.length === 0) {
                 friListContainer.innerHTML = `<div class="text-xs text-slate-400 p-2">暂无可用菜品<br><span class="text-[10px]">No dishes available</span></div>`;
             } else {
-                friListContainer.innerHTML = FRI_DISHES.map((dish, idx) => `
-                    <div id="cardFri_${idx}" class="p-3 rounded-xl border-2 border-slate-200 bg-white transition-all space-y-3">
-                        <label class="flex items-start justify-between cursor-pointer">
-                            <div class="flex items-center space-x-3">
-                                <input type="checkbox" id="chkFri_${idx}" onchange="toggleFriDish(${idx})" class="w-5 h-5 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mt-0.5">
-                                <div>
-                                    <div class="text-sm font-bold text-slate-800">${dish.name}</div>
-                                    <div class="mt-1 space-y-0.5">
-                                        <div class="text-xs font-bold text-amber-700">RM ${dish.price}.00 / 份</div>
-                                        <div class="text-[10px] text-amber-600/80">portion</div>
-                                        <div>
-                                            <span class="text-[10px] bg-amber-100 text-amber-800 font-bold px-1.5 py-0.5 rounded-full inline-block mt-1">已订 ${dish.booked || 0} / ${dish.limit || 0} 份 (Booked ${dish.booked || 0}/${dish.limit || 0})</span>
+                friListContainer.innerHTML = FRI_DISHES.map((dish, idx) => {
+                    const isSoldOut = (dish.booked || 0) >= (dish.limit || 0);
+                    return `
+                        <div id="cardFri_${idx}" class="p-3 rounded-xl border-2 ${isSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200 bg-white'} transition-all space-y-3">
+                            <label class="flex items-start justify-between ${isSoldOut ? 'cursor-not-allowed' : 'cursor-pointer'}">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" id="chkFri_${idx}" ${isSoldOut ? 'disabled' : 'onchange="toggleFriDish(' + idx + ')"'} class="w-5 h-5 text-amber-600 rounded border-slate-300 focus:ring-amber-500 mt-0.5">
+                                    <div>
+                                        <div class="text-sm font-bold text-slate-800">${dish.name} ${isSoldOut ? '<span class="text-rose-500 text-xs font-semibold">(已售罄 Sold Out)</span>' : ''}</div>
+                                        <div class="mt-1 space-y-0.5">
+                                            <div class="text-xs font-bold text-amber-700">RM ${dish.price}.00 / 份</div>
+                                            <div class="text-[10px] text-amber-600/80">portion</div>
+                                            <div>
+                                                <span class="text-[10px] ${isSoldOut ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'} font-bold px-1.5 py-0.5 rounded-full inline-block mt-1">已订 ${dish.booked || 0} / ${dish.limit || 0} 份 (Booked ${dish.booked || 0}/${dish.limit || 0})</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </label>
-                        <div id="qtyFriBox_${idx}" class="hidden flex items-center justify-between pt-2 border-t border-amber-200/50">
-                            <div>
-                                <span class="text-xs font-bold text-slate-600 block leading-tight">份数</span>
-                                <span class="text-[10px] text-slate-400">Qty</span>
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                <button type="button" onclick="adjustFriQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">-</button>
-                                <input type="number" id="qtyFri_${idx}" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
-                                <button type="button" onclick="adjustFriQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">+</button>
+                            </label>
+                            <div id="qtyFriBox_${idx}" class="hidden flex items-center justify-between pt-2 border-t border-amber-200/50">
+                                <div>
+                                    <span class="text-xs font-bold text-slate-600 block leading-tight">份数</span>
+                                    <span class="text-[10px] text-slate-400">Qty</span>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <button type="button" onclick="adjustFriQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">-</button>
+                                    <input type="number" id="qtyFri_${idx}" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
+                                    <button type="button" onclick="adjustFriQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-bold text-base flex items-center justify-center border border-amber-200 shadow-sm active:scale-95 transition">+</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
 
             const satHeaderEl = document.getElementById('headerSat');
@@ -531,36 +534,39 @@
             if (SAT_DISHES.length === 0) {
                 satListContainer.innerHTML = `<div class="text-xs text-slate-400 p-2">暂无可用菜品<br><span class="text-[10px]">No dishes available</span></div>`;
             } else {
-                satListContainer.innerHTML = SAT_DISHES.map((dish, idx) => `
-                    <div id="cardSat_${idx}" class="p-3 rounded-xl border-2 border-slate-200 bg-white transition-all space-y-3">
-                        <label class="flex items-start justify-between cursor-pointer">
-                            <div class="flex items-center space-x-3">
-                                <input type="checkbox" id="chkSat_${idx}" onchange="toggleSatDish(${idx})" class="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 mt-0.5">
-                                <div>
-                                    <div class="text-sm font-bold text-slate-800">${dish.name}</div>
-                                    <div class="mt-1 space-y-0.5">
-                                        <div class="text-xs font-bold text-indigo-600">RM ${dish.price}.00 / 份</div>
-                                        <div class="text-[10px] text-indigo-500/80">portion</div>
-                                        <div>
-                                            <span class="text-[10px] bg-indigo-100 text-indigo-800 font-bold px-1.5 py-0.5 rounded-full inline-block mt-1">已订 ${dish.booked || 0} / ${dish.limit || 0} 份 (Booked ${dish.booked || 0}/${dish.limit || 0})</span>
+                satListContainer.innerHTML = SAT_DISHES.map((dish, idx) => {
+                    const isSoldOut = (dish.booked || 0) >= (dish.limit || 0);
+                    return `
+                        <div id="cardSat_${idx}" class="p-3 rounded-xl border-2 ${isSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200 bg-white'} transition-all space-y-3">
+                            <label class="flex items-start justify-between ${isSoldOut ? 'cursor-not-allowed' : 'cursor-pointer'}">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" id="chkSat_${idx}" ${isSoldOut ? 'disabled' : 'onchange="toggleSatDish(' + idx + ')"'} class="w-5 h-5 text-indigo-600 rounded border-slate-300 focus:ring-indigo-500 mt-0.5">
+                                    <div>
+                                        <div class="text-sm font-bold text-slate-800">${dish.name} ${isSoldOut ? '<span class="text-rose-500 text-xs font-semibold">(已售罄 Sold Out)</span>' : ''}</div>
+                                        <div class="mt-1 space-y-0.5">
+                                            <div class="text-xs font-bold text-indigo-600">RM ${dish.price}.00 / 份</div>
+                                            <div class="text-[10px] text-indigo-500/80">portion</div>
+                                            <div>
+                                                <span class="text-[10px] ${isSoldOut ? 'bg-rose-100 text-rose-800' : 'bg-indigo-100 text-indigo-800'} font-bold px-1.5 py-0.5 rounded-full inline-block mt-1">已订 ${dish.booked || 0} / ${dish.limit || 0} 份 (Booked ${dish.booked || 0}/${dish.limit || 0})</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-                        </label>
-                        <div id="qtySatBox_${idx}" class="hidden flex items-center justify-between pt-2 border-t border-indigo-100">
-                            <div>
-                                <span class="text-xs font-bold text-slate-600 block leading-tight">份数</span>
-                                <span class="text-[10px] text-slate-400">Qty</span>
-                            </div>
-                            <div class="flex items-center space-x-3">
-                                <button type="button" onclick="adjustSatQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold text-base flex items-center justify-center border border-indigo-200 shadow-sm active:scale-95 transition">-</button>
-                                <input type="number" id="qtySat_${idx}" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
-                                <button type="button" onclick="adjustSatQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold text-base flex items-center justify-center border border-indigo-200 shadow-sm active:scale-95 transition">+</button>
+                            </label>
+                            <div id="qtySatBox_${idx}" class="hidden flex items-center justify-between pt-2 border-t border-indigo-100">
+                                <div>
+                                    <span class="text-xs font-bold text-slate-600 block leading-tight">份数</span>
+                                    <span class="text-[10px] text-slate-400">Qty</span>
+                                </div>
+                                <div class="flex items-center space-x-3">
+                                    <button type="button" onclick="adjustSatQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold text-base flex items-center justify-center border border-indigo-200 shadow-sm active:scale-95 transition">-</button>
+                                    <input type="number" id="qtySat_${idx}" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
+                                    <button type="button" onclick="adjustSatQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-indigo-50 hover:bg-indigo-100 text-indigo-800 font-bold text-base flex items-center justify-center border border-indigo-200 shadow-sm active:scale-95 transition">+</button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             }
 
             const dessertContainer = document.getElementById('dessertListContainer');
@@ -570,18 +576,19 @@
                 document.getElementById('sectionDessert').classList.remove('hidden');
                 document.getElementById('headerDessert').innerHTML = `<span>🥣 周六限定糖水 (${satDateStr})</span><span class="text-[10px] font-normal text-rose-700">Saturday Dessert (${satDateStr})</span>`;
                 
+                const isDessertSoldOut = DESSERT_ORDERED_QTY >= SAT_DESSERT_LIMIT;
                 dessertContainer.innerHTML = `
-                    <div id="cardDessert" class="p-3.5 rounded-xl border-2 border-slate-200 bg-white transition-all space-y-3">
-                        <label class="flex items-start justify-between cursor-pointer">
+                    <div id="cardDessert" class="p-3.5 rounded-xl border-2 ${isDessertSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200 bg-white'} transition-all space-y-3">
+                        <label class="flex items-start justify-between ${isDessertSoldOut ? 'cursor-not-allowed' : 'cursor-pointer'}">
                             <div class="flex items-center space-x-3">
-                                <input type="checkbox" id="chkDessert" onchange="toggleCard('Dessert')" class="w-5 h-5 text-rose-600 rounded border-slate-300 focus:ring-rose-500 mt-0.5">
+                                <input type="checkbox" id="chkDessert" ${isDessertSoldOut ? 'disabled' : 'onchange="toggleCard(\'Dessert\')"'} class="w-5 h-5 text-rose-600 rounded border-slate-300 focus:ring-rose-500 mt-0.5">
                                 <div>
-                                    <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">${SAT_DESSERT_NAME}</div>
+                                    <div id="txtDessertTitle" class="text-sm font-bold text-slate-800">${SAT_DESSERT_NAME} ${isDessertSoldOut ? '<span class="text-rose-500 text-xs font-semibold">(已售罄 Sold Out)</span>' : ''}</div>
                                     <div class="mt-1 space-y-0.5">
                                         <div id="txtDessertPrice" class="text-xs font-bold text-rose-600">RM ${DESSERT_PRICE}.00 / 份</div>
                                         <div class="text-[10px] text-rose-500/80">portion</div>
                                         <div>
-                                            <span id="badgeDessertCount" class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full inline-block mt-1">已订 ${DESSERT_ORDERED_QTY} / ${SAT_DESSERT_LIMIT} 份 (Booked ${DESSERT_ORDERED_QTY}/${SAT_DESSERT_LIMIT})</span>
+                                            <span id="badgeDessertCount" class="text-[10px] ${isDessertSoldOut ? 'bg-rose-100 text-rose-800' : 'bg-rose-100 text-rose-800'} font-bold px-2 py-0.5 rounded-full inline-block mt-1">已订 ${DESSERT_ORDERED_QTY} / ${SAT_DESSERT_LIMIT} 份 (Booked ${DESSERT_ORDERED_QTY}/${SAT_DESSERT_LIMIT})</span>
                                         </div>
                                     </div>
                                 </div>
@@ -664,18 +671,22 @@
         function adjustFriQty(idx, amount) {
             const input = document.getElementById(`qtyFri_${idx}`);
             let val = (parseInt(input.value) || 1) + amount;
-            if (val < 1) val = 1;
-
+            
             const dish = FRI_DISHES[idx];
             const limit = Number(dish.limit) || 0;
             const booked = Number(dish.booked) || 0;
 
-            if (limit > 0) {
-                const maxAllowed = Math.max(1, limit - booked);
-                if (val > maxAllowed) {
-                    val = maxAllowed;
-                    alert(`⚠️ 该菜品剩余名额不足！最多只能预订 ${maxAllowed} 份。\n(Only ${maxAllowed} portions left.)`);
-                }
+            if (booked >= limit) {
+                alert("⚠️ 该菜品名额已满，无法再选！");
+                input.value = 1;
+                return;
+            }
+
+            const remaining = limit - booked;
+            if (val < 1) val = 1;
+            if (val > remaining) {
+                val = remaining;
+                alert(`⚠️ 剩余名额不足！最多只能再预订 ${remaining} 份。`);
             }
 
             input.value = val;
@@ -685,18 +696,22 @@
         function adjustSatQty(idx, amount) {
             const input = document.getElementById(`qtySat_${idx}`);
             let val = (parseInt(input.value) || 1) + amount;
-            if (val < 1) val = 1;
-
+            
             const dish = SAT_DISHES[idx];
             const limit = Number(dish.limit) || 0;
             const booked = Number(dish.booked) || 0;
 
-            if (limit > 0) {
-                const maxAllowed = Math.max(1, limit - booked);
-                if (val > maxAllowed) {
-                    val = maxAllowed;
-                    alert(`⚠️ 该菜品剩余名额不足！最多只能预订 ${maxAllowed} 份。\n(Only ${maxAllowed} portions left.)`);
-                }
+            if (booked >= limit) {
+                alert("⚠️ 该菜品名额已满，无法再选！");
+                input.value = 1;
+                return;
+            }
+
+            const remaining = limit - booked;
+            if (val < 1) val = 1;
+            if (val > remaining) {
+                val = remaining;
+                alert(`⚠️ 剩余名额不足！最多只能再预订 ${remaining} 份。`);
             }
 
             input.value = val;
@@ -706,13 +721,18 @@
         function adjustQty(type, amount) {
             const input = document.getElementById(`qty${type}`);
             let val = (parseInt(input.value) || 1) + amount;
-            if (val < 1) val = 1;
-
+            
             if (type === 'Dessert') {
-                const maxAllowed = Math.max(1, SAT_DESSERT_LIMIT - DESSERT_ORDERED_QTY);
-                if (val > maxAllowed) {
-                    val = maxAllowed;
-                    alert(`⚠️ 该糖水剩余名额不足！最多只能预订 ${maxAllowed} 份。`);
+                if (DESSERT_ORDERED_QTY >= SAT_DESSERT_LIMIT) {
+                    alert("⚠️ 该糖水名额已满，无法再选！");
+                    input.value = 1;
+                    return;
+                }
+                const remaining = SAT_DESSERT_LIMIT - DESSERT_ORDERED_QTY;
+                if (val < 1) val = 1;
+                if (val > remaining) {
+                    val = remaining;
+                    alert(`⚠️ 剩余名额不足！最多只能再预订 ${remaining} 份。`);
                 }
             }
 
