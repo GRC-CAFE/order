@@ -1051,7 +1051,7 @@
             rawMessage += `💰 *总计 Total*：RM ${total}\n` +
                           `📝 *备注 Remarks*：${notes}\n` +
                           `--------------------------------\n` +
-                          `已下单，已按照 RM ${total} 完成转账/准备付款，请查收！\n` +
+                          `已下单, 已按照 RM ${total} 完成转账/准备付款, 请查收!\n` +
                           `Order placed. Transferred/Ready to pay RM ${total}, please check!`;
 
             if (!GOOGLE_SCRIPT_URL) {
@@ -1078,12 +1078,22 @@
                 if (result && result.success) {
                     btn.innerHTML = `<i class="fa-solid fa-check text-white"></i><span>保存成功！正在打开 WhatsApp...</span>`;
                     
+                    // 下单成功后跳转 WhatsApp，并在切回网页时自动刷新页面获取最新库存
                     setTimeout(() => {
                         window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
+                        
+                        const handleVisibilityChange = () => {
+                            if (document.visibilityState === 'visible') {
+                                document.removeEventListener('visibilitychange', handleVisibilityChange);
+                                window.location.reload();
+                            }
+                        };
+                        document.addEventListener('visibilitychange', handleVisibilityChange);
+
                         setTimeout(() => {
-                            btn.disabled = false;
-                            btn.innerHTML = `<i class="fa-brands fa-whatsapp text-white text-xl"></i><div class="flex flex-col text-left leading-tight"><span class="text-sm font-bold">确认已付款</span><span class="text-[9px] font-normal text-emerald-100">Confirm & Send</span></div>`;
-                        }, 2000);
+                            window.location.reload();
+                        }, 3000);
+
                     }, 400);
                 } else {
                     throw new Error(result.message || "服务器返回未知错误");
