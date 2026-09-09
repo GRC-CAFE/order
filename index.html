@@ -71,7 +71,7 @@
         <button type="button" onclick="dismissIosPrompt()" class="text-slate-400 hover:text-white text-xs px-2 py-1"><i class="fa-solid fa-xmark text-sm"></i></button>
     </div>
 
-      <!-- 封面及轮播区域 -->
+    <!-- 封面及轮播区域 -->
     <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-lg cursor-grab active:cursor-grabbing bg-white transform-gpu">
         <img id="carouselImage" src="cafe1.jpeg" class="w-full h-auto block transition-opacity duration-500 opacity-100 pointer-events-none will-change-[opacity]" alt="GRC CAFE 展示">
         <div id="carouselDots" class="absolute top-3 right-3 flex space-x-1.5 z-20 bg-white/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/50 shadow-sm"></div>
@@ -221,7 +221,6 @@
                 <img src="qrcode.jpeg" class="w-full h-full object-contain rounded-xl shadow-sm" alt="DuitNow 付款码">
             </div>
 
-            <!-- 缩小后的金额展示区域 -->
             <div class="bg-rose-50/80 px-3 py-2 rounded-xl border border-rose-100/80 shadow-sm">
                 <p class="text-[11px] text-rose-500 font-medium leading-tight">
                     扫码后请手动输入转账金额：<br>
@@ -230,7 +229,6 @@
                 <p id="qrAmountText" class="text-xl font-black text-rose-600 mt-0.5">RM 0.00</p>
             </div>
 
-            <!-- 缩小后的按钮区域 -->
             <div class="space-y-1.5 pt-0.5">
                 <button type="button" onclick="copyAmount()" id="copyAmountBtn" class="w-full bg-amber-50 hover:bg-amber-100/80 active:scale-[0.98] text-amber-900 text-xs font-bold py-1.5 px-2 rounded-lg border border-amber-200/60 flex flex-col items-center justify-center transition-all">
                     <div class="flex items-center space-x-1.5">
@@ -264,7 +262,6 @@
             </div>
 
             <div class="flex items-center justify-between space-x-2">
-                <!-- 已选数量点击展开小红点按钮 -->
                 <button type="button" onclick="toggleCartPreview()" id="btnCartCount" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 border border-amber-300/60 transition active:scale-95">
                     <i class="fa-solid fa-shopping-basket text-amber-600"></i>
                     <span id="cartBadgeCount">已选 0 项 / Selected 0</span>
@@ -440,15 +437,6 @@
         
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw-t99KLkdMEcFzto_gfkosudLT3ElFVOqndO3KHZImHgx71hUqr9CDNSRg2Km45-j9Mw/exec"; 
 
-        const ALL_SLIDES = [
-            { image: "cafe1.jpeg", isFriday: false, isSaturdayMain: false, isDessert: false, isInstruction: false },
-            { image: "dish1.jpeg", isFriday: true,  isSaturdayMain: false, isDessert: false, isInstruction: false },
-            { image: "dish2.jpeg", isFriday: false, isSaturdayMain: true,  isDessert: false, isInstruction: false },
-            { image: "dish3.jpeg", isFriday: false, isSaturdayMain: false, isDessert: true,  isInstruction: false },
-            { image: "instruction.jpeg", isFriday: false, isSaturdayMain: false, isDessert: false, isInstruction: true },
-            { image: "pwa.jpeg", isFriday: false, isSaturdayMain: false, isDessert: false, isInstruction: false }
-        ];
-
         let SLIDES = [];
         let currentTotal = "0.00";
         let slideIndex = 0;
@@ -472,8 +460,9 @@
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             document.getElementById('copyPhoneSubText').innerText = `Copy Phone (${DUITNOW_PHONE})`;
             
-            const imagesToPreload = ["cafe1.jpeg", "dish1.jpeg", "dish2.jpeg", "dish3.jpeg", "instruction.jpeg", "pwa.jpeg"];
-            imagesToPreload.forEach(src => {
+            // 基础固定图片预加载
+            const baseImages = ["cafe1.jpeg", "instruction.jpeg", "pwa.jpeg"];
+            baseImages.forEach(src => {
                 const img = new Image();
                 img.src = src;
             });
@@ -513,21 +502,55 @@
             }
         }
 
+        // --- 动态生成轮播图列表 ---
         function updateCarouselSlides() {
-            SLIDES = ALL_SLIDES.filter(slide => {
-                const imgName = slide.image.toLowerCase();
-                if (slide.isInstruction || imgName.includes('pwa')) {
-                    return true;
-                }
-                if (slide.isFriday && !ENABLE_FRI_DINNER) return false;
-                if (slide.isSaturdayMain && !ENABLE_SAT_DINNER) return false;
-                if (slide.isDessert && !ENABLE_SAT_DESSERT) return false;
-                return true;
-            });
+            let dynamicSlides = [
+                { image: "cafe1.jpeg" } // 第一张固定为首页宣传图
+            ];
+
+            // 1. 周五菜品动态照片：fri_dish1.jpeg ~ fri_dish5.jpeg
+            if (ENABLE_FRI_DINNER && FRI_DISHES && FRI_DISHES.length > 0) {
+                FRI_DISHES.forEach((dish, idx) => {
+                    dynamicSlides.push({
+                        image: `fri_dish${idx + 1}.jpeg`,
+                        title: dish.name
+                    });
+                });
+            }
+
+            // 2. 周六菜品动态照片：sat_dish1.jpeg ~ sat_dish5.jpeg
+            if (ENABLE_SAT_DINNER && SAT_DISHES && SAT_DISHES.length > 0) {
+                SAT_DISHES.forEach((dish, idx) => {
+                    dynamicSlides.push({
+                        image: `sat_dish${idx + 1}.jpeg`,
+                        title: dish.name
+                    });
+                });
+            }
+
+            // 3. 周六糖水/甜品照片：sat_dessert.jpeg
+            if (ENABLE_SAT_DESSERT) {
+                dynamicSlides.push({
+                    image: "sat_dessert.jpeg",
+                    title: SAT_DESSERT_NAME
+                });
+            }
+
+            // 4. 追加尾部说明照片
+            dynamicSlides.push({ image: "instruction.jpeg" });
+            dynamicSlides.push({ image: "pwa.jpeg" });
+
+            SLIDES = dynamicSlides;
 
             if (SLIDES.length === 0) {
-                SLIDES = [{ image: "cafe1.jpeg", isFriday: false, isSaturdayMain: false, isDessert: false, isInstruction: false }];
+                SLIDES = [{ image: "cafe1.jpeg" }];
             }
+
+            // 预加载新生成的图片
+            SLIDES.forEach(s => {
+                const img = new Image();
+                img.src = s.image;
+            });
 
             renderDots();
             showSlide(0);
@@ -918,7 +941,7 @@
             calculateTotal();
         }
 
-        // --- 计算总额与生成底部可折叠菜单预览 (已做数值强转修复) ---
+        // --- 计算总额与生成底部可折叠菜单预览 ---
         function calculateTotal() {
             let total = 0;
             let totalItemsCount = 0;
@@ -1253,7 +1276,6 @@
             const overlay = document.getElementById('loadingOverlay');
             const loadingText = document.getElementById('loadingText');
 
-            // 激活提交防重与全屏遮罩
             btn.disabled = true;
             if (overlay) overlay.classList.remove('hidden');
 
