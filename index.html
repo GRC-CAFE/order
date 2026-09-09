@@ -492,19 +492,19 @@
                 const res = await fetch(GOOGLE_SCRIPT_URL);
                 const config = await res.json();
                 if (config && !config.error) {
-                    ENABLE_FRI_DINNER = parseBool(config.ENABLE_FRI_DINNER);
-                    ENABLE_SAT_DINNER = parseBool(config.ENABLE_SAT_DINNER);
-                    ENABLE_SAT_DESSERT = parseBool(config.ENABLE_SAT_DESSERT);
+                    if (config.ENABLE_FRI_DINNER !== undefined) ENABLE_FRI_DINNER = parseBool(config.ENABLE_FRI_DINNER);
+                    if (config.ENABLE_SAT_DINNER !== undefined) ENABLE_SAT_DINNER = parseBool(config.ENABLE_SAT_DINNER);
+                    if (config.ENABLE_SAT_DESSERT !== undefined) ENABLE_SAT_DESSERT = parseBool(config.ENABLE_SAT_DESSERT);
                     
                     if (config.friDishes && Array.isArray(config.friDishes)) {
-                        FRI_DISHES = config.friDishes;
+                        FRI_DISHES = config.friDishes.map(d => ({ ...d, price: Number(d.price) || 0 }));
                     }
                     if (config.satDishes && Array.isArray(config.satDishes)) {
-                        SAT_DISHES = config.satDishes;
+                        SAT_DISHES = config.satDishes.map(d => ({ ...d, price: Number(d.price) || 0 }));
                     }
 
                     if (config.satDessertName) SAT_DESSERT_NAME = config.satDessertName;
-                    if (config.dessertPrice) DESSERT_PRICE = Number(config.dessertPrice);
+                    if (config.dessertPrice !== undefined) DESSERT_PRICE = Number(config.dessertPrice) || 0;
                     if (config.satDessertLimit) SAT_DESSERT_LIMIT = Number(config.satDessertLimit);
                     if (config.dessertOrderedQty !== undefined) DESSERT_ORDERED_QTY = Number(config.dessertOrderedQty);
                 }
@@ -572,6 +572,7 @@
                     const isSoldOut = booked >= limit;
                     const remaining = Math.max(0, limit - booked);
                     const isLowStock = !isSoldOut && remaining <= 3;
+                    const priceVal = Number(dish.price) || 0;
 
                     return `
                         <div id="cardFri_${idx}" class="relative p-3.5 rounded-2xl border-2 ${isSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200/80 bg-white'} transition-all space-y-3 shadow-sm">
@@ -588,7 +589,7 @@
                                             ${isLowStock ? `<span class="text-amber-700 text-[10px] font-bold ml-1 bg-amber-100 px-1.5 py-0.5 rounded-md">🔥 仅剩 ${remaining} 份 (${remaining} left)</span>` : ''}
                                         </div>
                                         <div class="mt-1 flex items-center space-x-1.5">
-                                            <span class="text-xs font-bold text-amber-700">RM ${dish.price}.00</span>
+                                            <span class="text-xs font-bold text-amber-700">RM ${priceVal.toFixed(2)}</span>
                                             <span class="text-[10px] text-amber-600/80">/ 份 (portion)</span>
                                         </div>
                                         <div class="mt-1">
@@ -629,6 +630,7 @@
                     const isSoldOut = booked >= limit;
                     const remaining = Math.max(0, limit - booked);
                     const isLowStock = !isSoldOut && remaining <= 3;
+                    const priceVal = Number(dish.price) || 0;
 
                     return `
                         <div id="cardSat_${idx}" class="relative p-3.5 rounded-2xl border-2 ${isSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200/80 bg-white'} transition-all space-y-3 shadow-sm">
@@ -645,7 +647,7 @@
                                             ${isLowStock ? `<span class="text-indigo-700 text-[10px] font-bold ml-1 bg-indigo-100 px-1.5 py-0.5 rounded-md">🔥 仅剩 ${remaining} 份 (${remaining} left)</span>` : ''}
                                         </div>
                                         <div class="mt-1 flex items-center space-x-1.5">
-                                            <span class="text-xs font-bold text-indigo-600">RM ${dish.price}.00</span>
+                                            <span class="text-xs font-bold text-indigo-600">RM ${priceVal.toFixed(2)}</span>
                                             <span class="text-[10px] text-indigo-500/80">/ 份 (portion)</span>
                                         </div>
                                         <div class="mt-1">
@@ -695,7 +697,7 @@
                                         ${isDessertLowStock ? `<span class="text-rose-600 text-[10px] font-bold ml-1 bg-rose-100 px-1.5 py-0.5 rounded-md">🔥 仅剩 ${dessertRemaining} 份 (${dessertRemaining} left)</span>` : ''}
                                     </div>
                                     <div class="mt-1 flex items-center space-x-1.5">
-                                        <span id="txtDessertPrice" class="text-xs font-bold text-rose-600">RM ${DESSERT_PRICE}.00</span>
+                                        <span id="txtDessertPrice" class="text-xs font-bold text-rose-600">RM ${Number(DESSERT_PRICE).toFixed(2)}</span>
                                         <span class="text-[10px] text-rose-500/80">/ 份 (portion)</span>
                                     </div>
                                     <div class="mt-1">
@@ -720,9 +722,9 @@
             }
 
             let priceParts = [];
-            if (ENABLE_FRI_DINNER && FRI_DISHES.length > 0) priceParts.push(`周五晚餐 Fri RM${FRI_DISHES[0].price}`);
-            if (ENABLE_SAT_DINNER && SAT_DISHES.length > 0) priceParts.push(`周六晚餐 Sat RM${SAT_DISHES[0].price}`);
-            if (ENABLE_SAT_DESSERT) priceParts.push(`糖水 Dessert RM${DESSERT_PRICE}`);
+            if (ENABLE_FRI_DINNER && FRI_DISHES.length > 0) priceParts.push(`周五晚餐 Fri RM${Number(FRI_DISHES[0].price).toFixed(2)}`);
+            if (ENABLE_SAT_DINNER && SAT_DISHES.length > 0) priceParts.push(`周六晚餐 Sat RM${Number(SAT_DISHES[0].price).toFixed(2)}`);
+            if (ENABLE_SAT_DESSERT) priceParts.push(`糖水 Dessert RM${Number(DESSERT_PRICE).toFixed(2)}`);
 
             document.getElementById('priceHeader').innerText = priceParts.join(' | ') || "暂无可选餐点 (No Meals Available)";
 
@@ -916,7 +918,7 @@
             calculateTotal();
         }
 
-        // --- 计算总额与生成底部可折叠菜单预览 ---
+        // --- 计算总额与生成底部可折叠菜单预览 (已做数值强转修复) ---
         function calculateTotal() {
             let total = 0;
             let totalItemsCount = 0;
@@ -927,9 +929,11 @@
                     const chk = document.getElementById(`chkFri_${idx}`);
                     if (chk && chk.checked) {
                         const qty = parseInt(document.getElementById(`qtyFri_${idx}`).value) || 1;
-                        total += qty * dish.price;
+                        const price = Number(dish.price) || 0;
+                        const sub = qty * price;
+                        total += sub;
                         totalItemsCount += qty;
-                        cartPreviewHtml += `<div class="flex justify-between items-center"><span>[周五 Fri] ${dish.name} x ${qty}</span><span class="font-bold">RM ${qty * dish.price}</span></div>`;
+                        cartPreviewHtml += `<div class="flex justify-between items-center"><span>[周五 Fri] ${dish.name} x ${qty}</span><span class="font-bold">RM ${sub.toFixed(2)}</span></div>`;
                     }
                 });
             }
@@ -939,9 +943,11 @@
                     const chk = document.getElementById(`chkSat_${idx}`);
                     if (chk && chk.checked) {
                         const qty = parseInt(document.getElementById(`qtySat_${idx}`).value) || 1;
-                        total += qty * dish.price;
+                        const price = Number(dish.price) || 0;
+                        const sub = qty * price;
+                        total += sub;
                         totalItemsCount += qty;
-                        cartPreviewHtml += `<div class="flex justify-between items-center"><span>[周六 Sat] ${dish.name} x ${qty}</span><span class="font-bold">RM ${qty * dish.price}</span></div>`;
+                        cartPreviewHtml += `<div class="flex justify-between items-center"><span>[周六 Sat] ${dish.name} x ${qty}</span><span class="font-bold">RM ${sub.toFixed(2)}</span></div>`;
                     }
                 });
             }
@@ -949,9 +955,11 @@
             const chkDessert = document.getElementById('chkDessert');
             if (ENABLE_SAT_DESSERT && chkDessert && chkDessert.checked) {
                 const qty = parseInt(document.getElementById('qtyDessert').value) || 1;
-                total += qty * DESSERT_PRICE;
+                const price = Number(DESSERT_PRICE) || 0;
+                const sub = qty * price;
+                total += sub;
                 totalItemsCount += qty;
-                cartPreviewHtml += `<div class="flex justify-between items-center"><span>[糖水 Dessert] ${SAT_DESSERT_NAME} x ${qty}</span><span class="font-bold">RM ${qty * DESSERT_PRICE}</span></div>`;
+                cartPreviewHtml += `<div class="flex justify-between items-center"><span>[糖水 Dessert] ${SAT_DESSERT_NAME} x ${qty}</span><span class="font-bold">RM ${sub.toFixed(2)}</span></div>`;
             }
 
             currentTotal = total.toFixed(2);
@@ -1144,7 +1152,7 @@
             document.getElementById('queryModal').classList.add('hidden');
         }
 
-        // --- 订单查询系统（增强：状态标签与一键复制摘要） ---
+        // --- 订单查询系统 ---
         async function submitQueryOrders() {
             const nameInput = document.getElementById('queryNameInput').value.trim();
             const container = document.getElementById('queryResultsContainer');
@@ -1165,7 +1173,8 @@
                         container.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-xl">没有找到关于 "${nameInput}" 的当前活动订单。<br><span class="text-[10px]">No active orders found for "${nameInput}".</span></div>`;
                     } else {
                         container.innerHTML = data.orders.map((order, idx) => {
-                            const summaryText = `【GRC CAFE 订单凭证 / Order Receipt】\n姓名 Name: ${order.name}\n分类 Category: ${order.category}\n餐点 Item: ${order.detail} x ${order.qty}\n金额 Amount: RM ${order.subtotal}\n时间 Time: ${formatLocalTimestamp(order.timestamp)}`;
+                            const subTotalVal = Number(order.subtotal) || 0;
+                            const summaryText = `【GRC CAFE 订单凭证 / Order Receipt】\n姓名 Name: ${order.name}\n分类 Category: ${order.category}\n餐点 Item: ${order.detail} x ${order.qty}\n金额 Amount: RM ${subTotalVal.toFixed(2)}\n时间 Time: ${formatLocalTimestamp(order.timestamp)}`;
                             
                             return `
                                 <div class="p-3.5 rounded-xl border border-emerald-200/80 bg-emerald-50/40 text-xs space-y-2 shadow-sm relative">
@@ -1174,7 +1183,7 @@
                                             <span>📦 ${order.category}</span>
                                             <span class="bg-emerald-100 text-emerald-800 text-[9px] font-bold px-1.5 py-0.5 rounded-md">已预订 Active</span>
                                         </span>
-                                        <span class="text-emerald-700 font-black text-sm">RM ${order.subtotal}</span>
+                                        <span class="text-emerald-700 font-black text-sm">RM ${subTotalVal.toFixed(2)}</span>
                                     </div>
                                     <div class="text-slate-600">明细 Details: <span class="font-semibold text-slate-800">${order.detail}</span> (数量/Qty: ${order.qty})</div>
                                     ${order.notes && order.notes !== '无 None' ? `<div class="text-[10px] text-rose-500 font-medium">备注 Remarks: ${order.notes}</div>` : ''}
@@ -1214,7 +1223,8 @@
                     const chk = document.getElementById(`chkFri_${idx}`);
                     if (chk && chk.checked) {
                         const q = parseInt(document.getElementById(`qtyFri_${idx}`).value) || 1;
-                        friSelectedOrders.push({ name: dish.name, qty: q, subtotal: q * dish.price });
+                        const price = Number(dish.price) || 0;
+                        friSelectedOrders.push({ name: dish.name, qty: q, subtotal: q * price });
                     }
                 });
             }
@@ -1225,7 +1235,8 @@
                     const chk = document.getElementById(`chkSat_${idx}`);
                     if (chk && chk.checked) {
                         const q = parseInt(document.getElementById(`qtySat_${idx}`).value) || 1;
-                        satSelectedOrders.push({ name: dish.name, qty: q, subtotal: q * dish.price });
+                        const price = Number(dish.price) || 0;
+                        satSelectedOrders.push({ name: dish.name, qty: q, subtotal: q * price });
                     }
                 });
             }
@@ -1272,8 +1283,9 @@
 
             if (dessertChecked && ENABLE_SAT_DESSERT) {
                 const q = parseInt(document.getElementById('qtyDessert').value) || 1;
+                const dPrice = Number(DESSERT_PRICE) || 0;
                 selectedItems.push(`星期六 Dessert: ${SAT_DESSERT_NAME} x ${q}份/portion(s)`);
-                payload.dessertOrder = { checked: true, detail: SAT_DESSERT_NAME, qty: q, subtotal: q * DESSERT_PRICE };
+                payload.dessertOrder = { checked: true, detail: SAT_DESSERT_NAME, qty: q, subtotal: q * dPrice };
             }
 
             let rawMessage = `🛒 *【晚餐/糖水预订订单 Dinner & Dessert Order】*\n` +
