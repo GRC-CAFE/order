@@ -15,11 +15,35 @@
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <!-- Firebase Push SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 </head>
 <body class="bg-gradient-to-b from-amber-50/80 via-orange-50/30 to-amber-50/60 min-h-screen pb-36 select-none relative font-sans text-slate-800">
 
     <!-- Toast 动态提示浮层 -->
     <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] hidden max-w-xs w-full px-4 py-3 rounded-xl shadow-xl text-xs font-bold text-center transition-all duration-300 pointer-events-none transform -translate-y-2"></div>
+
+    <!-- Web Push 订阅广播弹窗 -->
+    <div id="pushPromptBanner" class="hidden fixed top-3 left-3 right-3 max-w-md mx-auto z-50 bg-amber-900/95 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-amber-700/80 flex items-center justify-between transition-all">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white text-lg font-bold shadow-sm">
+                <i class="fa-solid fa-bell"></i>
+            </div>
+            <div>
+                <div class="text-xs font-bold text-white leading-tight">开启本周菜单提醒</div>
+                <div class="text-[10px] text-amber-200 mt-0.5">Menu Push Notifications</div>
+                <div class="text-[11px] text-amber-100 mt-1 leading-tight">新菜单上架时第一时间推送到您的手机！</div>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2">
+            <button type="button" onclick="dismissPushBanner()" class="text-amber-300 hover:text-white text-xs px-2 py-1">暂不</button>
+            <button type="button" onclick="requestPushNotificationPermission()" class="bg-white text-amber-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-md active:scale-95 transition flex flex-col items-center">
+                <span>允许提醒</span>
+            </button>
+        </div>
+    </div>
 
     <!-- 全屏提交加载 Overlay 遮罩 -->
     <div id="loadingOverlay" class="fixed inset-0 z-[90] bg-slate-900/60 backdrop-blur-sm hidden flex flex-col items-center justify-center text-white space-y-3">
@@ -79,7 +103,6 @@
 
     <div class="max-w-md mx-auto px-2 -mt-0.5 relative z-10 space-y-5">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-amber-100/60 space-y-5">
-            <!-- 顶部规则行：去掉价格，只保留单行截单规则 -->
             <div class="flex justify-start items-center pb-4 border-b border-slate-100">
                 <div class="flex items-center space-x-2 bg-amber-50 border border-amber-200/60 px-3 py-1.5 rounded-xl">
                     <span class="text-xs font-medium text-slate-500">截单规则<span class="text-[10px] text-slate-400 font-normal">Order Cut-Off</span>:</span>
@@ -89,7 +112,6 @@
             </div>
 
             <form id="orderForm" onsubmit="handleOrder(event)" class="space-y-4">
-                <!-- 名字与订单查询区块 -->
                 <div class="space-y-1.5">
                     <div class="flex justify-between items-center">
                         <div>
@@ -108,7 +130,6 @@
                            class="w-full px-3 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
                 </div>
 
-                <!-- 选餐区域 -->
                 <div>
                     <div class="mb-3">
                         <label class="block text-sm font-bold text-slate-700 leading-tight">选择预订餐点 (可多选) <span class="text-rose-500">*</span></label>
@@ -116,7 +137,6 @@
                     </div>
                     
                     <div class="space-y-4">
-                        <!-- 星期五 独立模块 -->
                         <div id="sectionFriday" class="p-3.5 rounded-2xl border border-amber-200/70 bg-amber-50/30 space-y-3">
                             <div id="txtFriSectionHeader" class="text-xs font-bold text-amber-800 bg-amber-100 px-3 py-1.5 rounded-xl inline-flex flex-col shadow-sm">
                                 <span>📅 星期五晚餐</span>
@@ -125,7 +145,6 @@
                             <div id="friDishesList" class="space-y-2.5"></div>
                         </div>
 
-                        <!-- 星期六主餐 独立模块 -->
                         <div id="sectionSaturday" class="p-3.5 rounded-2xl border border-indigo-100 bg-indigo-50/30 space-y-3">
                             <div id="headerSat" class="text-xs font-bold text-indigo-900 bg-indigo-100 px-3 py-1.5 rounded-xl inline-flex flex-col shadow-sm">
                                 <span>🗓️ 星期六晚餐</span>
@@ -134,7 +153,6 @@
                             <div id="satDishesList" class="space-y-2.5"></div>
                         </div>
 
-                        <!-- 周六糖水 独立模块 -->
                         <div id="sectionDessert" class="p-3.5 rounded-2xl border border-rose-100 bg-rose-50/30 space-y-3">
                             <div id="headerDessert" class="text-xs font-bold text-rose-900 bg-rose-100 px-3 py-1.5 rounded-xl inline-flex flex-col shadow-sm">
                                 <span>🥣 星期六限定糖水</span>
@@ -166,7 +184,6 @@
             </form>
         </div>
 
-        <!-- 社交媒体分享模块 -->
         <div class="bg-white rounded-2xl shadow-lg p-5 border border-amber-100/60 text-center space-y-3">
             <div>
                 <h3 class="text-xs font-bold text-slate-700 leading-tight">将菜单分享给好友</h3>
@@ -242,10 +259,9 @@
         </div>
     </div>
 
-    <!-- 底部固定栏与浮动已选清单卡片 -->
+    <!-- 底部固定栏 -->
     <div class="fixed bottom-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-md border-t border-slate-200/60 shadow-2xl px-3 py-2.5">
         <div class="max-w-md mx-auto space-y-2">
-            <!-- 可折叠已选菜单预览卡片 -->
             <div id="cartPreviewCard" class="hidden bg-amber-50/90 border border-amber-200 rounded-xl p-3 space-y-1.5 text-xs max-h-36 overflow-y-auto shadow-inner">
                 <div class="flex justify-between items-center text-amber-900 font-bold border-b border-amber-200/60 pb-1">
                     <span>🛒 已选餐点清单 (Selected Items)</span>
@@ -281,7 +297,7 @@
         </div>
     </div>
 
-    <!-- 订单查询弹窗 (Modal) -->
+    <!-- 订单查询 Modal -->
     <div id="queryModal" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full p-5 space-y-4 border border-amber-100">
             <div class="flex justify-between items-center pb-3 border-b border-slate-100">
@@ -313,7 +329,6 @@
                 </div>
             </div>
 
-            <!-- 查询结果展示区域 -->
             <div id="queryResultsContainer" class="max-h-64 overflow-y-auto space-y-2.5 pt-2 text-left">
                 <div class="text-center text-xs text-slate-400 py-6">请输入名字后点击查询<br><span class="text-[10px]">Enter name to search</span></div>
             </div>
@@ -328,12 +343,93 @@
     </div>
 
     <script>
+        // --- 1. Firebase 初始化与 Push 推送部分 ---
+        const VAPID_KEY = "BJNZbNNFDkM5831pbQrjwoQ3sqpGNLJ3MEzA1EmUftHIfOLFIrRim9S4l_qLtWw4rqRQ3D5cJa8R5myRG5QFIeI";
+        const firebaseConfig = {
+            apiKey: "AIzaSyCYKaU34rYerQ2wtEQueUQy_OHWflCESrs",
+            authDomain: "grccafe-push.firebaseapp.com",
+            projectId: "grccafe-push",
+            storageBucket: "grccafe-push.appspot.com",
+            messagingSenderId: "1098234827361",
+            appId: "1:1098234827361:web:a1b2c3d4e5f6g7h8i9j0"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        let messaging = null;
+        if (firebase.messaging.isSupported()) {
+            messaging = firebase.messaging();
+        }
+
+        async function initPushSubscription() {
+            if (!messaging) return;
+            if (Notification.permission === 'default') {
+                document.getElementById('pushPromptBanner').classList.remove('hidden');
+            } else if (Notification.permission === 'granted') {
+                savePushTokenToBackend();
+            }
+        }
+
+        function dismissPushBanner() {
+            document.getElementById('pushPromptBanner').classList.add('hidden');
+        }
+
+        async function requestPushNotificationPermission() {
+            dismissPushBanner();
+            try {
+                const permission = await Notification.requestPermission();
+                if (permission === 'granted') {
+                    showToast("✅ 已成功开启菜单推送提醒！", "success");
+                    await savePushTokenToBackend();
+                } else {
+                    showToast("⚠️ 推送权限已被拒绝", "warning");
+                }
+            } catch (err) {
+                console.error("请求推送权限失败:", err);
+            }
+        }
+
+        async function savePushTokenToBackend() {
+            if (!messaging) return;
+            try {
+                const registration = await navigator.serviceWorker.ready;
+                const token = await messaging.getToken({
+                    vapidKey: VAPID_KEY,
+                    serviceWorkerRegistration: registration
+                });
+
+                if (token) {
+                    await fetch(GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                        body: JSON.stringify({
+                            action: 'subscribe',
+                            token: token,
+                            userAgent: navigator.userAgent
+                        })
+                    });
+                }
+            } catch (err) {
+                console.error("获取/发送 FCM Token 错误:", err);
+            }
+        }
+
+        if (messaging) {
+            messaging.onMessage((payload) => {
+                const title = payload.notification ? payload.notification.title : "GRC CAFE 提醒";
+                const body = payload.notification ? payload.notification.body : "";
+                showToast(`🔔 ${title}: ${body}`, "info");
+            });
+        }
+
+        // --- 2. PWA 与 Core UI 脚本 ---
         let deferredPrompt = null;
         const PROMPT_COOLDOWN = 24 * 60 * 60 * 1000; 
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').catch(err => console.error(err));
+                navigator.serviceWorker.register('./sw.js').then(() => {
+                    initPushSubscription();
+                }).catch(err => console.error(err));
             });
         }
 
@@ -374,7 +470,6 @@
             localStorage.setItem('ios_pwa_dismissed_time', Date.now().toString());
         }
 
-        // --- Toast 浮态提示系统 ---
         let toastTimer = null;
         function showToast(msg, type = 'info') {
             const toast = document.getElementById('toast');
@@ -399,7 +494,6 @@
             }, 3000);
         }
 
-        // --- 本地姓名记忆系统 ---
         function loadSavedCustomerName() {
             const savedName = localStorage.getItem('grc_customer_name');
             if (savedName) {
@@ -453,7 +547,6 @@
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             document.getElementById('copyPhoneSubText').innerText = `Copy Phone (${DUITNOW_PHONE})`;
             
-            // 基础固定图片预加载
             const baseImages = ["cafe1.jpeg", "instruction.jpeg", "pwa.jpeg"];
             baseImages.forEach(src => {
                 const img = new Image();
@@ -495,51 +588,33 @@
             }
         }
 
-        // --- 动态生成轮播图列表 ---
         function updateCarouselSlides() {
             let dynamicSlides = [
-                { image: "cafe1.jpeg" } // 第一张固定为首页宣传图
+                { image: "cafe1.jpeg" }
             ];
 
-            // 1. 周五菜品动态照片：fri_dish1.jpeg ~ fri_dish5.jpeg
             if (ENABLE_FRI_DINNER && FRI_DISHES && FRI_DISHES.length > 0) {
                 FRI_DISHES.forEach((dish, idx) => {
-                    dynamicSlides.push({
-                        image: `fri_dish${idx + 1}.jpeg`,
-                        title: dish.name
-                    });
+                    dynamicSlides.push({ image: `fri_dish${idx + 1}.jpeg`, title: dish.name });
                 });
             }
 
-            // 2. 周六菜品动态照片：sat_dish1.jpeg ~ sat_dish5.jpeg
             if (ENABLE_SAT_DINNER && SAT_DISHES && SAT_DISHES.length > 0) {
                 SAT_DISHES.forEach((dish, idx) => {
-                    dynamicSlides.push({
-                        image: `sat_dish${idx + 1}.jpeg`,
-                        title: dish.name
-                    });
+                    dynamicSlides.push({ image: `sat_dish${idx + 1}.jpeg`, title: dish.name });
                 });
             }
 
-            // 3. 周六糖水/甜品照片：sat_dessert.jpeg
             if (ENABLE_SAT_DESSERT) {
-                dynamicSlides.push({
-                    image: "sat_dessert.jpeg",
-                    title: SAT_DESSERT_NAME
-                });
+                dynamicSlides.push({ image: "sat_dessert.jpeg", title: SAT_DESSERT_NAME });
             }
 
-            // 4. 追加尾部说明照片
             dynamicSlides.push({ image: "instruction.jpeg" });
             dynamicSlides.push({ image: "pwa.jpeg" });
 
             SLIDES = dynamicSlides;
+            if (SLIDES.length === 0) SLIDES = [{ image: "cafe1.jpeg" }];
 
-            if (SLIDES.length === 0) {
-                SLIDES = [{ image: "cafe1.jpeg" }];
-            }
-
-            // 预加载新生成的图片
             SLIDES.forEach(s => {
                 const img = new Image();
                 img.src = s.image;
@@ -743,7 +818,6 @@
             calculateTotal();
         }
 
-        // --- 选中卡片样式强化与角标切换 ---
         function toggleFriDish(idx) {
             const chk = document.getElementById(`chkFri_${idx}`);
             const card = document.getElementById(`cardFri_${idx}`);
@@ -927,7 +1001,6 @@
             calculateTotal();
         }
 
-        // --- 计算总额与生成底部可折叠菜单预览 ---
         function calculateTotal() {
             let total = 0;
             let totalItemsCount = 0;
@@ -976,7 +1049,6 @@
             document.getElementById('qrAmountText').innerText = `RM ${currentTotal}`;
             document.getElementById('copyAmountText').innerText = `复制转账金额 (${currentTotal})`;
 
-            // 更新底部小红点与浮动预览卡片内容
             document.getElementById('cartBadgeCount').innerText = `已选 ${totalItemsCount} 项 / Selected ${totalItemsCount}`;
             const previewItemsContainer = document.getElementById('cartPreviewItems');
             if (cartPreviewHtml) {
@@ -986,7 +1058,6 @@
             }
         }
 
-        // 切换展开/折叠已选菜单预览卡片
         function toggleCartPreview() {
             const card = document.getElementById('cartPreviewCard');
             const chevron = document.getElementById('cartChevron');
@@ -1161,7 +1232,6 @@
             document.getElementById('queryModal').classList.add('hidden');
         }
 
-        // --- 订单查询系统 ---
         async function submitQueryOrders() {
             const nameInput = document.getElementById('queryNameInput').value.trim();
             const container = document.getElementById('queryResultsContainer');
