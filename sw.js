@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'grc-cafe-v2';
+const CACHE_NAME = 'grc-cafe-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -23,11 +23,11 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// 离线/静默后台推送广播监听
+// 离线/静默后台推送广播监听（必填：负责后台弹窗）
 messaging.onBackgroundMessage((payload) => {
-  const notificationTitle = payload.notification ? payload.notification.title : 'GRC CAFE';
+  const notificationTitle = payload.notification ? payload.notification.title : 'GRC CAFE 提醒';
   const notificationOptions = {
-    body: payload.notification ? payload.notification.body : '',
+    body: payload.notification ? payload.notification.body : '本周新菜单上线啦，快来预订吧！',
     icon: 'logo-192.png',
     data: {
       url: payload.data && payload.data.url ? payload.data.url : './'
@@ -49,7 +49,7 @@ self.addEventListener('notificationclick', (event) => {
           return client.focus();
         }
       }
-        if (clients.openWindow) {
+      if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
     })
