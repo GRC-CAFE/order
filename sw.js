@@ -13,12 +13,12 @@ const ASSETS_TO_CACHE = [
 ];
 
 firebase.initializeApp({
-  apiKey: "AIzaSyCYKaU34rYerQ2wtEQueUQy_OHWflCESrs",
-  authDomain: "grccafe-push.firebaseapp.com",
-  projectId: "grccafe-push",
-  storageBucket: "grccafe-push.appspot.com",
-  messagingSenderId: "1098234827361",
-  appId: "1:1098234827361:web:a1b2c3d4e5f6g7h8i9j0"
+  apiKey: "AIzaSyBQ0p9wjbzNbxiUnPOHvcoPoL8EZpHrn94",
+  authDomain: "grc-cafe-pwa.firebaseapp.com",
+  projectId: "grc-cafe-pwa",
+  storageBucket: "grc-cafe-pwa.appspot.com",
+  messagingSenderId: "922576960907",
+  appId: "1:922576960907:web:f316e5009b2ac1edc8838e"
 });
 
 const messaging = firebase.messaging();
