@@ -1,24 +1,86 @@
-const CACHE_NAME = 'grc-cafe-v1';
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
+importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
+
+const CACHE_NAME = 'grc-cafe-v2';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './cafe1.jpeg',
-  './dish1.jpeg',
-  './dish2.jpeg',
-  './dish3.jpeg',
-  './qrcode.jpeg'
+  './instruction.jpeg',
+  './pwa.jpeg',
+  './qrcode.jpeg',
+  './logo-192.png'
 ];
 
-// 安装 Service Worker 并缓存静态资源
+firebase.initializeApp({
+  apiKey: "AIzaSyCYKaU34rYerQ2wtEQueUQy_OHWflCESrs",
+  authDomain: "grccafe-push.firebaseapp.com",
+  projectId: "grccafe-push",
+  storageBucket: "grccafe-push.appspot.com",
+  messagingSenderId: "1098234827361",
+  appId: "1:1098234827361:web:a1b2c3d4e5f6g7h8i9j0"
+});
+
+const messaging = firebase.messaging();
+
+// 离线/静默后台推送广播监听
+messaging.onBackgroundMessage((payload) => {
+  const notificationTitle = payload.notification ? payload.notification.title : 'GRC CAFE';
+  const notificationOptions = {
+    body: payload.notification ? payload.notification.body : '',
+    icon: 'logo-192.png',
+    data: {
+      url: payload.data && payload.data.url ? payload.data.url : './'
+    }
+  };
+
+  self.registration.showNotification(notificationTitle, notificationOptions);
+});
+
+// 点击通知唤起网页
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const targetUrl = event.notification.data ? event.notification.data.url : './';
+  
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      for (let client of windowClients) {
+        if (client.url === targetUrl && 'focus' in client) {
+          return client.focus();
+        }
+      }
+        if (clients.openWindow) {
+        return clients.openWindow(targetUrl);
+      }
+    })
+  );
+});
+
+// 安装与缓存管理
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
+  self.skipWaiting();
 });
 
-// 拦截请求，优先从网络获取最新数据，网络不可用时使用缓存
+self.addEventListener('activate', (e) => {
+  e.waitUntil(
+    caches.keys().then((keys) => {
+      return Promise.all(
+        keys.map((key) => {
+          if (key !== CACHE_NAME) {
+            return caches.delete(key);
+          }
+        })
+      );
+    })
+  );
+  self.clients.claim();
+});
+
 self.addEventListener('fetch', (e) => {
   e.respondWith(
     fetch(e.request).catch(() => caches.match(e.request))
