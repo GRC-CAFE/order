@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'grc-cafe-v5';
+const CACHE_NAME = 'grc-cafe-v3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -12,33 +12,30 @@ const ASSETS_TO_CACHE = [
   './logo-192.png'
 ];
 
-try {
-  firebase.initializeApp({
-    apiKey: "AIzaSyBQ0p9wjbzNbxiUnPOHvcoPoL8EZpHrn94",
-    authDomain: "grc-cafe-pwa.firebaseapp.com",
-    projectId: "grc-cafe-pwa",
-    storageBucket: "grc-cafe-pwa.appspot.com",
-    messagingSenderId: "922576960907",
-    appId: "1:922576960907:web:f316e5009b2ac1edc8838e"
-  });
+firebase.initializeApp({
+  apiKey: "AIzaSyBQ0p9wjbzNbxiUnPOHvcoPoL8EZpHrn94",
+  authDomain: "grc-cafe-pwa.firebaseapp.com",
+  projectId: "grc-cafe-pwa",
+  storageBucket: "grc-cafe-pwa.appspot.com",
+  messagingSenderId: "922576960907",
+  appId: "1:922576960907:web:f316e5009b2ac1edc8838e"
+});
 
-  const messaging = firebase.messaging();
+const messaging = firebase.messaging();
 
-  messaging.onBackgroundMessage((payload) => {
-    const notificationTitle = payload.notification ? payload.notification.title : 'GRC CAFE 提醒';
-    const notificationOptions = {
-      body: payload.notification ? payload.notification.body : '本周新菜单上线啦，快来预订吧！',
-      icon: 'logo-192.png',
-      data: {
-        url: payload.data && payload.data.url ? payload.data.url : './'
-      }
-    };
+// 离线/静默后台推送广播监听（必填：负责后台弹窗）
+messaging.onBackgroundMessage((payload) => {
+  const notificationTitle = payload.notification ? payload.notification.title : 'GRC CAFE 提醒';
+  const notificationOptions = {
+    body: payload.notification ? payload.notification.body : '本周新菜单上线啦，快来预订吧！',
+    icon: 'logo-192.png',
+    data: {
+      url: payload.data && payload.data.url ? payload.data.url : './'
+    }
+  };
 
-    self.registration.showNotification(notificationTitle, notificationOptions);
-  });
-} catch(e) {
-  console.warn("FCM Messaging background error ignored:", e);
-}
+  self.registration.showNotification(notificationTitle, notificationOptions);
+});
 
 // 点击通知唤起网页
 self.addEventListener('notificationclick', (event) => {
@@ -84,23 +81,8 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
-// PWA 核心修复：完全忽略非同源（API / 跨域）请求，防止 Chrome PWA 误判应用跨域而弹出复制 URL 提示
 self.addEventListener('fetch', (e) => {
-  const reqUrl = new URL(e.request.url);
-
-  // 如果请求不是当前网站主域名下的资源（例如 script.google.com, firebase, cdn 等），直接放行
-  if (reqUrl.origin !== location.origin) {
-    return;
-  }
-
   e.respondWith(
-    caches.match(e.request).then((cachedResponse) => {
-      if (cachedResponse) {
-        return cachedResponse;
-      }
-      return fetch(e.request).catch(() => {
-        return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
-      });
-    })
+    fetch(e.request).catch(() => caches.match(e.request))
   );
 });
