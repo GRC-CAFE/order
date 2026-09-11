@@ -1,8 +1,10 @@
 {
+  "id": "./index.html",
   "name": "GRC CAFE - 预订系统",
   "short_name": "GRC CAFE",
   "description": "GRC CAFE 晚餐与糖水预订系统",
   "start_url": "./index.html",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#fffbeb",
   "theme_color": "#f59e0b",
@@ -11,12 +13,26 @@
     {
       "src": "logo-192.png",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
     },
     {
       "src": "logo-512.png",
       "sizes": "512x512",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }
