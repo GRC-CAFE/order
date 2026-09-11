@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>GRC CAFE - 晚餐与糖水预订 | Dinner & Dessert Pre-Order</title>
     
     <!-- PWA 相关配置 -->
@@ -19,8 +19,21 @@
     <!-- Firebase Push SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
+
+    <style>
+        /* 全局禁止长按呼出 Chrome 系统菜单及选中文本，防止触发 PWA URL 提示 */
+        * {
+            -webkit-touch-callout: none !important;
+            -webkit-user-select: none !important;
+            user-select: none !important;
+        }
+        input, textarea {
+            -webkit-user-select: text !important;
+            user-select: text !important;
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-b from-amber-50/80 via-orange-50/30 to-amber-50/60 min-h-screen pb-36 select-none relative font-sans text-slate-800">
+<body class="bg-gradient-to-b from-amber-50/80 via-orange-50/30 to-amber-50/60 min-h-screen pb-36 relative font-sans text-slate-800">
 
     <!-- Toast 动态提示浮层 -->
     <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] hidden max-w-xs w-full px-4 py-3 rounded-xl shadow-xl text-xs font-bold text-center transition-all duration-300 pointer-events-none transform -translate-y-2 opacity-0"></div>
@@ -343,6 +356,11 @@
     </div>
 
     <script>
+        // 全局防长按菜单唤起 PWA 提示
+        window.addEventListener('contextmenu', function(e) {
+            e.preventDefault();
+        }, false);
+
         // --- 1. Firebase 初始化与 Push 推送部分 ---
         const VAPID_KEY = "BJNZbNNFDkM5831pbQrjwoQ3sqpGNLJ3MEzA1EmUftHIfOLFIrRim9S4l_qLtWw4rqRQ3D5cJa8R5myRG5QFIeI";
         const firebaseConfig = {
@@ -1146,30 +1164,29 @@
             }
         }
 
-        // --- 优化：修复 Android Chrome PWA 弹窗 "Tap to copy URL for this app" ---
+        // --- 彻底阻断 PWA 原生剪贴板 API 拦截方案 ---
         function safeCopyText(text, successCallback) {
-            if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(text).then(successCallback).catch(() => {
-                    fallbackCopyText(text, successCallback);
-                });
-            } else {
-                fallbackCopyText(text, successCallback);
-            }
-        }
-
-        function fallbackCopyText(text, successCallback) {
             const textArea = document.createElement("textarea");
             textArea.value = text;
             textArea.setAttribute('readonly', '');
-            textArea.style.position = "absolute";
+            textArea.style.position = "fixed";
+            textArea.style.top = "0";
             textArea.style.left = "-9999px";
+            textArea.style.opacity = "0";
             document.body.appendChild(textArea);
+            
+            textArea.focus();
             textArea.select();
+            
             try {
-                document.execCommand('copy');
-                if (successCallback) successCallback();
-            } catch(err) {
-                showToast("⚠️ 复制失败，请手动复制", "warning");
+                const successful = document.execCommand('copy');
+                if (successful && successCallback) {
+                    successCallback();
+                } else if (!successful) {
+                    throw new Error("Copy command failed");
+                }
+            } catch (err) {
+                showToast("⚠️ 复制失败，请手动长按文本", "warning");
             }
             document.body.removeChild(textArea);
         }
@@ -1194,7 +1211,7 @@
             });
         }
 
-        const shareUrl = window.location.origin + window.location.pathname;
+        const shareUrl = window.location.protocol + '//' + window.location.host + window.location.pathname;
         const shareTitle = "GRC CAFE - 晚餐与糖水预订 | Dinner & Dessert Pre-Order";
         const shareDescription = "来看看这周的美味晚餐和糖水菜单，支持在线预订！Delicious dinner & dessert pre-order menu!";
 
