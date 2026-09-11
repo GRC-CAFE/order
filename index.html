@@ -1296,7 +1296,6 @@
         async function handleOrder(event) {
             event.preventDefault();
 
-            // 强效二次校验顾客名字
             const nameInput = document.getElementById('name');
             const name = nameInput ? nameInput.value.trim() : "";
             if (!name) {
