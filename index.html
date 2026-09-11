@@ -14,7 +14,7 @@
     <link rel="apple-touch-icon" href="logo-192.png">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
     <!-- Firebase Push SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -23,7 +23,7 @@
 <body class="bg-gradient-to-b from-amber-50/80 via-orange-50/30 to-amber-50/60 min-h-screen pb-36 select-none relative font-sans text-slate-800">
 
     <!-- Toast 动态提示浮层 -->
-    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] hidden max-w-xs w-full px-4 py-3 rounded-xl shadow-xl text-xs font-bold text-center transition-all duration-300 pointer-events-none transform -translate-y-2 opacity-0"></div>
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] hidden max-w-xs w-full px-4 py-3 rounded-xl shadow-xl text-xs font-bold text-center transition-all duration-300 pointer-events-none transform -translate-y-2"></div>
 
     <!-- Web Push 订阅广播弹窗 -->
     <div id="pushPromptBanner" class="hidden fixed top-3 left-3 right-3 max-w-md mx-auto z-50 bg-amber-900/95 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-amber-700/80 flex items-center justify-between transition-all">
@@ -354,14 +354,10 @@
             appId: "1:922576960907:web:f316e5009b2ac1edc8838e"
         };
 
+        firebase.initializeApp(firebaseConfig);
         let messaging = null;
-        try {
-            if (typeof firebase !== 'undefined' && firebase.messaging && firebase.messaging.isSupported()) {
-                firebase.initializeApp(firebaseConfig);
-                messaging = firebase.messaging();
-            }
-        } catch(e) {
-            console.warn("Firebase Push Messaging Not Supported on this device:", e);
+        if (firebase.messaging.isSupported()) {
+            messaging = firebase.messaging();
         }
 
         async function initPushSubscription() {
@@ -433,7 +429,7 @@
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').then(() => {
                     initPushSubscription();
-                }).catch(err => console.error("SW Registration error:", err));
+                }).catch(err => console.error(err));
             });
         }
 
@@ -588,7 +584,7 @@
                     if (config.dessertOrderedQty !== undefined) DESSERT_ORDERED_QTY = Number(config.dessertOrderedQty);
                 }
             } catch (err) {
-                console.warn("无法连接后台 API，使用默认配置 / Cannot connect to API, using defaults", err);
+                console.log("无法连接后台 API，使用默认配置 / Cannot connect to API, using defaults", err);
             }
         }
 
@@ -1146,32 +1142,20 @@
             }
         }
 
-        // --- 优化：修复 Android Chrome PWA 弹窗 "Tap to copy URL for this app" ---
         function safeCopyText(text, successCallback) {
             if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(text).then(successCallback).catch(() => {
-                    fallbackCopyText(text, successCallback);
-                });
+                navigator.clipboard.writeText(text).then(successCallback);
             } else {
-                fallbackCopyText(text, successCallback);
-            }
-        }
-
-        function fallbackCopyText(text, successCallback) {
-            const textArea = document.createElement("textarea");
-            textArea.value = text;
-            textArea.setAttribute('readonly', '');
-            textArea.style.position = "absolute";
-            textArea.style.left = "-9999px";
-            document.body.appendChild(textArea);
-            textArea.select();
-            try {
+                const textArea = document.createElement("textarea");
+                textArea.value = text;
+                textArea.style.position = "fixed";
+                textArea.style.left = "-9999px";
+                document.body.appendChild(textArea);
+                textArea.select();
                 document.execCommand('copy');
-                if (successCallback) successCallback();
-            } catch(err) {
-                showToast("⚠️ 复制失败，请手动复制", "warning");
+                document.body.removeChild(textArea);
+                successCallback();
             }
-            document.body.removeChild(textArea);
         }
 
         function copyAmount() {
@@ -1194,7 +1178,7 @@
             });
         }
 
-        const shareUrl = window.location.origin + window.location.pathname;
+        const shareUrl = window.location.href;
         const shareTitle = "GRC CAFE - 晚餐与糖水预订 | Dinner & Dessert Pre-Order";
         const shareDescription = "来看看这周的美味晚餐和糖水菜单，支持在线预订！Delicious dinner & dessert pre-order menu!";
 
@@ -1298,7 +1282,7 @@
                 }
             } catch (err) {
                 console.error(err);
-                container.innerHTML = `<div class="text-center text-xs text-rose-500 py-4">网络连接异常。<br><span class="text-[10px]">Network error. Please check internet connection or time settings.</span></div>`;
+                container.innerHTML = `<div class="text-center text-xs text-rose-500 py-4">网络错误，无法连接服务器。<br><span class="text-[10px]">Network error. Cannot connect to server.</span></div>`;
             }
         }
 
@@ -1403,11 +1387,16 @@
             }
 
             try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 12000);
+
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload)
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
                 });
+                clearTimeout(timeoutId);
 
                 const result = await response.json();
 
@@ -1440,7 +1429,7 @@
                 console.error("提交失败:", err);
                 if (overlay) overlay.classList.add('hidden');
                 btn.disabled = false;
-                showToast(`❌ 提交失败: ${err.message || '系统安全或网络异常'}`, "error");
+                showToast(`❌ 提交失败 / Submission Failed: ${err.message || '网络连接超时 Timeout'}`, "error");
             }
         }
     </script>
