@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'grc-cafe-v3';
+const CACHE_NAME = 'grc-cafe-v4';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -23,7 +23,7 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// 离线/静默后台推送广播监听（必填：负责后台弹窗）
+// 离线/静默后台推送广播监听（负责后台弹窗）
 messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification ? payload.notification.title : 'GRC CAFE 提醒';
   const notificationOptions = {
