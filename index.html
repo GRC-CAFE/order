@@ -16,7 +16,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
-    <!-- Firebase Push SDK (保持稳定兼容版本) -->
+    <!-- Firebase Push SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 </head>
@@ -1146,24 +1146,32 @@
             }
         }
 
+        // --- 优化：修复 Android Chrome PWA 弹窗 "Tap to copy URL for this app" ---
         function safeCopyText(text, successCallback) {
             if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(text).then(successCallback);
+                navigator.clipboard.writeText(text).then(successCallback).catch(() => {
+                    fallbackCopyText(text, successCallback);
+                });
             } else {
-                const textArea = document.createElement("textarea");
-                textArea.value = text;
-                textArea.style.position = "fixed";
-                textArea.style.left = "-9999px";
-                document.body.appendChild(textArea);
-                textArea.select();
-                try {
-                    document.execCommand('copy');
-                    successCallback();
-                } catch(err) {
-                    showToast("⚠️ 复制失败，请手动复制", "warning");
-                }
-                document.body.removeChild(textArea);
+                fallbackCopyText(text, successCallback);
             }
+        }
+
+        function fallbackCopyText(text, successCallback) {
+            const textArea = document.createElement("textarea");
+            textArea.value = text;
+            textArea.setAttribute('readonly', '');
+            textArea.style.position = "absolute";
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                if (successCallback) successCallback();
+            } catch(err) {
+                showToast("⚠️ 复制失败，请手动复制", "warning");
+            }
+            document.body.removeChild(textArea);
         }
 
         function copyAmount() {
@@ -1186,7 +1194,7 @@
             });
         }
 
-        const shareUrl = window.location.href;
+        const shareUrl = window.location.origin + window.location.pathname;
         const shareTitle = "GRC CAFE - 晚餐与糖水预订 | Dinner & Dessert Pre-Order";
         const shareDescription = "来看看这周的美味晚餐和糖水菜单，支持在线预订！Delicious dinner & dessert pre-order menu!";
 
