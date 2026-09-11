@@ -343,7 +343,6 @@
     </div>
 
     <script>
-        // --- 1. Firebase 初始化与 Push 推送部分 ---
         const VAPID_KEY = "BJNZbNNFDkM5831pbQrjwoQ3sqpGNLJ3MEzA1EmUftHIfOLFIrRim9S4l_qLtWw4rqRQ3D5cJa8R5myRG5QFIeI";
         const firebaseConfig = {
             apiKey: "AIzaSyBQ0p9wjbzNbxiUnPOHvcoPoL8EZpHrn94",
@@ -421,7 +420,6 @@
             });
         }
 
-        // --- 2. PWA 与 Core UI 脚本 ---
         let deferredPrompt = null;
         const PROMPT_COOLDOWN = 24 * 60 * 60 * 1000; 
 
