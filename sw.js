@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'grc-cafe-v4';
+const CACHE_NAME = 'grc-cafe-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -37,7 +37,7 @@ try {
     self.registration.showNotification(notificationTitle, notificationOptions);
   });
 } catch(e) {
-  console.warn("FCM Messaging background error ignored on older Android:", e);
+  console.warn("FCM Messaging background error ignored:", e);
 }
 
 // 点击通知唤起网页
@@ -84,12 +84,12 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
-// 优化后的安全 fetch 拦截策略：排除跨域 API，防止低版本 Android 系统报错
+// PWA 核心修复：完全忽略非同源（API / 跨域）请求，防止 Chrome PWA 误判应用跨域而弹出复制 URL 提示
 self.addEventListener('fetch', (e) => {
-  const url = e.request.url;
+  const reqUrl = new URL(e.request.url);
 
-  // 如果是跨域 API 或后端提交请求，直接跳过缓存逻辑走标准网络请求
-  if (url.includes('script.google.com') || url.includes('googleapis.com') || url.includes('fcm.googleapis.com')) {
+  // 如果请求不是当前网站主域名下的资源（例如 script.google.com, firebase, cdn 等），直接放行
+  if (reqUrl.origin !== location.origin) {
     return;
   }
 
@@ -99,8 +99,7 @@ self.addEventListener('fetch', (e) => {
         return cachedResponse;
       }
       return fetch(e.request).catch(() => {
-        // 如果断网且没有缓存，避免抛出底层系统崩溃异常
-        return new Response('Network Error', { status: 408, headers: { 'Content-Type': 'text/plain' } });
+        return new Response('Offline', { status: 503, statusText: 'Service Unavailable' });
       });
     })
   );
