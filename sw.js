@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'grc-cafe-v4';
+const CACHE_NAME = 'grc-cafe-v5';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -23,7 +23,6 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// 离线/静默后台推送广播监听（负责后台弹窗）
 messaging.onBackgroundMessage((payload) => {
   const notificationTitle = payload.notification ? payload.notification.title : 'GRC CAFE 提醒';
   const notificationOptions = {
@@ -37,7 +36,6 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 点击通知唤起网页
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   const targetUrl = event.notification.data ? event.notification.data.url : './';
@@ -56,7 +54,6 @@ self.addEventListener('notificationclick', (event) => {
   );
 });
 
-// 安装与缓存管理
 self.addEventListener('install', (e) => {
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
