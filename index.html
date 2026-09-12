@@ -276,13 +276,16 @@
                     <i id="cartChevron" class="fa-solid fa-chevron-up text-[10px] text-amber-700 transition-transform"></i>
                 </button>
 
-                <!-- 点击该黄色按钮可平滑滚动至 DuitNow 支付区 -->
-                <button type="button" onclick="scrollToDuitNow()" class="flex-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-[10px] font-bold py-1.5 px-2 rounded-xl flex flex-col items-center justify-center shadow-sm transition cursor-pointer">
+               <!-- 修改前 -->
+                <!-- <button type="button" onclick="scrollToDuitNow()" class="flex-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-[10px] font-bold py-1.5 px-2 rounded-xl flex flex-col items-center justify-center shadow-sm transition cursor-pointer"> -->
+
+                <!-- 修改后：将 py-1.5 改为 py-1，文字更精简 -->
+                <button type="button" onclick="scrollToDuitNow()" class="flex-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-[10px] font-bold py-1 px-2 rounded-xl flex flex-col items-center justify-center shadow-sm transition cursor-pointer">
                     <div class="flex items-center space-x-1">
-                        <i class="fa-solid fa-receipt text-xs"></i>
-                        <span>请付款并发送凭证 (点击看二维码)</span>
+                        <i class="fa-solid fa-qrcode text-[11px]"></i>
+                        <span>查看 DuitNow 付款二维码</span>
                     </div>
-                    <span class="text-[9px] font-normal text-amber-100">Pay & send receipt (Tap to view QR)</span>
+                    <span class="text-[9px] font-normal text-amber-100">Tap to view payment QR code</span>
                 </button>
             </div>
 
