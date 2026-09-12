@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'grc-cafe-v12';
+const CACHE_NAME = 'grc-cafe-v13';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -10,7 +10,7 @@ const ASSETS_TO_CACHE = [
   './pwa.jpeg',
   './qrcode.jpeg',
   './logo-192.png',
-  './logo-512.png',
+  './logo-512.png'
 ];
 
 firebase.initializeApp({
@@ -24,11 +24,16 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// 离线/静默后台推送广播监听
+// 离线/静默后台推送广播监听（仅当 Payload 中没有包含 notification 属性时才手动弹出，避免重复）
 messaging.onBackgroundMessage((payload) => {
-  const notificationTitle = payload.notification ? payload.notification.title : 'GRC CAFE 提醒';
+  if (payload.notification) {
+    // Firebase SDK 会自动处理带有 notification 属性的推送，直接返回避免重复弹出
+    return;
+  }
+
+  const notificationTitle = payload.data && payload.data.title ? payload.data.title : 'GRC CAFE 提醒';
   const notificationOptions = {
-    body: payload.notification ? payload.notification.body : '本周新菜单上线啦，快来预订吧！',
+    body: payload.data && payload.data.body ? payload.data.body : '本周新菜单上线啦，快来预订吧！',
     icon: 'logo-192.png',
     data: {
       url: payload.data && payload.data.url ? payload.data.url : './'
@@ -38,7 +43,7 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 点击通知唤起网页（修复绝对路径匹配与 URL 解析）
+// 点击通知唤起网页
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   
@@ -85,15 +90,13 @@ self.addEventListener('activate', (e) => {
   self.clients.claim();
 });
 
-// 网络拦截与离线缓存降级策略（Network First with Cache Fallback）
+// 网络拦截与离线缓存降级策略
 self.addEventListener('fetch', (e) => {
-  // 仅针对 GET 请求进行缓存拦截
   if (e.request.method !== 'GET') return;
 
   e.respondWith(
     fetch(e.request)
       .then((networkResponse) => {
-        // 请求成功时同步更新缓存
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -103,12 +106,10 @@ self.addEventListener('fetch', (e) => {
         return networkResponse;
       })
       .catch(() => {
-        // 离线或无网络时回退到本地缓存
         return caches.match(e.request).then((cachedResponse) => {
           if (cachedResponse) {
             return cachedResponse;
           }
-          // 页面导航失败时兜底返回 index.html
           if (e.request.mode === 'navigate') {
             return caches.match('./index.html');
           }
