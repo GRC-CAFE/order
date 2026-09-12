@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>GRC CAFE - 晚餐与糖水预订 | Dinner & Dessert Pre-Order</title>
     
     <!-- PWA 相关配置 -->
@@ -13,17 +13,35 @@
     <meta name="apple-mobile-web-app-title" content="GRC CAFE">
     <link rel="apple-touch-icon" href="logo-192.png">
 
+    <!-- 预加载核心资源 -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-    <!-- Firebase Push SDK -->
+    <!-- Firebase Push SDK (Compat 9.23.0) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
+
+    <style>
+        body {
+            -webkit-tap-highlight-color: transparent;
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
 </head>
-<body class="bg-gradient-to-b from-amber-50/80 via-orange-50/30 to-amber-50/60 min-h-screen pb-36 select-none relative font-sans text-slate-800">
+<body class="bg-gradient-to-b from-amber-50/80 via-orange-50/30 to-amber-50/60 min-h-screen pb-40 select-none relative font-sans text-slate-800 antialiased">
 
     <!-- Toast 动态提示浮层 -->
-    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] hidden max-w-xs w-full px-4 py-3 rounded-xl shadow-xl text-xs font-bold text-center transition-all duration-300 pointer-events-none transform -translate-y-2"></div>
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] hidden max-w-xs w-full px-4 py-3 rounded-xl shadow-xl text-xs font-bold text-center transition-all duration-300 pointer-events-none transform -translate-y-2 opacity-0"></div>
 
     <!-- Web Push 订阅广播弹窗 -->
     <div id="pushPromptBanner" class="hidden fixed top-3 left-3 right-3 max-w-md mx-auto z-50 bg-amber-900/95 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-amber-700/80 flex items-center justify-between transition-all">
@@ -97,7 +115,7 @@
 
     <!-- 封面及轮播区域 -->
     <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-lg cursor-grab active:cursor-grabbing bg-white transform-gpu">
-        <img id="carouselImage" src="cafe1.jpeg" class="w-full h-auto block transition-opacity duration-500 opacity-100 pointer-events-none will-change-[opacity]" alt="GRC CAFE 展示">
+        <img id="carouselImage" src="cafe1.jpeg" class="w-full h-auto block transition-opacity duration-300 opacity-100 pointer-events-none will-change-[opacity]" alt="GRC CAFE 展示">
         <div id="carouselDots" class="absolute top-3 right-3 flex space-x-1.5 z-20 bg-white/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/50 shadow-sm"></div>
     </div>
 
@@ -106,8 +124,7 @@
             <div class="flex justify-start items-center pb-4 border-b border-slate-100">
                 <div class="flex items-center space-x-2 bg-amber-50 border border-amber-200/60 px-3 py-1.5 rounded-xl">
                     <span class="text-xs font-medium text-slate-500">截单规则<span class="text-[10px] text-slate-400 font-normal">Order Cut-Off</span>:</span>
-                    <span id="deadlineText" class="text-xs font-bold text-amber-900">周四/周五 8PM 截单<span class="text-[10px] font-normal text-amber-700/80">(Thu/Fri 8PM)</span>
-                    </span>
+                    <span id="deadlineText" class="text-xs font-bold text-amber-900">周四/周五 8PM 截单<span class="text-[10px] font-normal text-amber-700/80">(Thu/Fri 8PM)</span></span>
                 </div>
             </div>
 
@@ -329,7 +346,7 @@
                 </div>
             </div>
 
-            <div id="queryResultsContainer" class="max-h-64 overflow-y-auto space-y-2.5 pt-2 text-left">
+            <div id="queryResultsContainer" class="max-h-64 overflow-y-auto space-y-2.5 pt-2 text-left hide-scrollbar">
                 <div class="text-center text-xs text-slate-400 py-6">请输入名字后点击查询<br><span class="text-[10px]">Enter name to search</span></div>
             </div>
 
@@ -343,8 +360,13 @@
     </div>
 
     <script>
-        // --- 1. Firebase 初始化与 Push 推送部分 ---
+        // --- 全局配置常量 ---
+        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw-t99KLkdMEcFzto_gfkosudLT3ElFVOqndO3KHZImHgx71hUqr9CDNSRg2Km45-j9Mw/exec"; 
+        const MY_PHONE_NUMBER = "60162207137"; 
+        const DUITNOW_PHONE = "0162207137";   
         const VAPID_KEY = "BJNZbNNFDkM5831pbQrjwoQ3sqpGNLJ3MEzA1EmUftHIfOLFIrRim9S4l_qLtWw4rqRQ3D5cJa8R5myRG5QFIeI";
+
+        // --- 1. Firebase 初始化与 Push 推送部分 ---
         const firebaseConfig = {
             apiKey: "AIzaSyBQ0p9wjbzNbxiUnPOHvcoPoL8EZpHrn94",
             authDomain: "grc-cafe-pwa.firebaseapp.com",
@@ -389,7 +411,7 @@
         }
 
         async function savePushTokenToBackend() {
-            if (!messaging) return;
+            if (!messaging || !GOOGLE_SCRIPT_URL) return;
             try {
                 const registration = await navigator.serviceWorker.ready;
                 const token = await messaging.getToken({
@@ -421,7 +443,7 @@
             });
         }
 
-        // --- 2. PWA 与 Core UI 脚本 ---
+        // --- 2. PWA & UI 基础辅助函数 ---
         let deferredPrompt = null;
         const PROMPT_COOLDOWN = 24 * 60 * 60 * 1000; 
 
@@ -476,22 +498,26 @@
             if (!toast) return;
 
             toast.innerText = msg;
-            toast.className = "fixed top-5 left-1/2 -translate-x-1/2 z-[100] max-w-xs w-full px-4 py-3 rounded-xl shadow-xl text-xs font-bold text-center transition-all duration-300 pointer-events-none transform translate-y-0 opacity-100 ";
+            let baseClass = "fixed top-5 left-1/2 -translate-x-1/2 z-[100] max-w-xs w-full px-4 py-3 rounded-xl shadow-xl text-xs font-bold text-center transition-all duration-300 pointer-events-none transform translate-y-0 opacity-100 ";
             
             if (type === 'error') {
-                toast.className += "bg-rose-600 text-white shadow-rose-600/30";
+                baseClass += "bg-rose-600 text-white shadow-rose-600/30";
             } else if (type === 'success') {
-                toast.className += "bg-emerald-600 text-white shadow-emerald-600/30";
+                baseClass += "bg-emerald-600 text-white shadow-emerald-600/30";
             } else if (type === 'warning') {
-                toast.className += "bg-amber-500 text-slate-950 shadow-amber-500/30";
+                baseClass += "bg-amber-500 text-slate-950 shadow-amber-500/30";
             } else {
-                toast.className += "bg-slate-800 text-white shadow-slate-800/30";
+                baseClass += "bg-slate-800 text-white shadow-slate-800/30";
             }
+
+            toast.className = baseClass;
 
             if (toastTimer) clearTimeout(toastTimer);
             toastTimer = setTimeout(() => {
                 toast.className = toast.className.replace('translate-y-0 opacity-100', '-translate-y-2 opacity-0');
+                setTimeout(() => { toast.classList.add('hidden'); }, 300);
             }, 3000);
+            toast.classList.remove('hidden');
         }
 
         function loadSavedCustomerName() {
@@ -508,6 +534,7 @@
             }
         }
 
+        // --- 3. 菜单状态 & 业务数据变量 ---
         let ENABLE_FRI_DINNER = true;
         let ENABLE_SAT_DINNER = true;
         let ENABLE_SAT_DESSERT = true;
@@ -518,11 +545,6 @@
         let DESSERT_PRICE = 5;    
         let SAT_DESSERT_LIMIT = 20;
         let DESSERT_ORDERED_QTY = 0;
-
-        const MY_PHONE_NUMBER = "60162207137"; 
-        const DUITNOW_PHONE = "0162207137";   
-        
-        const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw-t99KLkdMEcFzto_gfkosudLT3ElFVOqndO3KHZImHgx71hUqr9CDNSRg2Km45-j9Mw/exec"; 
 
         let SLIDES = [];
         let currentTotal = "0.00";
@@ -546,12 +568,6 @@
 
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             document.getElementById('copyPhoneSubText').innerText = `Copy Phone (${DUITNOW_PHONE})`;
-            
-            const baseImages = ["cafe1.jpeg", "instruction.jpeg", "pwa.jpeg"];
-            baseImages.forEach(src => {
-                const img = new Image();
-                img.src = src;
-            });
 
             await fetchRemoteConfig();
             updateCarouselSlides();
@@ -584,22 +600,20 @@
                     if (config.dessertOrderedQty !== undefined) DESSERT_ORDERED_QTY = Number(config.dessertOrderedQty);
                 }
             } catch (err) {
-                console.log("无法连接后台 API，使用默认配置 / Cannot connect to API, using defaults", err);
+                console.log("无法连接后台 API，使用默认配置", err);
             }
         }
 
         function updateCarouselSlides() {
-            let dynamicSlides = [
-                { image: "cafe1.jpeg" }
-            ];
+            let dynamicSlides = [{ image: "cafe1.jpeg" }];
 
-            if (ENABLE_FRI_DINNER && FRI_DISHES && FRI_DISHES.length > 0) {
+            if (ENABLE_FRI_DINNER && FRI_DISHES.length > 0) {
                 FRI_DISHES.forEach((dish, idx) => {
                     dynamicSlides.push({ image: `fri_dish${idx + 1}.jpeg`, title: dish.name });
                 });
             }
 
-            if (ENABLE_SAT_DINNER && SAT_DISHES && SAT_DISHES.length > 0) {
+            if (ENABLE_SAT_DINNER && SAT_DISHES.length > 0) {
                 SAT_DISHES.forEach((dish, idx) => {
                     dynamicSlides.push({ image: `sat_dish${idx + 1}.jpeg`, title: dish.name });
                 });
@@ -613,13 +627,6 @@
             dynamicSlides.push({ image: "pwa.jpeg" });
 
             SLIDES = dynamicSlides;
-            if (SLIDES.length === 0) SLIDES = [{ image: "cafe1.jpeg" }];
-
-            SLIDES.forEach(s => {
-                const img = new Image();
-                img.src = s.image;
-            });
-
             renderDots();
             showSlide(0);
         }
@@ -647,11 +654,7 @@
             const satDateStr = `${targetSaturday.getMonth() + 1}/${targetSaturday.getDate()}`;
 
             const friHeaderEl = document.getElementById('txtFriSectionHeader');
-            if (FRI_DISHES.length > 1) {
-                friHeaderEl.innerHTML = `<span>📅 星期五晚餐 (${friDateStr}) - ${FRI_DISHES.length}款可选</span><span class="text-[10px] font-normal text-amber-700">Friday Dinner (${friDateStr}) - ${FRI_DISHES.length} items available</span>`;
-            } else {
-                friHeaderEl.innerHTML = `<span>📅 星期五晚餐 (${friDateStr})</span><span class="text-[10px] font-normal text-amber-700">Friday Dinner (${friDateStr})</span>`;
-            }
+            friHeaderEl.innerHTML = `<span>📅 星期五晚餐 (${friDateStr}) ${FRI_DISHES.length > 1 ? `- ${FRI_DISHES.length}款可选` : ''}</span><span class="text-[10px] font-normal text-amber-700">Friday Dinner (${friDateStr})</span>`;
 
             const friListContainer = document.getElementById('friDishesList');
             if (FRI_DISHES.length === 0) {
@@ -694,9 +697,9 @@
                                     <span class="text-xs font-bold text-slate-600 block leading-tight">数量 / Qty</span>
                                 </div>
                                 <div class="flex items-center space-x-3">
-                                    <button type="button" id="btnFriMinus_${idx}" onclick="adjustFriQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-base flex items-center justify-center border border-amber-300/60 shadow-sm active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed">-</button>
+                                    <button type="button" id="btnFriMinus_${idx}" onclick="adjustFriQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-base flex items-center justify-center border border-amber-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">-</button>
                                     <input type="number" id="qtyFri_${idx}" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
-                                    <button type="button" id="btnFriPlus_${idx}" onclick="adjustFriQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-base flex items-center justify-center border border-amber-300/60 shadow-sm active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed">+</button>
+                                    <button type="button" id="btnFriPlus_${idx}" onclick="adjustFriQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-base flex items-center justify-center border border-amber-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">+</button>
                                 </div>
                             </div>
                         </div>
@@ -705,11 +708,7 @@
             }
 
             const satHeaderEl = document.getElementById('headerSat');
-            if (SAT_DISHES.length > 1) {
-                satHeaderEl.innerHTML = `<span>🗓️ 星期六晚餐 (${satDateStr}) - ${SAT_DISHES.length}款可选</span><span class="text-[10px] font-normal text-indigo-700">Saturday Dinner (${satDateStr}) - ${SAT_DISHES.length} items available</span>`;
-            } else {
-                satHeaderEl.innerHTML = `<span>🗓️ 星期六晚餐 (${satDateStr})</span><span class="text-[10px] font-normal text-indigo-700">Saturday Dinner (${satDateStr})</span>`;
-            }
+            satHeaderEl.innerHTML = `<span>🗓️ 星期六晚餐 (${satDateStr}) ${SAT_DISHES.length > 1 ? `- ${SAT_DISHES.length}款可选` : ''}</span><span class="text-[10px] font-normal text-indigo-700">Saturday Dinner (${satDateStr})</span>`;
 
             const satListContainer = document.getElementById('satDishesList');
             if (SAT_DISHES.length === 0) {
@@ -752,9 +751,9 @@
                                     <span class="text-xs font-bold text-slate-600 block leading-tight">数量 / Qty</span>
                                 </div>
                                 <div class="flex items-center space-x-3">
-                                    <button type="button" id="btnSatMinus_${idx}" onclick="adjustSatQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold text-base flex items-center justify-center border border-indigo-300/60 shadow-sm active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed">-</button>
+                                    <button type="button" id="btnSatMinus_${idx}" onclick="adjustSatQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold text-base flex items-center justify-center border border-indigo-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">-</button>
                                     <input type="number" id="qtySat_${idx}" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
-                                    <button type="button" id="btnSatPlus_${idx}" onclick="adjustSatQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold text-base flex items-center justify-center border border-indigo-300/60 shadow-sm active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed">+</button>
+                                    <button type="button" id="btnSatPlus_${idx}" onclick="adjustSatQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold text-base flex items-center justify-center border border-indigo-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">+</button>
                                 </div>
                             </div>
                         </div>
@@ -792,7 +791,7 @@
                                         <span class="text-[10px] text-rose-500/80">/ 份 (portion)</span>
                                     </div>
                                     <div class="mt-1">
-                                        <span id="badgeDessertCount" class="text-[10px] ${isDessertSoldOut ? 'bg-rose-100 text-rose-800' : 'bg-rose-100 text-rose-800'} font-bold px-2 py-0.5 rounded-full inline-block">已订 ${DESSERT_ORDERED_QTY} / ${SAT_DESSERT_LIMIT} 份 (Booked ${DESSERT_ORDERED_QTY}/${SAT_DESSERT_LIMIT})</span>
+                                        <span id="badgeDessertCount" class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full inline-block">已订 ${DESSERT_ORDERED_QTY} / ${SAT_DESSERT_LIMIT} 份 (Booked ${DESSERT_ORDERED_QTY}/${SAT_DESSERT_LIMIT})</span>
                                     </div>
                                 </div>
                             </div>
@@ -803,9 +802,9 @@
                                 <span class="text-xs font-bold text-slate-600 block leading-tight">数量 / Qty</span>
                             </div>
                             <div class="flex items-center space-x-3">
-                                <button type="button" id="btnDessertMinus" onclick="adjustQty('Dessert', -1)" class="w-8 h-8 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-900 font-bold text-base flex items-center justify-center border border-rose-300/60 shadow-sm active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed">-</button>
+                                <button type="button" id="btnDessertMinus" onclick="adjustQty('Dessert', -1)" class="w-8 h-8 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-900 font-bold text-base flex items-center justify-center border border-rose-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">-</button>
                                 <input type="number" id="qtyDessert" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
-                                <button type="button" id="btnDessertPlus" onclick="adjustQty('Dessert', 1)" class="w-8 h-8 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-900 font-bold text-base flex items-center justify-center border border-rose-300/60 shadow-sm active:scale-95 transition disabled:opacity-40 disabled:cursor-not-allowed">+</button>
+                                <button type="button" id="btnDessertPlus" onclick="adjustQty('Dessert', 1)" class="w-8 h-8 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-900 font-bold text-base flex items-center justify-center border border-rose-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">+</button>
                             </div>
                         </div>
                     </div>
@@ -818,6 +817,7 @@
             calculateTotal();
         }
 
+        // --- 4. 表单交互与数量调整 ---
         function toggleFriDish(idx) {
             const chk = document.getElementById(`chkFri_${idx}`);
             const card = document.getElementById(`cardFri_${idx}`);
@@ -886,7 +886,6 @@
             const btnPlus = document.getElementById(`btnFriPlus_${idx}`);
 
             const currentVal = parseInt(input.value) || 1;
-
             if (btnMinus) btnMinus.disabled = currentVal <= 1;
             if (btnPlus) btnPlus.disabled = currentVal >= remaining;
         }
@@ -902,22 +901,18 @@
             const btnPlus = document.getElementById(`btnSatPlus_${idx}`);
 
             const currentVal = parseInt(input.value) || 1;
-
             if (btnMinus) btnMinus.disabled = currentVal <= 1;
             if (btnPlus) btnPlus.disabled = currentVal >= remaining;
         }
 
         function updateDessertButtonStates() {
             const remaining = Math.max(0, SAT_DESSERT_LIMIT - DESSERT_ORDERED_QTY);
-
             const input = document.getElementById('qtyDessert');
             const btnMinus = document.getElementById('btnDessertMinus');
             const btnPlus = document.getElementById('btnDessertPlus');
 
             if (!input) return;
-
             const currentVal = parseInt(input.value) || 1;
-
             if (btnMinus) btnMinus.disabled = currentVal <= 1;
             if (btnPlus) btnPlus.disabled = currentVal >= remaining;
         }
@@ -931,17 +926,10 @@
             const booked = Number(dish.booked) || 0;
             const remaining = Math.max(0, limit - booked);
 
-            if (booked >= limit) {
-                showToast("⚠️ 该菜品名额已满！/ Dish is fully booked!", "warning");
-                input.value = 1;
-                updateFriButtonStates(idx);
-                return;
-            }
-
             if (val < 1) val = 1;
             if (val > remaining) {
                 val = remaining;
-                showToast(`⚠️ 剩余名额不足！最多只能预订 ${remaining} 份。\nNot enough quota! Max ${remaining} portion(s).`, "warning");
+                showToast(`⚠️ 最多可预订 ${remaining} 份`, "warning");
             }
 
             input.value = val;
@@ -958,17 +946,10 @@
             const booked = Number(dish.booked) || 0;
             const remaining = Math.max(0, limit - booked);
 
-            if (booked >= limit) {
-                showToast("⚠️ 该菜品名额已满！/ Dish is fully booked!", "warning");
-                input.value = 1;
-                updateSatButtonStates(idx);
-                return;
-            }
-
             if (val < 1) val = 1;
             if (val > remaining) {
                 val = remaining;
-                showToast(`⚠️ 剩余名额不足！最多只能预订 ${remaining} 份。\nNot enough quota! Max ${remaining} portion(s).`, "warning");
+                showToast(`⚠️ 最多可预订 ${remaining} 份`, "warning");
             }
 
             input.value = val;
@@ -978,21 +959,15 @@
 
         function adjustQty(type, amount) {
             const input = document.getElementById(`qty${type}`);
+            if (!input) return;
+
             let val = (parseInt(input.value) || 1) + amount;
-            
             if (type === 'Dessert') {
                 const remaining = Math.max(0, SAT_DESSERT_LIMIT - DESSERT_ORDERED_QTY);
-
-                if (DESSERT_ORDERED_QTY >= SAT_DESSERT_LIMIT) {
-                    showToast("⚠️ 该糖水名额已满！/ Dessert is fully booked!", "warning");
-                    input.value = 1;
-                    updateDessertButtonStates();
-                    return;
-                }
                 if (val < 1) val = 1;
                 if (val > remaining) {
                     val = remaining;
-                    showToast(`⚠️ 剩余名额不足！最多只能预订 ${remaining} 份。\nNot enough quota! Max ${remaining} portion(s).`, "warning");
+                    showToast(`⚠️ 最多可预订 ${remaining} 份`, "warning");
                 }
                 input.value = val;
                 updateDessertButtonStates();
@@ -1070,6 +1045,7 @@
             }
         }
 
+        // --- 5. 轮播图控制 ---
         function renderDots() {
             document.getElementById('carouselDots').innerHTML = SLIDES.map((_, i) => 
                 `<button type="button" onclick="goToSlide(${i})" id="dot${i}" class="w-2 h-2 rounded-full ${i === 0 ? 'bg-amber-500' : 'bg-slate-300'} transition-all focus:outline-none"></button>`
@@ -1082,7 +1058,7 @@
             carouselTimer = setInterval(() => {
                 slideIndex = (slideIndex + 1) % SLIDES.length;
                 showSlide(slideIndex);
-            }, 10000);
+            }, 8000);
         }
 
         function stopCarousel() {
@@ -1110,26 +1086,13 @@
                     if (dot) dot.className = (i === index) ? "w-2 h-2 rounded-full bg-amber-500 transition-all focus:outline-none" : "w-2 h-2 rounded-full bg-slate-300 transition-all focus:outline-none";
                 });
                 img.style.opacity = '1';
-            }, 200);
+            }, 150);
         }
 
         function initSwipeEvents() {
             const container = document.getElementById('carouselContainer');
-            
-            container.addEventListener('touchstart', (e) => { 
-                stopCarousel(); 
-                touchStartX = e.changedTouches[0].screenX; 
-            }, { passive: true });
-            
-            container.addEventListener('touchend', (e) => { 
-                touchEndX = e.changedTouches[0].screenX; 
-                handleSwipe(); 
-                startCarousel(); 
-            }, { passive: true });
-
-            container.addEventListener('mousedown', () => { stopCarousel(); });
-            container.addEventListener('mouseup', () => { startCarousel(); });
-            container.addEventListener('mouseleave', () => { startCarousel(); });
+            container.addEventListener('touchstart', (e) => { stopCarousel(); touchStartX = e.changedTouches[0].screenX; }, { passive: true });
+            container.addEventListener('touchend', (e) => { touchEndX = e.changedTouches[0].screenX; handleSwipe(); startCarousel(); }, { passive: true });
         }
 
         function handleSwipe() {
@@ -1142,6 +1105,7 @@
             }
         }
 
+        // --- 6. 复制与分享功能 ---
         function safeCopyText(text, successCallback) {
             if (navigator.clipboard && window.isSecureContext) {
                 navigator.clipboard.writeText(text).then(successCallback);
@@ -1160,72 +1124,55 @@
 
         function copyAmount() {
             safeCopyText(currentTotal, () => {
-                showToast(`✅ 已复制金额 / Amount Copied (RM ${currentTotal})`, "success");
-                const span = document.getElementById('copyAmountText');
-                const orig = span.innerText;
-                span.innerText = `✅ 已复制金额 (RM ${currentTotal})`;
-                setTimeout(() => { span.innerText = orig; }, 2500);
+                showToast(`✅ 已复制金额 (RM ${currentTotal})`, "success");
             });
         }
 
         function copyPhone() {
             safeCopyText(DUITNOW_PHONE, () => {
-                showToast(`✅ 已复制 DuitNow 手机号 / Phone Copied (${DUITNOW_PHONE})`, "success");
-                const span = document.getElementById('copyPhoneText');
-                const orig = span.innerText;
-                span.innerText = `✅ 已复制号码 (${DUITNOW_PHONE})`;
-                setTimeout(() => { span.innerText = orig; }, 2500);
+                showToast(`✅ 已复制 DuitNow 号码 (${DUITNOW_PHONE})`, "success");
             });
         }
 
         const shareUrl = window.location.href;
         const shareTitle = "GRC CAFE - 晚餐与糖水预订 | Dinner & Dessert Pre-Order";
-        const shareDescription = "来看看这周的美味晚餐和糖水菜单，支持在线预订！Delicious dinner & dessert pre-order menu!";
+        const shareDescription = "来看看这周的美味晚餐和糖水菜单，支持在线预订！";
 
         function nativeShare() {
             if (navigator.share) {
-                navigator.share({ title: shareTitle, text: shareDescription, url: shareUrl }).catch((error) => console.log('分享取消:', error));
+                navigator.share({ title: shareTitle, text: shareDescription, url: shareUrl }).catch(() => {});
             } else {
-                safeCopyText(shareUrl, () => { showToast("✅ 链接已复制！\nLink copied to clipboard!", "success"); });
+                safeCopyText(shareUrl, () => { showToast("✅ 链接已复制！", "success"); });
             }
         }
 
         function shareToWhatsApp() {
-            const text = `${shareTitle}\n${shareDescription}\n👉 点击链接查看菜单并预订: ${shareUrl}`;
+            const text = `${shareTitle}\n${shareDescription}\n👉 点击预订: ${shareUrl}`;
             window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
         }
 
         function shareToMessenger() {
-            const shareText = `来一起看看 GRC CAFE 这周的美味晚餐和糖水菜单，支持在线预订哦！\nCheck out GRC CAFE's weekly menu & pre-order online!\n👉 ${shareUrl}`;
+            const shareText = `${shareTitle}\n${shareDescription}\n👉 ${shareUrl}`;
             safeCopyText(shareText, () => {
-                showToast("✅ 菜单文案已复制！即将打开 Messenger\nMenu copied! Opening Messenger...", "info");
-                setTimeout(() => {
-                    window.open("https://www.messenger.com/", "_blank");
-                }, 1000);
+                showToast("✅ 菜单信息已复制！即将打开 Messenger", "info");
+                setTimeout(() => { window.open("https://www.messenger.com/", "_blank"); }, 1000);
             });
         }
 
         function formatLocalTimestamp(isoString) {
             if (!isoString) return '';
-            if (!isoString.includes('T') && !isoString.endsWith('Z')) {
-                return isoString;
-            }
             const date = new Date(isoString);
-            return date.toLocaleString("zh-CN", { 
-                timeZone: "Asia/Kuala_Lumpur",
-                hour12: false 
-            }).replace(/\//g, '-');
+            return isNaN(date.getTime()) ? isoString : date.toLocaleString("zh-CN", { timeZone: "Asia/Kuala_Lumpur", hour12: false });
         }
 
+        // --- 7. 订单查询 Modal ---
         function openOrderQueryModal() {
             const currentName = document.getElementById('name').value.trim() || localStorage.getItem('grc_customer_name') || '';
             if (currentName) {
                 document.getElementById('queryNameInput').value = currentName;
             }
             document.getElementById('queryModal').classList.remove('hidden');
-            if (currentName) {
-                submitQueryOrders();
-            }
+            if (currentName) submitQueryOrders();
         }
 
         function closeOrderQueryModal() {
@@ -1237,62 +1184,55 @@
             const container = document.getElementById('queryResultsContainer');
             
             if (!nameInput) {
-                showToast("请输入要查询的名字！\nPlease enter a name!", "warning");
+                showToast("请输入要查询的名字！", "warning");
                 return;
             }
 
-            container.innerHTML = `<div class="text-center text-xs text-slate-400 py-6"><i class="fa-solid fa-spinner animate-spin"></i> 正在查询当前有效订单...<br><span class="text-[10px]">Searching active orders...</span></div>`;
+            container.innerHTML = `<div class="text-center text-xs text-slate-400 py-6"><i class="fa-solid fa-spinner animate-spin"></i> 正在查询当前订单...</div>`;
 
             try {
                 const res = await fetch(`${GOOGLE_SCRIPT_URL}?action=query&name=${encodeURIComponent(nameInput)}`);
                 const data = await res.json();
 
                 if (data.success) {
-                    if (data.orders.length === 0) {
-                        container.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-xl">没有找到关于 "${nameInput}" 的当前活动订单。<br><span class="text-[10px]">No active orders found for "${nameInput}".</span></div>`;
+                    if (!data.orders || data.orders.length === 0) {
+                        container.innerHTML = `<div class="text-center text-xs text-slate-400 py-6 bg-slate-50 rounded-xl">未查询到 "${nameInput}" 的活动订单。</div>`;
                     } else {
-                        container.innerHTML = data.orders.map((order, idx) => {
+                        container.innerHTML = data.orders.map(order => {
                             const subTotalVal = Number(order.subtotal) || 0;
-                            const summaryText = `【GRC CAFE 订单凭证 / Order Receipt】\n姓名 Name: ${order.name}\n分类 Category: ${order.category}\n餐点 Item: ${order.detail} x ${order.qty}\n金额 Amount: RM ${subTotalVal.toFixed(2)}\n时间 Time: ${formatLocalTimestamp(order.timestamp)}`;
+                            const summaryText = `【GRC CAFE 订单】\n姓名: ${order.name}\n餐点: ${order.detail} x ${order.qty}\n金额: RM ${subTotalVal.toFixed(2)}`;
                             
                             return `
-                                <div class="p-3.5 rounded-xl border border-emerald-200/80 bg-emerald-50/40 text-xs space-y-2 shadow-sm relative">
+                                <div class="p-3.5 rounded-xl border border-emerald-200/80 bg-emerald-50/40 text-xs space-y-2 shadow-sm">
                                     <div class="flex justify-between items-center font-bold text-slate-800">
-                                        <span class="flex items-center space-x-1.5">
-                                            <span>📦 ${order.category}</span>
-                                            <span class="bg-emerald-100 text-emerald-800 text-[9px] font-bold px-1.5 py-0.5 rounded-md">已预订 Active</span>
-                                        </span>
+                                        <span>📦 ${order.category}</span>
                                         <span class="text-emerald-700 font-black text-sm">RM ${subTotalVal.toFixed(2)}</span>
                                     </div>
-                                    <div class="text-slate-600">明细 Details: <span class="font-semibold text-slate-800">${order.detail}</span> (数量/Qty: ${order.qty})</div>
-                                    ${order.notes && order.notes !== '无 None' ? `<div class="text-[10px] text-rose-500 font-medium">备注 Remarks: ${order.notes}</div>` : ''}
+                                    <div class="text-slate-600">明细: <span class="font-semibold text-slate-800">${order.detail}</span> (x${order.qty})</div>
+                                    ${order.notes && order.notes !== '无 None' ? `<div class="text-[10px] text-rose-500">备注: ${order.notes}</div>` : ''}
                                     <div class="flex justify-between items-center text-[10px] text-slate-400 pt-2 border-t border-emerald-100">
-                                        <span>下单时间 Order Time: ${formatLocalTimestamp(order.timestamp)}</span>
-                                        <button type="button" onclick="copyOrderSummary('${encodeURIComponent(summaryText)}')" class="bg-white hover:bg-emerald-100 text-emerald-800 font-bold px-2 py-1 rounded-lg border border-emerald-200 shadow-sm transition active:scale-95 flex items-center space-x-1">
-                                            <i class="fa-regular fa-copy"></i>
-                                            <span>复制摘要 / Copy</span>
-                                        </button>
+                                        <span>时间: ${formatLocalTimestamp(order.timestamp)}</span>
+                                        <button type="button" onclick="copyOrderSummary('${encodeURIComponent(summaryText)}')" class="bg-white text-emerald-800 font-bold px-2 py-1 rounded-lg border border-emerald-200 shadow-sm transition active:scale-95">复制摘要</button>
                                     </div>
                                 </div>
                             `;
                         }).join('');
                     }
                 } else {
-                    container.innerHTML = `<div class="text-center text-xs text-rose-500 py-4">查询失败 Search Failed: ${data.message || '未知错误 Unknown Error'}</div>`;
+                    container.innerHTML = `<div class="text-center text-xs text-rose-500 py-4">查询失败: ${data.message || '未知错误'}</div>`;
                 }
             } catch (err) {
-                console.error(err);
-                container.innerHTML = `<div class="text-center text-xs text-rose-500 py-4">网络错误，无法连接服务器。<br><span class="text-[10px]">Network error. Cannot connect to server.</span></div>`;
+                container.innerHTML = `<div class="text-center text-xs text-rose-500 py-4">网络错误，无法连接服务器。</div>`;
             }
         }
 
         function copyOrderSummary(encodedStr) {
-            const summary = decodeURIComponent(encodedStr);
-            safeCopyText(summary, () => {
-                showToast("✅ 订单摘要已复制！\nOrder summary copied!", "success");
+            safeCopyText(decodeURIComponent(encodedStr), () => {
+                showToast("✅ 订单摘要已复制！", "success");
             });
         }
 
+        // --- 8. 下单核心提交逻辑 ---
         async function handleOrder(event) {
             event.preventDefault();
 
@@ -1302,8 +1242,7 @@
                     const chk = document.getElementById(`chkFri_${idx}`);
                     if (chk && chk.checked) {
                         const q = parseInt(document.getElementById(`qtyFri_${idx}`).value) || 1;
-                        const price = Number(dish.price) || 0;
-                        friSelectedOrders.push({ name: dish.name, qty: q, subtotal: q * price });
+                        friSelectedOrders.push({ name: dish.name, qty: q, subtotal: q * (Number(dish.price) || 0) });
                     }
                 });
             }
@@ -1314,8 +1253,7 @@
                     const chk = document.getElementById(`chkSat_${idx}`);
                     if (chk && chk.checked) {
                         const q = parseInt(document.getElementById(`qtySat_${idx}`).value) || 1;
-                        const price = Number(dish.price) || 0;
-                        satSelectedOrders.push({ name: dish.name, qty: q, subtotal: q * price });
+                        satSelectedOrders.push({ name: dish.name, qty: q, subtotal: q * (Number(dish.price) || 0) });
                     }
                 });
             }
@@ -1324,13 +1262,12 @@
             const dessertChecked = chkDessert ? chkDessert.checked : false;
 
             if (friSelectedOrders.length === 0 && satSelectedOrders.length === 0 && !dessertChecked) {
-                showToast("⚠️ 请至少勾选一项餐点！\nPlease select at least one item!", "warning");
+                showToast("⚠️ 请至少勾选一项餐点！", "warning");
                 return;
             }
 
             const btn = document.getElementById('submitBtn');
             const overlay = document.getElementById('loadingOverlay');
-            const loadingText = document.getElementById('loadingText');
 
             btn.disabled = true;
             if (overlay) overlay.classList.remove('hidden');
@@ -1351,22 +1288,16 @@
                 dessertOrder: null
             };
 
-            friSelectedOrders.forEach(item => {
-                selectedItems.push(`星期五 Friday: ${item.name} x ${item.qty}份/portion(s)`);
-            });
-
-            satSelectedOrders.forEach(item => {
-                selectedItems.push(`星期六 Saturday: ${item.name} x ${item.qty}份/portion(s)`);
-            });
+            friSelectedOrders.forEach(item => { selectedItems.push(`星期五 Friday: ${item.name} x ${item.qty}份`); });
+            satSelectedOrders.forEach(item => { selectedItems.push(`星期六 Saturday: ${item.name} x ${item.qty}份`); });
 
             if (dessertChecked && ENABLE_SAT_DESSERT) {
                 const q = parseInt(document.getElementById('qtyDessert').value) || 1;
-                const dPrice = Number(DESSERT_PRICE) || 0;
-                selectedItems.push(`星期六 Dessert: ${SAT_DESSERT_NAME} x ${q}份/portion(s)`);
-                payload.dessertOrder = { checked: true, detail: SAT_DESSERT_NAME, qty: q, subtotal: q * dPrice };
+                selectedItems.push(`星期六 Dessert: ${SAT_DESSERT_NAME} x ${q}份`);
+                payload.dessertOrder = { checked: true, detail: SAT_DESSERT_NAME, qty: q, subtotal: q * Number(DESSERT_PRICE) };
             }
 
-            let rawMessage = `🛒 *【晚餐/糖水预订订单 Dinner & Dessert Order】*\n` +
+            let rawMessage = `🛒 *【晚餐/糖水预订订单】*\n` +
                              `--------------------------------\n` +
                              `👤 *名字 Name*：${name}\n` +
                              `🍱 *已选餐点 Items*：\n`;
@@ -1376,15 +1307,7 @@
             rawMessage += `💰 *总计 Total*：RM ${total}\n` +
                           `📝 *备注 Remarks*：${notes}\n` +
                           `--------------------------------\n` +
-                          `已下单, 已按照 RM ${total} 完成转账/准备付款, 请查收!\n` +
-                          `Order placed. Transferred/Ready to pay RM ${total}, please check!`;
-
-            if (!GOOGLE_SCRIPT_URL) {
-                showToast("错误：未配置后端 API 地址。\nError: Backend API URL not configured.", "error");
-                btn.disabled = false;
-                if (overlay) overlay.classList.add('hidden');
-                return;
-            }
+                          `已下单，请查收转账！`;
 
             try {
                 const controller = new AbortController();
@@ -1401,35 +1324,18 @@
                 const result = await response.json();
 
                 if (result && result.success) {
-                    if (loadingText) {
-                        loadingText.innerHTML = `<div>保存成功！正在打开 WhatsApp...</div><div class="text-xs text-amber-200 font-normal">Saved successfully! Opening WhatsApp...</div>`;
-                    }
-                    
                     setTimeout(() => {
                         window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
-                        
-                        const handleVisibilityChange = () => {
-                            if (document.visibilityState === 'visible') {
-                                document.removeEventListener('visibilitychange', handleVisibilityChange);
-                                window.location.reload();
-                            }
-                        };
-                        document.addEventListener('visibilitychange', handleVisibilityChange);
-
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 3000);
-
-                    }, 400);
+                        setTimeout(() => { window.location.reload(); }, 2500);
+                    }, 300);
                 } else {
-                    throw new Error(result.message || "服务器返回未知错误");
+                    throw new Error(result.message || "服务器响应异常");
                 }
-
             } catch (err) {
                 console.error("提交失败:", err);
                 if (overlay) overlay.classList.add('hidden');
                 btn.disabled = false;
-                showToast(`❌ 提交失败 / Submission Failed: ${err.message || '网络连接超时 Timeout'}`, "error");
+                showToast(`❌ 提交失败: ${err.message || '网络超时'}`, "error");
             }
         }
     </script>
