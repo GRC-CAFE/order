@@ -58,7 +58,7 @@
         </div>
         <div class="flex items-center space-x-2">
             <button type="button" onclick="dismissPushBanner()" class="text-amber-300 hover:text-white text-xs px-2 py-1">暂不</button>
-            <button type="button" onclick="requestPushNotificationPermission()" class="bg-white text-amber-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-md active:scale-95 transition flex flex-col items-center">
+            <button type="button" onclick="requestNotificationPermission()" class="bg-white text-amber-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-md active:scale-95 transition flex flex-col items-center">
                 <span>允许提醒</span>
             </button>
         </div>
@@ -367,7 +367,7 @@
         const DUITNOW_PHONE = "0162207137";   
         const VAPID_KEY = "BJNZbNNFDkM5831pbQrjwoQ3sqpGNLJ3MEzA1EmUftHIfOLFIrRim9S4l_qLtWw4rqRQ3D5cJa8R5myRG5QFIeI";
 
-        // --- 1. Firebase 初始化与 Push 推送部分 ---
+        // --- 1. Firebase 初始化与 Web Push 逻辑 ---
         const firebaseConfig = {
             apiKey: "AIzaSyBQ0p9wjbzNbxiUnPOHvcoPoL8EZpHrn94",
             authDomain: "grc-cafe-pwa.firebaseapp.com",
@@ -396,21 +396,23 @@
             document.getElementById('pushPromptBanner').classList.add('hidden');
         }
 
-        async function requestPushNotificationPermission() {
+        // 请求系统通知权限并获取 Token
+        async function requestNotificationPermission() {
             dismissPushBanner();
             try {
                 const permission = await Notification.requestPermission();
                 if (permission === 'granted') {
-                    showToast("✅ 已成功开启菜单推送提醒！", "success");
+                    showToast("✅ 已授权通知权限", "success");
                     await savePushTokenToBackend();
-                } else {
-                    showToast("⚠️ 推送权限已被拒绝", "warning");
+                } else if (permission === 'denied') {
+                    showToast("⚠️ 通知权限已被拒绝，请点击浏览器地址栏设置解除拦截", "warning");
                 }
             } catch (err) {
-                console.error("请求推送权限失败:", err);
+                console.error("请求通知权限或获取 Token 异常：", err);
             }
         }
 
+        // 发送 Token 至 Google Apps Script 后端保存
         async function savePushTokenToBackend() {
             if (!messaging || !GOOGLE_SCRIPT_URL) return;
             try {
@@ -421,23 +423,30 @@
                 });
 
                 if (token) {
+                    console.log("获取成功 - FCM Token:", token);
                     await fetch(GOOGLE_SCRIPT_URL, {
                         method: 'POST',
                         headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                         body: JSON.stringify({
                             action: 'subscribe',
                             token: token,
+                            timestamp: new Date().toISOString(),
                             userAgent: navigator.userAgent
                         })
                     });
+                    console.log("Token 已提交至后端存储！");
+                } else {
+                    console.warn("未能生成 FCM Token，请检查 Firebase Web Push 配置。");
                 }
             } catch (err) {
-                console.error("获取/发送 FCM Token 错误:", err);
+                console.error("保存 Token 失败：", err);
             }
         }
 
+        // 前台消息监听：避免重复弹窗
         if (messaging) {
             messaging.onMessage((payload) => {
+                console.log('应用处于前台，收到 FCM 推送数据：', payload);
                 const title = payload.notification ? payload.notification.title : "GRC CAFE 提醒";
                 const body = payload.notification ? payload.notification.body : "";
                 showToast(`🔔 ${title}: ${body}`, "info");
@@ -450,9 +459,10 @@
 
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then(() => {
+                navigator.serviceWorker.register('./sw.js').then((reg) => {
+                    console.log('Service Worker 注册成功，作用域：', reg.scope);
                     initPushSubscription();
-                }).catch(err => console.error(err));
+                }).catch(err => console.error('Service Worker 注册失败：', err));
             });
         }
 
