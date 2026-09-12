@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'grc-cafe-v13';
+const CACHE_NAME = 'grc-cafe-v14';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -24,10 +24,10 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// 离线/后台推送监听：仅当 Payload 中没有原生 notification 字段时才手动触发显示，防止双重弹窗
+// 离线/后台推送监听：仅当 Payload 中没有原生 notification 字段时才手动触发显示
 messaging.onBackgroundMessage((payload) => {
   if (payload.notification) {
-    // Firebase SDK 会自动渲染系统级通知，此处直接跳过避免重复
+    // 即使 Firebase 渲染了通知，通过统一传递自定义 data 数据覆盖点击行为
     return;
   }
 
@@ -43,24 +43,36 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 点击通知唤起网页（自动根据 SW 所在目录解析绝对路径，彻底解决点击 404 问题）
+// 点击通知处理：唤起 PWA 窗口或打开新窗口
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  
-  let rawUrl = (event.notification.data && event.notification.data.url) ? event.notification.data.url : './';
-  
-  // 使用 self.registration.scope 作为基础路径，防止跳转到域名根目录或错误路径
+
+  let rawUrl = './';
+  if (event.notification.data && event.notification.data.url) {
+    rawUrl = event.notification.data.url;
+  }
+
+  // 解析出目标绝对 URL
   const targetUrl = new URL(rawUrl, self.registration.scope).href;
-  
+
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      // 如果网页已经打开，直接聚焦到该标签页
+      // 1. 尝试匹配域名作用域内的所有已有窗口/PWA 进程
       for (let client of windowClients) {
-        if (client.url === targetUrl && 'focus' in client) {
-          return client.focus();
+        const clientUrl = new URL(client.url, self.registration.scope).href;
+        
+        // 忽略 URL 结尾斜线和参数差异，只要匹配到已安装的 PWA 实例/页面即直接聚焦
+        if (clientUrl.startsWith(self.registration.scope)) {
+          if ('navigate' in client) {
+            client.navigate(targetUrl);
+          }
+          if ('focus' in client) {
+            return client.focus();
+          }
         }
       }
-      // 如果没有打开，开启新窗口加载页面
+
+      // 2. 如果没有找到已打开的 PWA 页面，新建窗口打开 PWA
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
