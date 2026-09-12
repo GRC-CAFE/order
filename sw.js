@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'grc-cafe-v11';
+const CACHE_NAME = 'grc-cafe-v12';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
