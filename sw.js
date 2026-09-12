@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'grc-cafe-v14';
+const CACHE_NAME = 'grc-cafe-v15';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -24,10 +24,9 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// 离线/后台推送监听：仅当 Payload 中没有原生 notification 字段时才手动触发显示
+// 离线/后台推送监听：当 Payload 中没有原生 notification 字段时手动触发显示
 messaging.onBackgroundMessage((payload) => {
   if (payload.notification) {
-    // 即使 Firebase 渲染了通知，通过统一传递自定义 data 数据覆盖点击行为
     return;
   }
 
@@ -43,7 +42,7 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 点击通知处理：唤起 PWA 窗口或打开新窗口
+// 点击通知处理：优先唤起并聚焦已有 PWA 窗口，若未打开则新建窗口
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
@@ -52,16 +51,12 @@ self.addEventListener('notificationclick', (event) => {
     rawUrl = event.notification.data.url;
   }
 
-  // 解析出目标绝对 URL
   const targetUrl = new URL(rawUrl, self.registration.scope).href;
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      // 1. 尝试匹配域名作用域内的所有已有窗口/PWA 进程
       for (let client of windowClients) {
         const clientUrl = new URL(client.url, self.registration.scope).href;
-        
-        // 忽略 URL 结尾斜线和参数差异，只要匹配到已安装的 PWA 实例/页面即直接聚焦
         if (clientUrl.startsWith(self.registration.scope)) {
           if ('navigate' in client) {
             client.navigate(targetUrl);
@@ -72,7 +67,6 @@ self.addEventListener('notificationclick', (event) => {
         }
       }
 
-      // 2. 如果没有找到已打开的 PWA 页面，新建窗口打开 PWA
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
@@ -82,12 +76,12 @@ self.addEventListener('notificationclick', (event) => {
 
 // 安装与缓存预加载
 self.addEventListener('install', (e) => {
+  self.skipWaiting(); // 强制新 Service Worker 立即激活
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
     })
   );
-  self.skipWaiting();
 });
 
 // 激活与旧缓存清理
@@ -103,7 +97,7 @@ self.addEventListener('activate', (e) => {
       );
     })
   );
-  self.clients.claim();
+  return self.clients.claim(); // 强制接管所有当前页面
 });
 
 // 网络拦截与离线缓存降级策略
