@@ -9,7 +9,7 @@ const ASSETS_TO_CACHE = [
   './instruction.jpeg',
   './pwa.jpeg',
   './qrcode.jpeg',
-  './logo-192.png'
+  './logo-192.png',
   './logo-512.png',
 ];
 
