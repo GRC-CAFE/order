@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'grc-cafe-v13';
+const CACHE_NAME = 'grc-cafe-v12';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -24,39 +24,43 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// 离线/静默后台推送广播监听（仅当 Payload 中没有包含 notification 属性时才手动弹出，避免重复）
+// 离线/后台推送监听：仅当 Payload 中没有原生 notification 字段时才手动触发显示，防止双重弹窗
 messaging.onBackgroundMessage((payload) => {
   if (payload.notification) {
-    // Firebase SDK 会自动处理带有 notification 属性的推送，直接返回避免重复弹出
+    // Firebase SDK 会自动渲染系统级通知，此处直接跳过避免重复
     return;
   }
 
-  const notificationTitle = payload.data && payload.data.title ? payload.data.title : 'GRC CAFE 提醒';
+  const notificationTitle = (payload.data && payload.data.title) ? payload.data.title : 'GRC CAFE 提醒';
   const notificationOptions = {
-    body: payload.data && payload.data.body ? payload.data.body : '本周新菜单上线啦，快来预订吧！',
+    body: (payload.data && payload.data.body) ? payload.data.body : '本周新菜单上线啦，快来预订吧！',
     icon: 'logo-192.png',
     data: {
-      url: payload.data && payload.data.url ? payload.data.url : './'
+      url: (payload.data && payload.data.url) ? payload.data.url : './'
     }
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 点击通知唤起网页
+// 点击通知唤起网页（自动根据 SW 所在目录解析绝对路径，彻底解决点击 404 问题）
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   
-  const rawUrl = event.notification.data ? event.notification.data.url : './';
-  const targetUrl = new URL(rawUrl, self.location.origin).href;
+  let rawUrl = (event.notification.data && event.notification.data.url) ? event.notification.data.url : './';
+  
+  // 使用 self.registration.scope 作为基础路径，防止跳转到域名根目录或错误路径
+  const targetUrl = new URL(rawUrl, self.registration.scope).href;
   
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // 如果网页已经打开，直接聚焦到该标签页
       for (let client of windowClients) {
         if (client.url === targetUrl && 'focus' in client) {
           return client.focus();
         }
       }
+      // 如果没有打开，开启新窗口加载页面
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
