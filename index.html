@@ -57,8 +57,33 @@
         </div>
     </div>
 
+    <!-- 自定义通知权限请求 Banner (新增) -->
+    <div id="notificationPermissionBanner" class="hidden fixed top-3 left-3 right-3 max-w-md mx-auto z-50 bg-amber-600/95 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-amber-500/80 flex items-center justify-between transition-all">
+        <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-lg shrink-0">
+                <i class="fa-solid fa-bell"></i>
+            </div>
+            <div>
+                <div class="text-xs font-bold text-white leading-tight">开启消息推送通知</div>
+                <div class="text-[10px] text-amber-100 mt-0.5">Enable Notifications</div>
+                <div class="text-[11px] text-amber-50 mt-1 leading-tight">第一时间获取出餐与菜单更新提醒！</div>
+                <div class="text-[10px] text-amber-200">Get updates instantly!</div>
+            </div>
+        </div>
+        <div class="flex items-center space-x-2 shrink-0">
+            <button type="button" onclick="dismissNotificationPrompt()" class="text-amber-100 hover:text-white text-xs px-2 py-1 flex flex-col items-center">
+                <span>下次</span>
+                <span class="text-[9px] text-amber-200/70">Later</span>
+            </button>
+            <button type="button" onclick="requestNotificationPermission()" class="bg-white text-amber-900 font-black text-xs px-3 py-1.5 rounded-xl shadow-md active:scale-95 transition flex flex-col items-center">
+                <span>立即开启</span>
+                <span class="text-[9px] text-amber-800">Enable</span>
+            </button>
+        </div>
+    </div>
+
     <!-- 自定义 PWA 安装提示弹窗 -->
-    <div id="pwaInstallBanner" class="hidden fixed top-3 left-3 right-3 max-w-md mx-auto z-50 bg-slate-900/95 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700/80 flex items-center justify-between transition-all">
+    <div id="pwaInstallBanner" class="hidden fixed top-20 left-3 right-3 max-w-md mx-auto z-50 bg-slate-900/95 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700/80 flex items-center justify-between transition-all">
         <div class="flex items-center space-x-3">
             <img src="logo-192.png" class="w-10 h-10 rounded-xl shadow-sm border border-slate-700 object-cover" alt="App Logo">
             <div>
@@ -81,7 +106,7 @@
     </div>
 
     <!-- iOS 专属安装引导提示条 -->
-    <div id="iosInstallBanner" class="hidden fixed top-3 left-3 right-3 max-w-md mx-auto z-50 bg-slate-900/95 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700/80 flex items-center justify-between transition-all">
+    <div id="iosInstallBanner" class="hidden fixed top-20 left-3 right-3 max-w-md mx-auto z-50 bg-slate-900/95 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700/80 flex items-center justify-between transition-all">
         <div class="flex items-center space-x-3">
             <img src="logo-192.png" class="w-10 h-10 rounded-xl shadow-sm border border-slate-700 object-cover" alt="App Logo">
             <div>
@@ -212,7 +237,7 @@
             </div>
         </div>
 
-        <!-- DuitNow 付款区域 (已加 id="duitnowSection" 供点击跳转) -->
+        <!-- DuitNow 付款区域 -->
         <div id="duitnowSection" class="bg-white rounded-2xl shadow-lg p-5 border border-amber-100/60 text-center space-y-3 scroll-mt-24">
             <div>
                 <h2 class="text-lg font-bold text-slate-800 flex items-center justify-center space-x-2">
@@ -276,10 +301,6 @@
                     <i id="cartChevron" class="fa-solid fa-chevron-up text-[10px] text-amber-700 transition-transform"></i>
                 </button>
 
-               <!-- 修改前 -->
-                <!-- <button type="button" onclick="scrollToDuitNow()" class="flex-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-[10px] font-bold py-1.5 px-2 rounded-xl flex flex-col items-center justify-center shadow-sm transition cursor-pointer"> -->
-
-                <!-- 修改后：将 py-1.5 改为 py-1，文字更精简 -->
                 <button type="button" onclick="scrollToDuitNow()" class="flex-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-[10px] font-bold py-1 px-2 rounded-xl flex flex-col items-center justify-center shadow-sm transition cursor-pointer">
                     <div class="flex items-center space-x-1">
                         <i class="fa-solid fa-qrcode text-[11px]"></i>
@@ -368,7 +389,7 @@
             messaging = firebase.messaging();
         }
 
-        // 下单成功后的静默绑定 Token 与名字逻辑
+        // 统一的静默/触发绑定 Token 与名字逻辑
         async function silentBindToken(customerName) {
             if (!('serviceWorker' in navigator) || !('Notification' in window) || !messaging) return;
             try {
@@ -385,7 +406,7 @@
                     }
                 }
             } catch (err) {
-                console.log("静默绑定 Token 失败:", err);
+                console.log("绑定 Token 失败:", err);
             }
         }
 
@@ -428,9 +449,32 @@
             });
         }
 
-        // --- 2. PWA & UI 基础辅助函数 ---
+        // --- 2. PWA & 通知 Banner 提示逻辑 ---
         let deferredPrompt = null;
         const PROMPT_COOLDOWN = 24 * 60 * 60 * 1000; 
+
+        // 检查通知权限 Banner 显示状态
+        function checkNotificationPrompt() {
+            if (!('Notification' in window)) return;
+            const permission = Notification.permission;
+            const lastDismissed = localStorage.getItem('notification_prompt_dismissed_time');
+            const isExpired = !lastDismissed || (Date.now() - parseInt(lastDismissed)) > PROMPT_COOLDOWN;
+
+            // 如果还没做决定（default）并且过了冷却时间，则显示横幅
+            if (permission === 'default' && isExpired) {
+                document.getElementById('notificationPermissionBanner').classList.remove('hidden');
+            }
+        }
+
+        function dismissNotificationPrompt() {
+            document.getElementById('notificationPermissionBanner').classList.add('hidden');
+            localStorage.setItem('notification_prompt_dismissed_time', Date.now().toString());
+        }
+
+        async function requestNotificationPermission() {
+            document.getElementById('notificationPermissionBanner').classList.add('hidden');
+            await silentBindToken('访客'); // 下单前未填名字时，先绑定为“访客”
+        }
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
@@ -552,6 +596,7 @@
 
         // 页面加载完成后触发
         window.addEventListener('load', async () => {
+            checkNotificationPrompt(); // 检查并展示自定义通知横幅
             checkIosPrompt();
             loadSavedCustomerName();
 
@@ -1221,7 +1266,7 @@
             });
         }
 
-        // --- 8. 下单核心提交逻辑（整合下单后静默绑定 Token） ---
+        // --- 8. 下单核心提交逻辑（整合下单后更新真实姓名 Token 绑定） ---
         async function handleOrder(event) {
             event.preventDefault();
 
@@ -1313,7 +1358,7 @@
                 const result = await response.json();
 
                 if (result && result.success) {
-                    // 下单成功后静默绑定当前客户名字与设备 Token[cite: 3]
+                    // 下单成功后，用客户填写的真实姓名重新绑定/覆盖云端 Token[cite: 1, 3]
                     await silentBindToken(name);
 
                     setTimeout(() => {
