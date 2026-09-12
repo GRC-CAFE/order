@@ -383,7 +383,7 @@
             messaging = firebase.messaging();
         }
 
-        // 注册 Service Worker 并同步 Token 至 Google Sheet
+        // 注册 Service Worker 并同步 Token 至 Google Sheet (已移除 no-cors 盲发)
         async function initPushNotification() {
             dismissPushBanner();
             if (!('serviceWorker' in navigator) || !('Notification' in window) || !messaging) {
@@ -402,8 +402,6 @@
                     return;
                 }
 
-                //showToast("✅ 已授权通知权限", "success");
-
                 // 注册 Service Worker
                 const registration = await navigator.serviceWorker.register('./sw.js');
                 await navigator.serviceWorker.ready;
@@ -416,7 +414,7 @@
 
                 if (currentToken) {
                     console.log("获取成功！当前 FCM Token:", currentToken);
-                    // 自动上传至 Google Sheet
+                    // 自动上传至 Google Sheet (支持 JSON 响应解析)
                     await saveTokenToGoogleSheet(currentToken);
                 } else {
                     console.warn("未能获取到 FCM Token");
@@ -426,15 +424,14 @@
             }
         }
 
-        // 将 Token 发送到 Google Apps Script
+        // 将 Token 发送到 Google Apps Script (已优化为标准 fetch 并带异常捕获)
         async function saveTokenToGoogleSheet(token) {
             if (!GOOGLE_SCRIPT_URL) return;
             try {
-                await fetch(GOOGLE_SCRIPT_URL, {
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // Apps Script 跨域需设置 no-cors
                     headers: {
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'text/plain;charset=utf-8' // 避免 GAS 触发复杂 CORS 预检
                     },
                     body: JSON.stringify({
                         action: 'subscribe',
@@ -443,9 +440,15 @@
                         userAgent: navigator.userAgent
                     })
                 });
-                console.log("FCM Token 已成功发送至 Google Sheet 写入/更新！");
+                
+                const result = await response.json();
+                if (result && (result.success || result.result === "success")) {
+                    console.log("✅ FCM Token 已成功同步至云端。");
+                } else {
+                    console.warn("⚠️ 云端保存 Token 返回异常:", result);
+                }
             } catch (err) {
-                console.error("Token 上传至 Google Sheet 失败:", err);
+                console.error("❌ Token 上传至 Google Sheet 失败:", err);
             }
         }
 
@@ -460,7 +463,7 @@
             }
         }
 
-        // 前台消息监听：避免重复弹窗
+        // 前台消息监听
         if (messaging) {
             messaging.onMessage((payload) => {
                 console.log('应用处于前台，收到 FCM 推送数据：', payload);
