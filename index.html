@@ -44,26 +44,6 @@
     <!-- Toast 动态提示浮层 -->
     <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[100] hidden max-w-xs w-full px-4 py-3 rounded-xl shadow-xl text-xs font-bold text-center transition-all duration-300 pointer-events-none transform -translate-y-2 opacity-0"></div>
 
-    <!-- Web Push 订阅广播弹窗 -->
-    <div id="pushPromptBanner" class="hidden fixed top-3 left-3 right-3 max-w-md mx-auto z-50 bg-amber-900/95 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-amber-700/80 flex items-center justify-between transition-all">
-        <div class="flex items-center space-x-3">
-            <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white text-lg font-bold shadow-sm">
-                <i class="fa-solid fa-bell"></i>
-            </div>
-            <div>
-                <div class="text-xs font-bold text-white leading-tight">开启本周菜单提醒</div>
-                <div class="text-[10px] text-amber-200 mt-0.5">Menu Push Notifications</div>
-                <div class="text-[11px] text-amber-100 mt-1 leading-tight">新菜单上架时第一时间推送到您的手机！</div>
-            </div>
-        </div>
-        <div class="flex items-center space-x-2">
-            <button type="button" onclick="dismissPushBanner()" class="text-amber-300 hover:text-white text-xs px-2 py-1">暂不</button>
-            <button type="button" onclick="initPushNotification()" class="bg-white text-amber-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-md active:scale-95 transition flex flex-col items-center">
-                <span>允许提醒</span>
-            </button>
-        </div>
-    </div>
-
     <!-- 全屏提交加载 Overlay 遮罩 -->
     <div id="loadingOverlay" class="fixed inset-0 z-[90] bg-slate-900/60 backdrop-blur-sm hidden flex flex-col items-center justify-center text-white space-y-3">
         <div class="w-12 h-12 border-4 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
@@ -383,59 +363,40 @@
             messaging = firebase.messaging();
         }
 
-        // 注册 Service Worker 并同步 Token 至 Google Sheet (已移除 no-cors 盲发)
-        async function initPushNotification() {
-            dismissPushBanner();
-            if (!('serviceWorker' in navigator) || !('Notification' in window) || !messaging) {
-                console.warn("当前浏览器不支持 Service Worker 或 Push 通知");
-                return;
-            }
-
+        // 下单成功后的静默绑定 Token 与名字逻辑
+        async function silentBindToken(customerName) {
+            if (!('serviceWorker' in navigator) || !('Notification' in window) || !messaging) return;
             try {
-                // 请求通知权限
                 const permission = await Notification.requestPermission();
-                if (permission !== 'granted') {
-                    console.warn("用户拒绝了通知权限");
-                    if (permission === 'denied') {
-                        showToast("⚠️ 通知权限已被拒绝，请点击浏览器地址栏设置解除拦截", "warning");
+                if (permission === 'granted') {
+                    const registration = await navigator.serviceWorker.register('./sw.js');
+                    await navigator.serviceWorker.ready;
+                    const currentToken = await messaging.getToken({
+                        serviceWorkerRegistration: registration,
+                        vapidKey: VAPID_KEY
+                    });
+                    if (currentToken) {
+                        await saveTokenToGoogleSheet(currentToken, customerName);
                     }
-                    return;
-                }
-
-                // 注册 Service Worker
-                const registration = await navigator.serviceWorker.register('./sw.js');
-                await navigator.serviceWorker.ready;
-
-                // 获取最新 FCM Token
-                const currentToken = await messaging.getToken({
-                    serviceWorkerRegistration: registration,
-                    vapidKey: VAPID_KEY
-                });
-
-                if (currentToken) {
-                    console.log("获取成功！当前 FCM Token:", currentToken);
-                    // 自动上传至 Google Sheet (支持 JSON 响应解析)
-                    await saveTokenToGoogleSheet(currentToken);
-                } else {
-                    console.warn("未能获取到 FCM Token");
                 }
             } catch (err) {
-                console.error("初始化推送服务失败:", err);
+                console.log("静默绑定 Token 失败:", err);
             }
         }
 
-        // 将 Token 发送到 Google Apps Script (已优化为标准 fetch 并带异常捕获)
-        async function saveTokenToGoogleSheet(token) {
+        // 将 Token 与名字一起发送到 Google Apps Script
+        async function saveTokenToGoogleSheet(token, customerName) {
             if (!GOOGLE_SCRIPT_URL) return;
             try {
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'text/plain;charset=utf-8' // 避免 GAS 触发复杂 CORS 预检
+                        'Content-Type': 'text/plain;charset=utf-8'
                     },
                     body: JSON.stringify({
                         action: 'subscribe',
                         token: token,
+                        name: customerName,
                         timestamp: new Date().toISOString(),
                         userAgent: navigator.userAgent
                     })
@@ -443,23 +404,12 @@
                 
                 const result = await response.json();
                 if (result && (result.success || result.result === "success")) {
-                    console.log("✅ FCM Token 已成功同步至云端。");
+                    console.log(`✅ FCM Token 已成功与客户 [${customerName}] 绑定并同步至云端。`);
                 } else {
                     console.warn("⚠️ 云端保存 Token 返回异常:", result);
                 }
             } catch (err) {
                 console.error("❌ Token 上传至 Google Sheet 失败:", err);
-            }
-        }
-
-        function dismissPushBanner() {
-            document.getElementById('pushPromptBanner').classList.add('hidden');
-        }
-
-        function checkPushBannerPrompt() {
-            if (!('Notification' in window)) return;
-            if (Notification.permission === 'default') {
-                document.getElementById('pushPromptBanner').classList.remove('hidden');
             }
         }
 
@@ -586,8 +536,6 @@
 
         // 页面加载完成后触发
         window.addEventListener('load', async () => {
-            initPushNotification();
-            checkPushBannerPrompt();
             checkIosPrompt();
             loadSavedCustomerName();
 
@@ -1257,7 +1205,7 @@
             });
         }
 
-        // --- 8. 下单核心提交逻辑 ---
+        // --- 8. 下单核心提交逻辑（整合下单后静默绑定 Token） ---
         async function handleOrder(event) {
             event.preventDefault();
 
@@ -1349,6 +1297,9 @@
                 const result = await response.json();
 
                 if (result && result.success) {
+                    // ✅ 核心优化：当老年人点击“确认已付款”且下单成功后，在后台静默获取并绑定设备 Token 与名字
+                    await silentBindToken(name);
+
                     setTimeout(() => {
                         window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
                         setTimeout(() => { window.location.reload(); }, 2500);
