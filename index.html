@@ -212,7 +212,8 @@
             </div>
         </div>
 
-        <div class="bg-white rounded-2xl shadow-lg p-5 border border-amber-100/60 text-center space-y-3">
+        <!-- DuitNow 付款区域 (已加 id="duitnowSection" 供点击跳转) -->
+        <div id="duitnowSection" class="bg-white rounded-2xl shadow-lg p-5 border border-amber-100/60 text-center space-y-3 scroll-mt-24">
             <div>
                 <h2 class="text-lg font-bold text-slate-800 flex items-center justify-center space-x-2">
                     <i class="fa-solid fa-qrcode text-pink-600"></i>
@@ -275,13 +276,14 @@
                     <i id="cartChevron" class="fa-solid fa-chevron-up text-[10px] text-amber-700 transition-transform"></i>
                 </button>
 
-                <div class="flex-1 bg-amber-500 text-white text-[10px] font-bold py-1.5 px-2 rounded-xl flex flex-col items-center justify-center shadow-sm">
+                <!-- 点击该黄色按钮可平滑滚动至 DuitNow 支付区 -->
+                <button type="button" onclick="scrollToDuitNow()" class="flex-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-[10px] font-bold py-1.5 px-2 rounded-xl flex flex-col items-center justify-center shadow-sm transition cursor-pointer">
                     <div class="flex items-center space-x-1">
                         <i class="fa-solid fa-receipt text-xs"></i>
-                        <span>请付款并发送凭证</span>
+                        <span>请付款并发送凭证 (点击看二维码)</span>
                     </div>
-                    <span class="text-[9px] font-normal text-amber-100">Pay & send receipt</span>
-                </div>
+                    <span class="text-[9px] font-normal text-amber-100">Pay & send receipt (Tap to view QR)</span>
+                </button>
             </div>
 
             <button type="button" onclick="document.getElementById('orderForm').requestSubmit()" id="submitBtn" 
@@ -462,6 +464,17 @@
         function dismissIosPrompt() {
             document.getElementById('iosInstallBanner').classList.add('hidden');
             localStorage.setItem('ios_pwa_dismissed_time', Date.now().toString());
+        }
+
+        // 点击黄色提示条平滑滚动到 DuitNow 支付区
+        function scrollToDuitNow() {
+            const section = document.getElementById('duitnowSection');
+            if (section) {
+                section.scrollIntoView({ 
+                    behavior: 'smooth', 
+                    block: 'start' 
+                });
+            }
         }
 
         let toastTimer = null;
@@ -1297,7 +1310,7 @@
                 const result = await response.json();
 
                 if (result && result.success) {
-                    // ✅ 核心优化：当老年人点击“确认已付款”且下单成功后，在后台静默获取并绑定设备 Token 与名字
+                    // 下单成功后静默绑定当前客户名字与设备 Token[cite: 3]
                     await silentBindToken(name);
 
                     setTimeout(() => {
