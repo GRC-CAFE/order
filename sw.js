@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'grc-cafe-v9';
+const CACHE_NAME = 'grc-cafe-v10';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -10,6 +10,7 @@ const ASSETS_TO_CACHE = [
   './pwa.jpeg',
   './qrcode.jpeg',
   './logo-192.png'
+  './logo-512.png',
 ];
 
 firebase.initializeApp({
