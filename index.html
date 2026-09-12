@@ -22,7 +22,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-    <!-- Firebase Push SDK (Compat 9.23.0) -->
+    <!-- 引入 Firebase Web SDK (v9 兼容版) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 
@@ -58,7 +58,7 @@
         </div>
         <div class="flex items-center space-x-2">
             <button type="button" onclick="dismissPushBanner()" class="text-amber-300 hover:text-white text-xs px-2 py-1">暂不</button>
-            <button type="button" onclick="requestNotificationPermission()" class="bg-white text-amber-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-md active:scale-95 transition flex flex-col items-center">
+            <button type="button" onclick="initPushNotification()" class="bg-white text-amber-950 font-black text-xs px-3 py-1.5 rounded-xl shadow-md active:scale-95 transition flex flex-col items-center">
                 <span>允许提醒</span>
             </button>
         </div>
@@ -372,7 +372,7 @@
             apiKey: "AIzaSyBQ0p9wjbzNbxiUnPOHvcoPoL8EZpHrn94",
             authDomain: "grc-cafe-pwa.firebaseapp.com",
             projectId: "grc-cafe-pwa",
-            storageBucket: "grc-cafe-pwa.firebasestorage.com",
+            storageBucket: "grc-cafe-pwa.firebasestorage.app",
             messagingSenderId: "922576960907",
             appId: "1:922576960907:web:f316e5009b2ac1edc8838e"
         };
@@ -383,12 +383,69 @@
             messaging = firebase.messaging();
         }
 
-        async function initPushSubscription() {
-            if (!messaging) return;
-            if (Notification.permission === 'default') {
-                document.getElementById('pushPromptBanner').classList.remove('hidden');
-            } else if (Notification.permission === 'granted') {
-                savePushTokenToBackend();
+        // 注册 Service Worker 并同步 Token 至 Google Sheet
+        async function initPushNotification() {
+            dismissPushBanner();
+            if (!('serviceWorker' in navigator) || !('Notification' in window) || !messaging) {
+                console.warn("当前浏览器不支持 Service Worker 或 Push 通知");
+                return;
+            }
+
+            try {
+                // 请求通知权限
+                const permission = await Notification.requestPermission();
+                if (permission !== 'granted') {
+                    console.warn("用户拒绝了通知权限");
+                    if (permission === 'denied') {
+                        showToast("⚠️ 通知权限已被拒绝，请点击浏览器地址栏设置解除拦截", "warning");
+                    }
+                    return;
+                }
+
+                showToast("✅ 已授权通知权限", "success");
+
+                // 注册 Service Worker
+                const registration = await navigator.serviceWorker.register('./sw.js');
+                await navigator.serviceWorker.ready;
+
+                // 获取最新 FCM Token
+                const currentToken = await messaging.getToken({
+                    serviceWorkerRegistration: registration,
+                    vapidKey: VAPID_KEY
+                });
+
+                if (currentToken) {
+                    console.log("获取成功！当前 FCM Token:", currentToken);
+                    // 自动上传至 Google Sheet
+                    await saveTokenToGoogleSheet(currentToken);
+                } else {
+                    console.warn("未能获取到 FCM Token");
+                }
+            } catch (err) {
+                console.error("初始化推送服务失败:", err);
+            }
+        }
+
+        // 将 Token 发送到 Google Apps Script
+        async function saveTokenToGoogleSheet(token) {
+            if (!GOOGLE_SCRIPT_URL) return;
+            try {
+                await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // Apps Script 跨域需设置 no-cors
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        action: 'subscribe',
+                        token: token,
+                        timestamp: new Date().toISOString(),
+                        userAgent: navigator.userAgent
+                    })
+                });
+                console.log("FCM Token 已成功发送至 Google Sheet 写入/更新！");
+            } catch (err) {
+                console.error("Token 上传至 Google Sheet 失败:", err);
             }
         }
 
@@ -396,50 +453,10 @@
             document.getElementById('pushPromptBanner').classList.add('hidden');
         }
 
-        // 请求系统通知权限并获取 Token
-        async function requestNotificationPermission() {
-            dismissPushBanner();
-            try {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    showToast("✅ 已授权通知权限", "success");
-                    await savePushTokenToBackend();
-                } else if (permission === 'denied') {
-                    showToast("⚠️ 通知权限已被拒绝，请点击浏览器地址栏设置解除拦截", "warning");
-                }
-            } catch (err) {
-                console.error("请求通知权限或获取 Token 异常：", err);
-            }
-        }
-
-        // 发送 Token 至 Google Apps Script 后端保存
-        async function savePushTokenToBackend() {
-            if (!messaging || !GOOGLE_SCRIPT_URL) return;
-            try {
-                const registration = await navigator.serviceWorker.ready;
-                const token = await messaging.getToken({
-                    vapidKey: VAPID_KEY,
-                    serviceWorkerRegistration: registration
-                });
-
-                if (token) {
-                    console.log("获取成功 - FCM Token:", token);
-                    await fetch(GOOGLE_SCRIPT_URL, {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                        body: JSON.stringify({
-                            action: 'subscribe',
-                            token: token,
-                            timestamp: new Date().toISOString(),
-                            userAgent: navigator.userAgent
-                        })
-                    });
-                    console.log("Token 已提交至后端存储！");
-                } else {
-                    console.warn("未能生成 FCM Token，请检查 Firebase Web Push 配置。");
-                }
-            } catch (err) {
-                console.error("保存 Token 失败：", err);
+        function checkPushBannerPrompt() {
+            if (!('Notification' in window)) return;
+            if (Notification.permission === 'default') {
+                document.getElementById('pushPromptBanner').classList.remove('hidden');
             }
         }
 
@@ -456,15 +473,6 @@
         // --- 2. PWA & UI 基础辅助函数 ---
         let deferredPrompt = null;
         const PROMPT_COOLDOWN = 24 * 60 * 60 * 1000; 
-
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('./sw.js').then((reg) => {
-                    console.log('Service Worker 注册成功，作用域：', reg.scope);
-                    initPushSubscription();
-                }).catch(err => console.error('Service Worker 注册失败：', err));
-            });
-        }
 
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault();
@@ -573,7 +581,10 @@
             return false;
         }
 
-        window.addEventListener('DOMContentLoaded', async () => {
+        // 页面加载完成后触发
+        window.addEventListener('load', async () => {
+            initPushNotification();
+            checkPushBannerPrompt();
             checkIosPrompt();
             loadSavedCustomerName();
 
