@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'grc-cafe-v17';
+const CACHE_NAME = 'grc-cafe-v18';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -24,7 +24,7 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// 离线/后台推送监听：当 Payload 中没有原生 notification 字段时手动触发显示
+// 离线/后台推送监听
 messaging.onBackgroundMessage((payload) => {
   if (payload.notification) {
     return;
@@ -42,17 +42,22 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 点击通知处理：支持精准定位并唤起 PWA
+// 点击通知处理：防跑偏、强行校正路径并唤起 PWA
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  // 1. 优先获取自定义 URL/click_action，默认精确退回到当前 PWA 作用域根目录 (例如 https://GRC-CAFE.github.io/order/)
+  // 1. 获取通知自带的 URL
   let rawUrl = event.notification.data?.url || event.notification.click_action || self.registration.scope;
-  const targetUrl = new URL(rawUrl, self.registration.scope).href;
+  let targetUrl = new URL(rawUrl, self.registration.scope).href;
+
+  // 2. 防跑偏拦截：如果解析出来的 URL 丢失了 /order/ 子路径，强制修正回当前 PWA 作用域根目录
+  if (!targetUrl.startsWith(self.registration.scope)) {
+    targetUrl = self.registration.scope;
+  }
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (windowClients) => {
-      // 2. 匹配已有 PWA 窗口（无论在后台还是前台）
+      // 3. 优先匹配已打开的 PWA 窗口（防止重复新建标签页）
       for (let client of windowClients) {
         if (client.url.startsWith(self.registration.scope)) {
           if ('navigate' in client && client.url !== targetUrl) {
@@ -64,7 +69,7 @@ self.addEventListener('notificationclick', (event) => {
         }
       }
 
-      // 3. 若未找到已有窗口，则打开独立的 PWA 界面
+      // 4. 若后台无已打开的 PWA，新建独立 PWA 窗口打开
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
@@ -74,7 +79,7 @@ self.addEventListener('notificationclick', (event) => {
 
 // 安装与缓存预加载
 self.addEventListener('install', (e) => {
-  self.skipWaiting(); // 强制新 Service Worker 立即激活
+  self.skipWaiting();
   e.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
       return cache.addAll(ASSETS_TO_CACHE);
@@ -95,7 +100,7 @@ self.addEventListener('activate', (e) => {
       );
     })
   );
-  return self.clients.claim(); // 强制接管所有当前页面
+  return self.clients.claim();
 });
 
 // 网络拦截与离线缓存降级策略
