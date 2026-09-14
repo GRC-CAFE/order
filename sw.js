@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'grc-cafe-v15';
+const CACHE_NAME = 'grc-cafe-v16';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -42,7 +42,7 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 点击通知处理：优先唤起并聚焦已有 PWA 窗口，若未打开则新建窗口
+// 点击通知处理：支持唤起已有窗口或打开新窗口
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
@@ -54,12 +54,13 @@ self.addEventListener('notificationclick', (event) => {
   const targetUrl = new URL(rawUrl, self.registration.scope).href;
 
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (windowClients) => {
+      // 1. 尝试找到已经打开的 PWA 窗口
       for (let client of windowClients) {
-        const clientUrl = new URL(client.url, self.registration.scope).href;
-        if (clientUrl.startsWith(self.registration.scope)) {
-          if ('navigate' in client) {
-            client.navigate(targetUrl);
+        if (client.url.startsWith(self.registration.scope)) {
+          // 如果目标地址有变化且支持 navigate，则更新页面，否则直接聚焦
+          if ('navigate' in client && client.url !== targetUrl) {
+            await client.navigate(targetUrl);
           }
           if ('focus' in client) {
             return client.focus();
@@ -67,6 +68,7 @@ self.addEventListener('notificationclick', (event) => {
         }
       }
 
+      // 2. 如果没有任何匹配窗口打开，则新建窗口
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
