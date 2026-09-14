@@ -1,7 +1,7 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-const CACHE_NAME = 'grc-cafe-v16';
+const CACHE_NAME = 'grc-cafe-v17';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -35,30 +35,26 @@ messaging.onBackgroundMessage((payload) => {
     body: (payload.data && payload.data.body) ? payload.data.body : '本周新菜单上线啦，快来预订吧！',
     icon: 'logo-192.png',
     data: {
-      url: (payload.data && payload.data.url) ? payload.data.url : './'
+      url: (payload.data && payload.data.url) ? payload.data.url : self.registration.scope
     }
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 点击通知处理：支持唤起已有窗口或打开新窗口
+// 点击通知处理：支持精准定位并唤起 PWA
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  let rawUrl = './';
-  if (event.notification.data && event.notification.data.url) {
-    rawUrl = event.notification.data.url;
-  }
-
+  // 1. 优先获取自定义 URL/click_action，默认精确退回到当前 PWA 作用域根目录 (例如 https://GRC-CAFE.github.io/order/)
+  let rawUrl = event.notification.data?.url || event.notification.click_action || self.registration.scope;
   const targetUrl = new URL(rawUrl, self.registration.scope).href;
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (windowClients) => {
-      // 1. 尝试找到已经打开的 PWA 窗口
+      // 2. 匹配已有 PWA 窗口（无论在后台还是前台）
       for (let client of windowClients) {
         if (client.url.startsWith(self.registration.scope)) {
-          // 如果目标地址有变化且支持 navigate，则更新页面，否则直接聚焦
           if ('navigate' in client && client.url !== targetUrl) {
             await client.navigate(targetUrl);
           }
@@ -68,7 +64,7 @@ self.addEventListener('notificationclick', (event) => {
         }
       }
 
-      // 2. 如果没有任何匹配窗口打开，则新建窗口
+      // 3. 若未找到已有窗口，则打开独立的 PWA 界面
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
