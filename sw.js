@@ -1,8 +1,8 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-// 升至 v20，强制浏览器刷新激活新的 Service Worker 规则
-const CACHE_NAME = 'grc-cafe-v20';
+// 升至 v21，强制浏览器清理旧缓存并激活最新点击跳转规则
+const CACHE_NAME = 'grc-cafe-v21';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -39,62 +39,38 @@ messaging.onBackgroundMessage((payload) => {
 
   const notificationTitle = (payload.data && payload.data.title) ? payload.data.title : 'GRC CAFE 提醒';
   
-  // 确保通知中附带的跳转目标网址始终准确指向 /order/ 路径
-  const targetUrl = (payload.data && payload.data.url) ? payload.data.url : self.registration.scope;
-
   const notificationOptions = {
     body: (payload.data && payload.data.body) ? payload.data.body : '本周新菜单上线啦，快来预订吧！',
     icon: 'logo-192.png',
     tag: 'grc-cafe-notification',
     renotify: true,
     data: {
-      url: targetUrl
+      url: 'https://grc-cafe.github.io/order/'
     }
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 2. 点击通知处理：锁定精准子目录，防止退回主域名
+// 2. 点击通知处理：强行校正并无条件锁定到 /order/ 子路径
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  // 确保 scope 结尾带有斜杠 (即 https://grc-cafe.github.io/order/)
-  let scopeUrl = self.registration.scope;
-  if (!scopeUrl.endsWith('/')) {
-    scopeUrl += '/';
-  }
-
-  // 获取 Payload 里的自定义目标 URL，若无则默认精准回退到 /order/ 作用域
-  let rawUrl = event.notification.data?.url || event.notification.click_action || scopeUrl;
-  let targetUrl;
-
-  try {
-    targetUrl = new URL(rawUrl, scopeUrl).href;
-  } catch (err) {
-    targetUrl = scopeUrl;
-  }
-
-  // 安全拦截：如果解析出来的 URL 丢失了 /order/ 目录，强行校正回 https://grc-cafe.github.io/order/
-  if (!targetUrl.includes('/order/')) {
-    targetUrl = scopeUrl;
-  }
+  // 强行拼接出绝对路径 https://grc-cafe.github.io/order/
+  const targetUrl = new URL('/order/', self.location.origin).href;
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (windowClients) => {
-      // 匹配当前已打开的 PWA 页面
+      // 匹配已打开的 /order/ 标签页并聚焦
       for (let client of windowClients) {
         if (client.url.includes('/order/')) {
-          if ('navigate' in client && client.url !== targetUrl) {
-            await client.navigate(targetUrl);
-          }
           if ('focus' in client) {
             return client.focus();
           }
         }
       }
 
-      // 如果 PWA 完全关闭，唤起并直接打开精准的 /order/ 页面
+      // 若 PWA 完全关闭，直接以独立窗口打开精准的 /order/ 页面
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
