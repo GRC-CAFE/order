@@ -1,8 +1,8 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-// 升至 v21，强制浏览器清理旧缓存并激活最新点击跳转规则
-const CACHE_NAME = 'grc-cafe-v21';
+// 升级版本号至 v23，强制手机端浏览器更新 Service Worker 规则
+const CACHE_NAME = 'grc-cafe-v23';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -45,23 +45,26 @@ messaging.onBackgroundMessage((payload) => {
     tag: 'grc-cafe-notification',
     renotify: true,
     data: {
-      url: 'https://grc-cafe.github.io/order/'
+      url: self.registration.scope
     }
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 2. 点击通知处理：强行校正并无条件锁定到 /order/ 子路径
+// 2. 点击通知处理：锁定当前注册的作用域 (/order/)，防止跳回根域名
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  // 强行拼接出绝对路径 https://grc-cafe.github.io/order/
-  const targetUrl = new URL('/order/', self.location.origin).href;
+  // 动态锁定当前的完整作用域 (例如 https://grc-cafe.github.io/order/)
+  let targetUrl = self.registration.scope;
+  if (!targetUrl.endsWith('/')) {
+    targetUrl += '/';
+  }
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (windowClients) => {
-      // 匹配已打开的 /order/ 标签页并聚焦
+      // 检查是否有已打开的 /order/ 页面
       for (let client of windowClients) {
         if (client.url.includes('/order/')) {
           if ('focus' in client) {
@@ -70,7 +73,7 @@ self.addEventListener('notificationclick', (event) => {
         }
       }
 
-      // 若 PWA 完全关闭，直接以独立窗口打开精准的 /order/ 页面
+      // 若 PWA 完全关闭，强制打开 /order/ 子目录
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
@@ -110,7 +113,6 @@ self.addEventListener('fetch', (e) => {
 
   const url = new URL(e.request.url);
 
-  // 过滤第三方 API，避免被静态 Cache 拦截
   if (
     url.origin.includes('googleapis.com') || 
     url.origin.includes('firebase') || 
