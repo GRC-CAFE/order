@@ -1,8 +1,8 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-// 升级缓存版本号，确保 GitHub Pages 更新后客户端能触发更新
-const CACHE_NAME = 'grc-cafe-v19';
+// 升至 v20，强制浏览器刷新激活新的 Service Worker 规则
+const CACHE_NAME = 'grc-cafe-v20';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -34,38 +34,57 @@ const messaging = firebase.messaging();
 // 1. 离线/后台推送监听
 messaging.onBackgroundMessage((payload) => {
   if (payload.notification) {
-    return; // 避免带有 notification 结构的载荷导致浏览器双重弹窗
+    return; // 避免前后台双重弹窗
   }
 
   const notificationTitle = (payload.data && payload.data.title) ? payload.data.title : 'GRC CAFE 提醒';
+  
+  // 确保通知中附带的跳转目标网址始终准确指向 /order/ 路径
+  const targetUrl = (payload.data && payload.data.url) ? payload.data.url : self.registration.scope;
+
   const notificationOptions = {
     body: (payload.data && payload.data.body) ? payload.data.body : '本周新菜单上线啦，快来预订吧！',
     icon: 'logo-192.png',
     tag: 'grc-cafe-notification',
     renotify: true,
     data: {
-      url: (payload.data && payload.data.url) ? payload.data.url : self.registration.scope
+      url: targetUrl
     }
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 2. 点击通知处理：防跑偏、强行校正路径并唤起 PWA
+// 2. 点击通知处理：锁定精准子目录，防止退回主域名
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  let rawUrl = event.notification.data?.url || event.notification.click_action || self.registration.scope;
-  let targetUrl = new URL(rawUrl, self.registration.scope).href;
+  // 确保 scope 结尾带有斜杠 (即 https://grc-cafe.github.io/order/)
+  let scopeUrl = self.registration.scope;
+  if (!scopeUrl.endsWith('/')) {
+    scopeUrl += '/';
+  }
 
-  if (!targetUrl.startsWith(self.registration.scope)) {
-    targetUrl = self.registration.scope;
+  // 获取 Payload 里的自定义目标 URL，若无则默认精准回退到 /order/ 作用域
+  let rawUrl = event.notification.data?.url || event.notification.click_action || scopeUrl;
+  let targetUrl;
+
+  try {
+    targetUrl = new URL(rawUrl, scopeUrl).href;
+  } catch (err) {
+    targetUrl = scopeUrl;
+  }
+
+  // 安全拦截：如果解析出来的 URL 丢失了 /order/ 目录，强行校正回 https://grc-cafe.github.io/order/
+  if (!targetUrl.includes('/order/')) {
+    targetUrl = scopeUrl;
   }
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (windowClients) => {
+      // 匹配当前已打开的 PWA 页面
       for (let client of windowClients) {
-        if (client.url.startsWith(self.registration.scope)) {
+        if (client.url.includes('/order/')) {
           if ('navigate' in client && client.url !== targetUrl) {
             await client.navigate(targetUrl);
           }
@@ -75,6 +94,7 @@ self.addEventListener('notificationclick', (event) => {
         }
       }
 
+      // 如果 PWA 完全关闭，唤起并直接打开精准的 /order/ 页面
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
@@ -108,13 +128,13 @@ self.addEventListener('activate', (e) => {
   return self.clients.claim();
 });
 
-// 5. 网络拦截与离线缓存降级策略（防 API 拦截）
+// 5. 网络拦截与离线缓存降级策略
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
 
   const url = new URL(e.request.url);
 
-  // 排除第三方 API、Google Apps Script 及 Firebase 接口，避免被 SW 静态缓存拦截
+  // 过滤第三方 API，避免被静态 Cache 拦截
   if (
     url.origin.includes('googleapis.com') || 
     url.origin.includes('firebase') || 
