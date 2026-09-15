@@ -37,42 +37,30 @@
             -ms-overflow-style: none;
             scrollbar-width: none;
         }
-        /* Spotlight 高亮引导样式：实现镂空聚焦效果 */
         .guide-highlight {
             z-index: 101 !important;
             box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.8), 0 0 25px 8px rgba(245, 158, 11, 0.6) !important;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        /* 非固定元素的常规高亮 */
         .guide-highlight:not(#guideTargetFooter):not(#guideCardBox):not(#submitBtn) {
             position: relative !important;
             background-color: #ffffff !important;
             border-radius: 1rem;
         }
-
-        /* 修复底部固定栏：默认状态下 z-index 为 40 */
         #guideTargetFooter {
             z-index: 40;
             transition: z-index 0.2s ease-in-out;
         }
-
-        /* 引导模式激活时：
-           1. 提升主内容容器层级至 z-index: 50，使其内部元素的 box-shadow 镂空遮罩能完美覆盖底部固定栏
-           2. 底部固定栏在第 1-3 步降至 z-index: 1，完全陷入暗色遮罩下方 */
         body.guide-active #mainContentContainer {
             position: relative;
             z-index: 50 !important;
         }
-
         body.guide-active #guideTargetFooter {
             z-index: 1 !important;
         }
-
-        /* 第 4 步高亮时：底部固定栏提升至 z-index: 150，单独聚焦提交按钮 */
         body.guide-active #guideTargetFooter.guide-step-4 {
             z-index: 150 !important;
         }
-
         #submitBtn.guide-highlight {
             position: relative !important;
             z-index: 102 !important;
@@ -521,10 +509,6 @@
             guideSteps.forEach(step => {
                 const el = document.getElementById(step.targetId);
                 if (el) el.classList.remove('guide-highlight');
-                if (step.extraTargetId) {
-                    const extraEl = document.getElementById(step.extraTargetId);
-                    if (extraEl) extraEl.classList.remove('guide-highlight');
-                }
             });
             const cardBox = document.getElementById('guideCardBox');
             if (cardBox) cardBox.classList.remove('guide-highlight');
@@ -605,7 +589,7 @@
             messaging = firebase.messaging();
         }
 
-        // 修复 PushManager undefined 异常与异步等待 Service Worker 就绪
+        // 绑定 FCM Token 逻辑（显式指定 GitHub Pages 的 /order/ Scope）
         async function silentBindToken(customerName) {
             if (!('serviceWorker' in navigator) || !('Notification' in window) || !('PushManager' in window) || !messaging) {
                 console.warn("当前浏览器或协议环境不支持 Web Push 功能。");
@@ -614,8 +598,9 @@
             try {
                 const permission = await Notification.requestPermission();
                 if (permission === 'granted') {
-                    let registration = await navigator.serviceWorker.register('./sw.js');
-                    registration = await navigator.serviceWorker.ready; // 等待 SW 真正激活
+                    // 显式锁定作用域为 /order/
+                    let registration = await navigator.serviceWorker.register('./sw.js', { scope: '/order/' });
+                    registration = await navigator.serviceWorker.ready;
                     
                     const currentToken = await messaging.getToken({
                         serviceWorkerRegistration: registration,
@@ -686,7 +671,8 @@
 
         async function requestNotificationPermission() {
             document.getElementById('notificationPermissionBanner').classList.add('hidden');
-            await silentBindToken('访客');
+            const currentName = document.getElementById('name').value.trim() || '访客';
+            await silentBindToken(currentName);
         }
 
         window.addEventListener('beforeinstallprompt', (e) => {
