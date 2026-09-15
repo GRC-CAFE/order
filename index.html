@@ -98,11 +98,8 @@
         </div>
     </div>
 
-    <!-- ========================================== -->
-    <!-- 新手引导 Spotlight 浮层卡片 (横长扁平极简版) -->
-    <!-- ========================================== -->
+    <!-- 新手引导 Spotlight 浮层卡片 -->
     <div id="appGuideOverlay" class="hidden fixed inset-0 z-[200] pointer-events-none flex flex-col justify-between p-3 transition-opacity duration-300">
-        <!-- 顶部退出按钮栏 -->
         <div class="pointer-events-auto flex justify-between items-center max-w-md mx-auto w-full pt-1">
             <div class="text-amber-400 font-bold text-[11px] tracking-wider flex items-center space-x-1 bg-amber-950/90 px-2.5 py-1 rounded-full border border-amber-500/40 shadow-lg">
                 <i class="fa-solid fa-compass text-amber-400 text-xs"></i>
@@ -117,10 +114,8 @@
             </button>
         </div>
 
-        <!-- 中间/底部动态气泡提示卡片（横长扁平设计，屏占极小） -->
         <div class="pointer-events-auto max-w-[95%] sm:max-w-md mx-auto w-full my-auto px-1">
             <div id="guideCardBox" class="bg-[#1e222d]/95 backdrop-blur-md text-white rounded-xl p-3 shadow-2xl border border-amber-500/80 space-y-2 relative transform transition-all duration-300">
-                <!-- 头部：步骤 Badge + 标题行 + 指示点 -->
                 <div class="flex items-center justify-between border-b border-slate-700/60 pb-1.5 px-0.5">
                     <div class="flex items-center space-x-2 min-w-0 pr-2">
                         <span id="guideStepBadge" class="bg-amber-500 text-slate-950 font-black text-[10px] px-2 py-0.5 rounded-md shadow-sm border border-amber-300 shrink-0">步骤 1 / 4</span>
@@ -130,7 +125,6 @@
                     <div id="guideDots" class="flex space-x-1 items-center shrink-0"></div>
                 </div>
 
-                <!-- 主内容：左侧精简说明，右侧快捷控制按钮 -->
                 <div class="flex items-center justify-between space-x-3 pt-0.5">
                     <div class="flex-1 min-w-0 space-y-0.5">
                         <p id="guideDesc" class="text-[11px] text-slate-200 leading-tight font-medium"></p>
@@ -150,7 +144,6 @@
             </div>
         </div>
 
-        <!-- 底部占位保持上下布局平衡 -->
         <div class="h-2"></div>
     </div>
 
@@ -225,13 +218,11 @@
     <!-- 主内容容器 -->
     <div id="mainContentContainer" class="max-w-md mx-auto px-2 -mt-0.5 relative z-10 space-y-5">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-amber-100/60 space-y-5">
-            <!-- 头部操作栏：包含截单规则与“使用指南”按钮 -->
             <div class="flex justify-between items-center pb-4 border-b border-slate-100">
                 <div class="flex items-center space-x-2 bg-amber-50 border border-amber-200/60 px-3 py-1.5 rounded-xl">
                     <span class="text-xs font-medium text-slate-500">截单规则<span class="text-[10px] text-slate-400 font-normal">Cut-Off</span>:</span>
                     <span id="deadlineText" class="text-xs font-bold text-amber-900">周四/周五 8PM<span class="text-[10px] font-normal text-amber-700/80">(Thu/Fri 8PM)</span></span>
                 </div>
-                <!-- 重新打开新手指南按钮 -->
                 <button type="button" onclick="startAppGuide()" class="text-amber-800 bg-amber-100/80 hover:bg-amber-200 px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1 transition border border-amber-300 shadow-xs">
                     <i class="fa-solid fa-circle-question"></i>
                     <div class="flex flex-col text-left leading-tight">
@@ -242,7 +233,6 @@
             </div>
 
             <form id="orderForm" onsubmit="handleOrder(event)" class="space-y-4">
-                <!-- 步骤 1 目标：名字输入区域 -->
                 <div id="guideTargetName" class="space-y-1.5 p-1 rounded-xl transition-all">
                     <div class="flex justify-between items-center">
                         <div>
@@ -261,7 +251,6 @@
                            class="w-full px-3 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
                 </div>
 
-                <!-- 步骤 2 目标：菜单勾选区 -->
                 <div id="guideTargetMenu" class="p-1 rounded-xl transition-all">
                     <div class="mb-3">
                         <label class="block text-sm font-bold text-slate-700 leading-tight">选择预订餐点 (可多选) <span class="text-rose-500">*</span></label>
@@ -346,7 +335,6 @@
             </div>
         </div>
 
-        <!-- 步骤 3 目标：DuitNow 付款区域 -->
         <div id="guideTargetDuitnow" class="bg-white rounded-2xl shadow-lg p-5 border border-amber-100/60 text-center space-y-3 scroll-mt-24 transition-all">
             <div>
                 <h2 class="text-lg font-bold text-slate-800 flex items-center justify-center space-x-2">
@@ -392,7 +380,7 @@
         </div>
     </div>
 
-    <!-- 步骤 4 目标：底部固定栏 (购物车预览与确认下单) -->
+    <!-- 底部固定栏 -->
     <div id="guideTargetFooter" class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/60 shadow-2xl px-3 py-2.5 transition-all">
         <div class="max-w-md mx-auto space-y-2">
             <div id="cartPreviewCard" class="hidden bg-amber-50/90 border border-amber-200 rounded-xl p-3 space-y-1.5 text-xs max-h-36 overflow-y-auto shadow-inner">
@@ -482,7 +470,7 @@
         const DUITNOW_PHONE = "0162207137";   
         const VAPID_KEY = "BJNZbNNFDkM5831pbQrjwoQ3sqpGNLJ3MEzA1EmUftHIfOLFIrRim9S4l_qLtWw4rqRQ3D5cJa8R5myRG5QFIeI";
 
-        // --- 新手引导控制逻辑 (极简 Spotlight Tour Guide) ---
+        // --- 新手引导控制逻辑 ---
         let currentGuideStep = 0;
         const guideSteps = [
             {
@@ -556,7 +544,6 @@
                 if (footer) footer.classList.remove('guide-step-4');
             }
             
-            // 高亮目标区域并定位
             const targetEl = document.getElementById(step.targetId);
             if (targetEl) {
                 targetEl.classList.add('guide-highlight');
@@ -567,14 +554,12 @@
                 }
             }
 
-            // 更新弹窗文字
             document.getElementById('guideStepBadge').innerText = `步骤 ${stepIndex + 1} / ${guideSteps.length}`;
             document.getElementById('guideTitle').innerText = step.title;
             document.getElementById('guideSubTitle').innerText = step.subTitle;
             document.getElementById('guideDesc').innerText = step.desc;
             document.getElementById('guideDescEn').innerText = step.descEn;
 
-            // 更新按钮状态
             document.getElementById('guidePrevBtn').disabled = stepIndex === 0;
             const nextBtnText = document.getElementById('guideNextBtnText');
             if (stepIndex === guideSteps.length - 1) {
@@ -583,7 +568,6 @@
                 nextBtnText.innerText = '下一步';
             }
 
-            // 渲染底部指示点
             document.getElementById('guideDots').innerHTML = guideSteps.map((_, i) => 
                 `<div class="w-1.5 h-1.5 rounded-full ${i === stepIndex ? 'bg-amber-400 w-3.5' : 'bg-slate-700'} transition-all"></div>`
             ).join('');
@@ -605,7 +589,7 @@
             }
         }
 
-        // --- 1. Firebase 初始化与 Web Push 逻辑 ---
+        // --- 1. Firebase 初始化与 Web Push 修正逻辑 ---
         const firebaseConfig = {
             apiKey: "AIzaSyBQ0p9wjbzNbxiUnPOHvcoPoL8EZpHrn94",
             authDomain: "grc-cafe-pwa.firebaseapp.com",
@@ -621,23 +605,31 @@
             messaging = firebase.messaging();
         }
 
+        // 修复 PushManager undefined 异常与异步等待 Service Worker 就绪
         async function silentBindToken(customerName) {
-            if (!('serviceWorker' in navigator) || !('Notification' in window) || !messaging) return;
+            if (!('serviceWorker' in navigator) || !('Notification' in window) || !('PushManager' in window) || !messaging) {
+                console.warn("当前浏览器或协议环境不支持 Web Push 功能。");
+                return;
+            }
             try {
                 const permission = await Notification.requestPermission();
                 if (permission === 'granted') {
-                    const registration = await navigator.serviceWorker.register('./sw.js');
-                    await navigator.serviceWorker.ready;
+                    let registration = await navigator.serviceWorker.register('./sw.js');
+                    registration = await navigator.serviceWorker.ready; // 等待 SW 真正激活
+                    
                     const currentToken = await messaging.getToken({
                         serviceWorkerRegistration: registration,
                         vapidKey: VAPID_KEY
                     });
                     if (currentToken) {
+                        console.log("生成的 FCM Token:", currentToken);
                         await saveTokenToGoogleSheet(currentToken, customerName);
+                    } else {
+                        console.warn("未能获取到 Token，可能未配置 VAPID Key。");
                     }
                 }
             } catch (err) {
-                console.log("绑定 Token 失败:", err);
+                console.error("绑定 Token 失败:", err);
             }
         }
 
@@ -826,7 +818,6 @@
             startCarousel();
             initSwipeEvents();
 
-            // 如果是首次访问，自动弹出新手引导
             if (!localStorage.getItem('grc_cafe_guide_shown')) {
                 setTimeout(() => {
                     startAppGuide();
