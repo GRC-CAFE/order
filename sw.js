@@ -1,8 +1,8 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-// 升级版本号至 v23，强制手机端浏览器更新 Service Worker 规则
-const CACHE_NAME = 'grc-cafe-v23';
+// 升级版本号至 v24，强制更新规则
+const CACHE_NAME = 'grc-cafe-v24';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -39,32 +39,40 @@ messaging.onBackgroundMessage((payload) => {
 
   const notificationTitle = (payload.data && payload.data.title) ? payload.data.title : 'GRC CAFE 提醒';
   
+  // 提取自定义的 URL 或默认使用绝对路径 /order/
+  const targetUrl = (payload.data && payload.data.url) ? payload.data.url : 'https://grc-cafe.github.io/order/';
+
   const notificationOptions = {
     body: (payload.data && payload.data.body) ? payload.data.body : '本周新菜单上线啦，快来预订吧！',
     icon: 'logo-192.png',
     tag: 'grc-cafe-notification',
     renotify: true,
     data: {
-      url: self.registration.scope
+      url: targetUrl
     }
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// 2. 点击通知处理：锁定当前注册的作用域 (/order/)，防止跳回根域名
+// 2. 点击通知处理：防止彻底关闭 PWA (Cold Start) 时跳回根域名
 self.addEventListener('notificationclick', (event) => {
-  event.notification.close();
+  event.notification.close(); // 立即关闭通知弹窗
 
-  // 动态锁定当前的完整作用域 (例如 https://grc-cafe.github.io/order/)
-  let targetUrl = self.registration.scope;
-  if (!targetUrl.endsWith('/')) {
-    targetUrl += '/';
+  // 1) 优先尝试从 FCM payload 提取 url/click_action，保底使用硬编码的绝对路径 https://grc-cafe.github.io/order/
+  let targetUrl = 'https://grc-cafe.github.io/order/';
+  
+  if (event.notification.data) {
+    if (event.notification.data.url) {
+      targetUrl = event.notification.data.url;
+    } else if (event.notification.data.FCM_MSG && event.notification.data.FCM_MSG.notification && event.notification.data.FCM_MSG.notification.click_action) {
+      targetUrl = event.notification.data.FCM_MSG.notification.click_action;
+    }
   }
 
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(async (windowClients) => {
-      // 检查是否有已打开的 /order/ 页面
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // 2) 如果后台已有打开的 /order/ 页面，直接聚焦 (Focus)
       for (let client of windowClients) {
         if (client.url.includes('/order/')) {
           if ('focus' in client) {
@@ -73,7 +81,7 @@ self.addEventListener('notificationclick', (event) => {
         }
       }
 
-      // 若 PWA 完全关闭，强制打开 /order/ 子目录
+      // 3) 若 PWA 完全杀掉/冷启动，强制通过 openWindow 打开精准的 /order/ 路径
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
