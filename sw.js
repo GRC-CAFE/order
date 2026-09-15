@@ -1,8 +1,8 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-// 升级版本号至 v26，强制手机端更新 Service Worker 规则
-const CACHE_NAME = 'grc-cafe-v26';
+// 升级版本号至 v27，强制更新 Service Worker 规则
+const CACHE_NAME = 'grc-cafe-v27';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -31,8 +31,10 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// 1. 拦截原生 Push 事件（防止 Firebase SDK 默认逻辑接管导致跳转根域名）
+// 1. 统一拦截所有推送，禁止双重弹窗，并强制指定目标 URL
 self.addEventListener('push', (event) => {
+  event.stopImmediatePropagation(); // 阻止后续监听器（包括 Firebase SDK 内部监听器）重复处理
+
   let title = 'GRC CAFE 提醒';
   let body = '本周新菜单上线啦，快来预订吧！';
   let targetUrl = 'https://grc-cafe.github.io/order/';
@@ -41,14 +43,14 @@ self.addEventListener('push', (event) => {
     try {
       const payload = event.data.json();
       
-      // 兼容 FCM 的 notification 和 data payload 结构
+      // 读取标题和内容
       if (payload.notification) {
         title = payload.notification.title || title;
         body = payload.notification.body || body;
       }
       if (payload.data) {
-        title = payload.data.title || title;
-        body = payload.data.body || body;
+        title = payload.data.title || payload.data.notification_title || title;
+        body = payload.data.body || payload.data.notification_body || body;
         if (payload.data.url) {
           targetUrl = payload.data.url;
         }
@@ -57,14 +59,14 @@ self.addEventListener('push', (event) => {
         targetUrl = payload.fcmOptions.link;
       }
     } catch (e) {
-      console.log('Push data parse error/text:', event.data.text());
+      console.log('Push payload parsing fallback:', event.data.text());
     }
   }
 
   const options = {
     body: body,
     icon: 'logo-192.png',
-    tag: 'grc-cafe-notification',
+    tag: 'grc-cafe-notification', // 固定 tag 避免重复生成多条卡片
     renotify: true,
     data: {
       url: targetUrl
@@ -74,28 +76,20 @@ self.addEventListener('push', (event) => {
   event.waitUntil(
     self.registration.showNotification(title, options)
   );
-});
+}, true); // 捕获阶段拦截
 
-// Firebase SDK 后台消息兜底
-messaging.onBackgroundMessage((payload) => {
-  // 如果原生 push 已处理，此处直接 return 避免重复弹窗
-  return;
-});
-
-// 2. 点击通知处理：防止彻底关闭 PWA (Cold Start) 时跳回根域名
+// 2. 点击通知处理：彻底锁定跳转到 /order/
 self.addEventListener('notificationclick', (event) => {
-  event.notification.close(); // 立即关闭通知弹窗
+  event.notification.close();
 
-  // 预设写死精准绝对路径 https://grc-cafe.github.io/order/
   let targetUrl = 'https://grc-cafe.github.io/order/';
-  
   if (event.notification.data && event.notification.data.url) {
     targetUrl = event.notification.data.url;
   }
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      // 1) 如果后台已有打开的 /order/ 页面，直接聚焦 (Focus)
+      // 若已有 /order/ 标签页打开，直接切过去
       for (let client of windowClients) {
         if (client.url.includes('/order/')) {
           if ('focus' in client) {
@@ -103,8 +97,7 @@ self.addEventListener('notificationclick', (event) => {
           }
         }
       }
-
-      // 2) 若 PWA 完全杀死/冷启动，强制使用 openWindow 打开 /order/ 绝对路径
+      // 彻底杀死进程冷启动时，拉起 /order/
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
@@ -122,7 +115,7 @@ self.addEventListener('install', (e) => {
   );
 });
 
-// 4. 激活与旧缓存清理
+// 4. 激活与清理旧缓存
 self.addEventListener('activate', (e) => {
   e.waitUntil(
     caches.keys().then((keys) => {
@@ -138,7 +131,7 @@ self.addEventListener('activate', (e) => {
   return self.clients.claim();
 });
 
-// 5. 网络拦截与离线缓存降级策略
+// 5. 网络拦截与离线策略
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
 
