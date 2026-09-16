@@ -2,7 +2,7 @@ importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js'
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
 // 升级版本号至 v29，强制手机端更新 SW
-const CACHE_NAME = 'grc-cafe-v29';
+const CACHE_NAME = 'grc-cafe-30';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -107,7 +107,7 @@ self.addEventListener('activate', (e) => {
   return self.clients.claim();
 });
 
-// 5. 网络拦截与离线缓存策略
+// 5. 网络拦截与离线缓存策略 (网络优先，回退缓存)
 self.addEventListener('fetch', (e) => {
   if (e.request.method !== 'GET') return;
 
@@ -134,14 +134,7 @@ self.addEventListener('fetch', (e) => {
         return networkResponse;
       })
       .catch(() => {
-        return caches.match(e.request).then((cachedResponse) => {
-          if (cachedResponse) {
-            return cachedResponse;
-          }
-          if (e.request.mode === 'navigate') {
-            return caches.match('./index.html');
-          }
-        });
+        return caches.match(e.request);
       })
   );
 });
