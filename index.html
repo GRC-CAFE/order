@@ -573,7 +573,7 @@
             }
         }
 
-        // --- 1. Firebase 初始化与 Web Push 修正逻辑 ---
+        // --- 1. Firebase 初始化与 Web Push 逻辑 (去除硬编码 scope) ---
         const firebaseConfig = {
             apiKey: "AIzaSyBQ0p9wjbzNbxiUnPOHvcoPoL8EZpHrn94",
             authDomain: "grc-cafe-pwa.firebaseapp.com",
@@ -589,7 +589,7 @@
             messaging = firebase.messaging();
         }
 
-        // 绑定 FCM Token 逻辑（显式指定 GitHub Pages 的 /order/ Scope）
+        // 绑定 FCM Token 逻辑 (自动映射环境)
         async function silentBindToken(customerName) {
             if (!('serviceWorker' in navigator) || !('Notification' in window) || !('PushManager' in window) || !messaging) {
                 console.warn("当前浏览器或协议环境不支持 Web Push 功能。");
@@ -598,8 +598,7 @@
             try {
                 const permission = await Notification.requestPermission();
                 if (permission === 'granted') {
-                    // 显式锁定作用域为 /order/
-                    let registration = await navigator.serviceWorker.register('./sw.js', { scope: '/order/' });
+                    let registration = await navigator.serviceWorker.register('./sw.js');
                     registration = await navigator.serviceWorker.ready;
                     
                     const currentToken = await messaging.getToken({
