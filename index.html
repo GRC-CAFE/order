@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>GRC CAFE - 晚餐与糖水预订 | Dinner & Dessert Pre-Order</title>
     
-    <!-- PWA 相关配置 -->
+    <!-- PWA 配置 -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#f59e0b">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -14,7 +14,7 @@
     <link rel="apple-touch-icon" href="logo-192.png">
     <link rel="icon" type="image/png" sizes="192x192" href="logo-192.png">
 
-    <!-- 预加载核心资源 -->
+    <!-- 预加载资源 -->
     <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
     <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
@@ -22,7 +22,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-    <!-- 引入 Firebase Web SDK (v9 兼容版) -->
+    <!-- Firebase SDK (v9 兼容模式) -->
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
 
@@ -70,10 +70,10 @@
 </head>
 <body class="bg-gradient-to-b from-amber-50/80 via-orange-50/30 to-amber-50/60 min-h-screen pb-40 select-none relative font-sans text-slate-800 antialiased">
 
-    <!-- Toast 动态提示浮层 -->
+    <!-- Toast 提示 -->
     <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 z-[300] hidden max-w-xs w-full px-4 py-3 rounded-xl shadow-xl text-xs font-bold text-center transition-all duration-300 pointer-events-none transform -translate-y-2 opacity-0"></div>
 
-    <!-- 全屏提交加载 Overlay 遮罩 -->
+    <!-- 加载遮罩 -->
     <div id="loadingOverlay" class="fixed inset-0 z-[90] bg-slate-900/60 backdrop-blur-sm hidden flex flex-col items-center justify-center text-white space-y-3">
         <div class="w-12 h-12 border-4 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
         <div id="loadingText" class="text-sm font-bold tracking-wide text-center">
@@ -86,7 +86,7 @@
         </div>
     </div>
 
-    <!-- 新手引导 Spotlight 浮层卡片 -->
+    <!-- 新手引导 -->
     <div id="appGuideOverlay" class="hidden fixed inset-0 z-[200] pointer-events-none flex flex-col justify-between p-3 transition-opacity duration-300">
         <div class="pointer-events-auto flex justify-between items-center max-w-md mx-auto w-full pt-1">
             <div class="text-amber-400 font-bold text-[11px] tracking-wider flex items-center space-x-1 bg-amber-950/90 px-2.5 py-1 rounded-full border border-amber-500/40 shadow-lg">
@@ -135,7 +135,7 @@
         <div class="h-2"></div>
     </div>
 
-    <!-- 自定义通知权限请求 Banner -->
+    <!-- 通知权限请求 Banner -->
     <div id="notificationPermissionBanner" class="hidden fixed top-3 left-3 right-3 max-w-md mx-auto z-50 bg-amber-600/95 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-amber-500/80 flex items-center justify-between transition-all">
         <div class="flex items-center space-x-3">
             <div class="w-10 h-10 rounded-xl bg-white/20 flex items-center justify-center text-lg shrink-0">
@@ -160,7 +160,7 @@
         </div>
     </div>
 
-    <!-- 自定义 PWA 安装提示弹窗 -->
+    <!-- PWA 安装提示 -->
     <div id="pwaInstallBanner" class="hidden fixed top-20 left-3 right-3 max-w-md mx-auto z-50 bg-slate-900/95 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700/80 flex items-center justify-between transition-all">
         <div class="flex items-center space-x-3">
             <img src="logo-192.png" class="w-10 h-10 rounded-xl shadow-sm border border-slate-700 object-cover" alt="App Logo">
@@ -183,7 +183,7 @@
         </div>
     </div>
 
-    <!-- iOS 专属安装引导提示条 -->
+    <!-- iOS 专属安装提示 -->
     <div id="iosInstallBanner" class="hidden fixed top-20 left-3 right-3 max-w-md mx-auto z-50 bg-slate-900/95 text-white p-3.5 rounded-2xl shadow-2xl backdrop-blur-md border border-slate-700/80 flex items-center justify-between transition-all">
         <div class="flex items-center space-x-3">
             <img src="logo-192.png" class="w-10 h-10 rounded-xl shadow-sm border border-slate-700 object-cover" alt="App Logo">
@@ -197,13 +197,13 @@
         <button type="button" onclick="dismissIosPrompt()" class="text-slate-400 hover:text-white text-xs px-2 py-1"><i class="fa-solid fa-xmark text-sm"></i></button>
     </div>
 
-    <!-- 封面及轮播区域 -->
+    <!-- 轮播图 -->
     <div id="carouselContainer" class="relative w-full max-w-md mx-auto overflow-hidden rounded-b-3xl shadow-lg cursor-grab active:cursor-grabbing bg-white transform-gpu">
         <img id="carouselImage" src="cafe1.jpeg" class="w-full h-auto block transition-opacity duration-300 opacity-100 pointer-events-none will-change-[opacity]" alt="GRC CAFE 展示">
         <div id="carouselDots" class="absolute top-3 right-3 flex space-x-1.5 z-20 bg-white/70 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/50 shadow-sm"></div>
     </div>
 
-    <!-- 主内容容器 -->
+    <!-- 主内容区域 -->
     <div id="mainContentContainer" class="max-w-md mx-auto px-2 -mt-0.5 relative z-10 space-y-5">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-amber-100/60 space-y-5">
             <div class="flex justify-between items-center pb-4 border-b border-slate-100">
@@ -368,7 +368,7 @@
         </div>
     </div>
 
-    <!-- 底部固定栏 -->
+    <!-- 底部固定导航 -->
     <div id="guideTargetFooter" class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 backdrop-blur-md border-t border-slate-200/60 shadow-2xl px-3 py-2.5 transition-all">
         <div class="max-w-md mx-auto space-y-2">
             <div id="cartPreviewCard" class="hidden bg-amber-50/90 border border-amber-200 rounded-xl p-3 space-y-1.5 text-xs max-h-36 overflow-y-auto shadow-inner">
@@ -458,7 +458,7 @@
         const DUITNOW_PHONE = "0162207137";   
         const VAPID_KEY = "BJNZbNNFDkM5831pbQrjwoQ3sqpGNLJ3MEzA1EmUftHIfOLFIrRim9S4l_qLtWw4rqRQ3D5cJa8R5myRG5QFIeI";
 
-        // --- 新手引导控制逻辑 ---
+        // --- 新手引导 ---
         let currentGuideStep = 0;
         const guideSteps = [
             {
@@ -573,7 +573,7 @@
             }
         }
 
-        // --- 1. Firebase 初始化与 Web Push 逻辑 (去除硬编码 scope) ---
+        // --- Firebase 初始化与 Web Push ---
         const firebaseConfig = {
             apiKey: "AIzaSyBQ0p9wjbzNbxiUnPOHvcoPoL8EZpHrn94",
             authDomain: "grc-cafe-pwa.firebaseapp.com",
@@ -589,27 +589,31 @@
             messaging = firebase.messaging();
         }
 
-        // 绑定 FCM Token 逻辑 (自动映射环境)
+        // 绑定 FCM Token
         async function silentBindToken(customerName) {
             if (!('serviceWorker' in navigator) || !('Notification' in window) || !('PushManager' in window) || !messaging) {
-                console.warn("当前浏览器或协议环境不支持 Web Push 功能。");
+                console.warn("当前浏览器环境不支持 Web Push 功能。");
                 return;
             }
             try {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    let registration = await navigator.serviceWorker.register('./sw.js');
-                    registration = await navigator.serviceWorker.ready;
-                    
-                    const currentToken = await messaging.getToken({
-                        serviceWorkerRegistration: registration,
-                        vapidKey: VAPID_KEY
-                    });
-                    if (currentToken) {
-                        console.log("生成的 FCM Token:", currentToken);
-                        await saveTokenToGoogleSheet(currentToken, customerName);
-                    } else {
-                        console.warn("未能获取到 Token，可能未配置 VAPID Key。");
+                const permission = Notification.permission;
+                if (permission === 'granted' || permission === 'default') {
+                    let reqPerm = permission;
+                    if (permission === 'default') {
+                        reqPerm = await Notification.requestPermission();
+                    }
+                    if (reqPerm === 'granted') {
+                        let registration = await navigator.serviceWorker.register('./sw.js');
+                        registration = await navigator.serviceWorker.ready;
+                        
+                        const currentToken = await messaging.getToken({
+                            serviceWorkerRegistration: registration,
+                            vapidKey: VAPID_KEY
+                        });
+                        if (currentToken) {
+                            console.log("生成的 FCM Token:", currentToken);
+                            await saveTokenToGoogleSheet(currentToken, customerName);
+                        }
                     }
                 }
             } catch (err) {
@@ -633,10 +637,10 @@
                 });
                 const result = await response.json();
                 if (result && (result.success || result.result === "success")) {
-                    console.log(`✅ FCM Token 已成功与客户 [${customerName}] 绑定并同步至云端。`);
+                    console.log(`✅ FCM Token 已成功绑定，用户: [${customerName}]`);
                 }
             } catch (err) {
-                console.error("❌ Token 上传至 Google Sheet 失败:", err);
+                console.error("❌ Token 保存失败:", err);
             }
         }
 
@@ -648,7 +652,7 @@
             });
         }
 
-        // --- 2. PWA & 通知 Banner 提示逻辑 ---
+        // --- PWA & 提示框控制 ---
         let deferredPrompt = null;
         const PROMPT_COOLDOWN = 24 * 60 * 60 * 1000; 
 
@@ -760,7 +764,7 @@
             }
         }
 
-        // --- 3. 菜单状态 & 业务数据变量 ---
+        // --- 菜单状态与数据 ---
         let ENABLE_FRI_DINNER = true;
         let ENABLE_SAT_DINNER = true;
         let ENABLE_SAT_DESSERT = true;
@@ -795,6 +799,12 @@
 
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             document.getElementById('copyPhoneSubText').innerText = `Copy Phone (${DUITNOW_PHONE})`;
+
+            // 🌟 自动绑定已经授权过通知的用户
+            if ('Notification' in window && Notification.permission === 'granted') {
+                const currentName = localStorage.getItem('grc_customer_name') || '已同步用户';
+                silentBindToken(currentName);
+            }
 
             await fetchRemoteConfig();
             updateCarouselSlides();
