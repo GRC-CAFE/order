@@ -17,14 +17,12 @@
     <!-- 预加载核心资源 -->
     <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
     <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
-    <link rel="preconnect" href="https://www.gstatic.com" crossorigin>
 
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
 
-    <!-- 引入 Firebase Web SDK (v9 兼容版) -->
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"></script>
+    <!-- 引入 OneSignal SDK (v16) -->
+    <script src="https://cdn.onesignal.com/sdks/web/v16/OneSignalSDK.page.js" defer></script>
 
     <style>
         body {
@@ -456,7 +454,9 @@
         const GOOGLE_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw-t99KLkdMEcFzto_gfkosudLT3ElFVOqndO3KHZImHgx71hUqr9CDNSRg2Km45-j9Mw/exec"; 
         const MY_PHONE_NUMBER = "60162207137"; 
         const DUITNOW_PHONE = "0162207137";   
-        const VAPID_KEY = "BJNZbNNFDkM5831pbQrjwoQ3sqpGNLJ3MEzA1EmUftHIfOLFIrRim9S4l_qLtWw4rqRQ3D5cJa8R5myRG5QFIeI";
+        
+        // ⚠️ 请填入 OneSignal Dashboard 提供的真实 App ID
+        const ONESIGNAL_APP_ID = "YOUR_ONESIGNAL_APP_ID"; 
 
         // --- 新手引导控制逻辑 ---
         let currentGuideStep = 0;
@@ -573,80 +573,19 @@
             }
         }
 
-        // --- 1. Firebase 初始化与 Web Push 逻辑 (去除硬编码 scope) ---
-        const firebaseConfig = {
-            apiKey: "AIzaSyBQ0p9wjbzNbxiUnPOHvcoPoL8EZpHrn94",
-            authDomain: "grc-cafe-pwa.firebaseapp.com",
-            projectId: "grc-cafe-pwa",
-            storageBucket: "grc-cafe-pwa.firebasestorage.app",
-            messagingSenderId: "922576960907",
-            appId: "1:922576960907:web:f316e5009b2ac1edc8838e"
-        };
-
-        firebase.initializeApp(firebaseConfig);
-        let messaging = null;
-        if (firebase.messaging.isSupported()) {
-            messaging = firebase.messaging();
-        }
-
-        // 绑定 FCM Token 逻辑 (自动映射环境)
-        async function silentBindToken(customerName) {
-            if (!('serviceWorker' in navigator) || !('Notification' in window) || !('PushManager' in window) || !messaging) {
-                console.warn("当前浏览器或协议环境不支持 Web Push 功能。");
-                return;
-            }
-            try {
-                const permission = await Notification.requestPermission();
-                if (permission === 'granted') {
-                    let registration = await navigator.serviceWorker.register('./sw.js');
-                    registration = await navigator.serviceWorker.ready;
-                    
-                    const currentToken = await messaging.getToken({
-                        serviceWorkerRegistration: registration,
-                        vapidKey: VAPID_KEY
-                    });
-                    if (currentToken) {
-                        console.log("生成的 FCM Token:", currentToken);
-                        await saveTokenToGoogleSheet(currentToken, customerName);
-                    } else {
-                        console.warn("未能获取到 Token，可能未配置 VAPID Key。");
-                    }
-                }
-            } catch (err) {
-                console.error("绑定 Token 失败:", err);
-            }
-        }
-
-        async function saveTokenToGoogleSheet(token, customerName) {
-            if (!GOOGLE_SCRIPT_URL) return;
-            try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify({
-                        action: 'subscribe',
-                        token: token,
-                        name: customerName,
-                        timestamp: new Date().toISOString(),
-                        userAgent: navigator.userAgent
-                    })
-                });
-                const result = await response.json();
-                if (result && (result.success || result.result === "success")) {
-                    console.log(`✅ FCM Token 已成功与客户 [${customerName}] 绑定并同步至云端。`);
-                }
-            } catch (err) {
-                console.error("❌ Token 上传至 Google Sheet 失败:", err);
-            }
-        }
-
-        if (messaging) {
-            messaging.onMessage((payload) => {
-                const title = payload.notification ? payload.notification.title : "GRC CAFE 提醒";
-                const body = payload.notification ? payload.notification.body : "";
-                showToast(`🔔 ${title}: ${body}`, "info");
+        // --- 1. OneSignal SDK 初始化与消息设置 ---
+        window.OneSignalDeferred = window.OneSignalDeferred || [];
+        OneSignalDeferred.push(async function(OneSignal) {
+            await OneSignal.init({
+                appId: ONESIGNAL_APP_ID,
             });
-        }
+
+            // 如果已有保存的姓名，作为标签或别名绑定至 OneSignal
+            const savedName = localStorage.getItem('grc_customer_name');
+            if (savedName) {
+                OneSignal.User.addTag("customer_name", savedName);
+            }
+        });
 
         // --- 2. PWA & 通知 Banner 提示逻辑 ---
         let deferredPrompt = null;
@@ -670,8 +609,9 @@
 
         async function requestNotificationPermission() {
             document.getElementById('notificationPermissionBanner').classList.add('hidden');
-            const currentName = document.getElementById('name').value.trim() || '访客';
-            await silentBindToken(currentName);
+            window.OneSignalDeferred.push(function(OneSignal) {
+                OneSignal.Notifications.requestPermission();
+            });
         }
 
         window.addEventListener('beforeinstallprompt', (e) => {
@@ -756,7 +696,11 @@
 
         function saveCustomerName(val) {
             if (val && val.trim()) {
-                localStorage.setItem('grc_customer_name', val.trim());
+                const cleanName = val.trim();
+                localStorage.setItem('grc_customer_name', cleanName);
+                window.OneSignalDeferred.push(function(OneSignal) {
+                    OneSignal.User.addTag("customer_name", cleanName);
+                });
             }
         }
 
@@ -1552,8 +1496,6 @@
                 const result = await response.json();
 
                 if (result && result.success) {
-                    await silentBindToken(name);
-
                     setTimeout(() => {
                         window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
                         setTimeout(() => { window.location.reload(); }, 2500);
