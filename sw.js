@@ -1,8 +1,8 @@
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js');
 
-// 升级版本号至 v28，强制手机端更新
-const CACHE_NAME = 'grc-cafe-v28';
+// 升级版本号至 v29，强制手机端更新 SW
+const CACHE_NAME = 'grc-cafe-v29';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
@@ -31,10 +31,10 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// 1. 仅当收到纯 Data 消息（无系统 notification 字段）时才手动弹窗，防止双弹窗
+// 1. 仅当收到纯 Data 消息（无系统 notification 字段）时手动弹窗
 messaging.onBackgroundMessage((payload) => {
   if (payload.notification) {
-    return; // 系统已自动显示通知，此处直接跳过
+    return; // 系统自动显示通知，直接跳过
   }
 
   const title = (payload.data && payload.data.title) ? payload.data.title : 'GRC CAFE 提醒';
@@ -44,16 +44,17 @@ messaging.onBackgroundMessage((payload) => {
   self.registration.showNotification(title, {
     body: body,
     icon: 'logo-192.png',
-    tag: 'grc-cafe-notification',
+    badge: 'logo-192.png', // 适配 Android 状态栏图标
+    tag: payload.data?.tag || 'grc-cafe-notification',
+    renotify: true,
     data: { url: targetUrl }
   });
 });
 
-// 2. 核心：劫持所有通知点击，死锁跳转到 /order/ 路径
+// 2. 劫持所有通知点击，精准跳转/聚焦到 /order/ 页面
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
 
-  // 无论来自 Firebase 默认通知还是自定义通知，强行指定为 /order/
   let targetUrl = 'https://grc-cafe.github.io/order/';
 
   if (event.notification.data && event.notification.data.url) {
@@ -64,7 +65,7 @@ self.addEventListener('notificationclick', (event) => {
 
   event.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
-      // 1) 若后台已有打开的 /order/ 页面，直接切换过去
+      // 若后台已有打开的 /order/ 页面，直接切换过去
       for (let client of windowClients) {
         if (client.url.includes('/order/')) {
           if ('focus' in client) {
@@ -72,7 +73,7 @@ self.addEventListener('notificationclick', (event) => {
           }
         }
       }
-      // 2) 若 PWA 完全杀掉进程冷启动，强制打开 /order/ 绝对路径
+      // 若 PWA 进程已被杀掉，冷启动打开网页
       if (clients.openWindow) {
         return clients.openWindow(targetUrl);
       }
