@@ -912,12 +912,12 @@
                     const priceVal = Number(dish.price) || 0;
 
                     return `
-                        <div id="cardFri_${idx}" class="relative p-3.5 rounded-2xl border-2 ${isSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200/80 bg-white'} transition-all space-y-3 shadow-sm">
-                            <span id="badgeFriCheck_${idx}" class="hidden absolute top-3 right-3 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center space-x-1">
+                        <div id="cardFri_${idx}" class="relative p-2.5 rounded-2xl border-2 ${isSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200/80 bg-white'} transition-all space-y-2 shadow-sm">
+                            <span id="badgeFriCheck_${idx}" class="hidden absolute top-2.5 right-2.5 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center space-x-1">
                                 <i class="fa-solid fa-check text-[9px]"></i><span>已选 Selected</span>
                             </span>
                             <label class="flex items-start justify-between ${isSoldOut ? 'cursor-not-allowed' : 'cursor-pointer'}">
-                                <div class="flex items-center space-x-3">
+                                <div class="flex items-center space-x-2.5">
                                     <input type="checkbox" id="chkFri_${idx}" ${isSoldOut ? 'disabled' : 'onchange="toggleFriDish(' + idx + ')"'} class="w-5 h-5 text-amber-600 rounded-md border-slate-300 focus:ring-amber-500 mt-0.5">
                                     <div>
                                         <div class="text-sm font-bold text-slate-800 pr-12">
@@ -925,17 +925,17 @@
                                             ${isSoldOut ? '<span class="text-rose-500 text-xs font-semibold block sm:inline">(已售罄 Sold Out)</span>' : ''}
                                             ${isLowStock ? `<span class="text-amber-700 text-[10px] font-bold ml-1 bg-amber-100 px-1.5 py-0.5 rounded-md">🔥 仅剩 ${remaining} 份 (${remaining} left)</span>` : ''}
                                         </div>
-                                        <div class="mt-1 flex items-center space-x-1.5">
+                                        <div class="mt-0.5 flex items-center space-x-1.5">
                                             <span class="text-xs font-bold text-amber-700">RM ${priceVal.toFixed(2)}</span>
                                             <span class="text-[10px] text-amber-600/80">/ 份 (portion)</span>
                                         </div>
-                                        <div class="mt-1">
+                                        <div class="mt-0.5">
                                             <span class="text-[10px] ${isSoldOut ? 'bg-rose-100 text-rose-800' : 'bg-amber-100 text-amber-800'} font-bold px-1.5 py-0.5 rounded-full inline-block">已订 ${booked} / ${limit} 份 (Booked ${booked}/${limit})</span>
                                         </div>
                                     </div>
                                 </div>
                             </label>
-                            <div id="qtyFriBox_${idx}" class="hidden flex items-center justify-between pt-2.5 border-t border-amber-200/60">
+                            <div id="qtyFriBox_${idx}" class="hidden flex items-center justify-between pt-2 border-t border-amber-200/60">
                                 <div>
                                     <span class="text-xs font-bold text-slate-600 block leading-tight">数量 / Qty</span>
                                 </div>
@@ -966,12 +966,12 @@
                     const priceVal = Number(dish.price) || 0;
 
                     return `
-                        <div id="cardSat_${idx}" class="relative p-3.5 rounded-2xl border-2 ${isSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200/80 bg-white'} transition-all space-y-3 shadow-sm">
-                            <span id="badgeSatCheck_${idx}" class="hidden absolute top-3 right-3 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center space-x-1">
+                        <div id="cardSat_${idx}" class="relative p-2.5 rounded-2xl border-2 ${isSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200/80 bg-white'} transition-all space-y-2 shadow-sm">
+                            <span id="badgeSatCheck_${idx}" class="hidden absolute top-2.5 right-2.5 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center space-x-1">
                                 <i class="fa-solid fa-check text-[9px]"></i><span>已选 Selected</span>
                             </span>
                             <label class="flex items-start justify-between ${isSoldOut ? 'cursor-not-allowed' : 'cursor-pointer'}">
-                                <div class="flex items-center space-x-3">
+                                <div class="flex items-center space-x-2.5">
                                     <input type="checkbox" id="chkSat_${idx}" ${isSoldOut ? 'disabled' : 'onchange="toggleSatDish(' + idx + ')"'} class="w-5 h-5 text-indigo-600 rounded-md border-slate-300 focus:ring-indigo-500 mt-0.5">
                                     <div>
                                         <div class="text-sm font-bold text-slate-800 pr-12">
@@ -979,17 +979,17 @@
                                             ${isSoldOut ? '<span class="text-rose-500 text-xs font-semibold block sm:inline">(已售罄 Sold Out)</span>' : ''}
                                             ${isLowStock ? `<span class="text-indigo-700 text-[10px] font-bold ml-1 bg-indigo-100 px-1.5 py-0.5 rounded-md">🔥 仅剩 ${remaining} 份 (${remaining} left)</span>` : ''}
                                         </div>
-                                        <div class="mt-1 flex items-center space-x-1.5">
+                                        <div class="mt-0.5 flex items-center space-x-1.5">
                                             <span class="text-xs font-bold text-indigo-600">RM ${priceVal.toFixed(2)}</span>
                                             <span class="text-[10px] text-indigo-500/80">/ 份 (portion)</span>
                                         </div>
-                                        <div class="mt-1">
+                                        <div class="mt-0.5">
                                             <span class="text-[10px] ${isSoldOut ? 'bg-rose-100 text-rose-800' : 'bg-indigo-100 text-indigo-800'} font-bold px-1.5 py-0.5 rounded-full inline-block">已订 ${booked} / ${limit} 份 (Booked ${booked}/${limit})</span>
                                         </div>
                                     </div>
                                 </div>
                             </label>
-                            <div id="qtySatBox_${idx}" class="hidden flex items-center justify-between pt-2.5 border-t border-indigo-100">
+                            <div id="qtySatBox_${idx}" class="hidden flex items-center justify-between pt-2 border-t border-indigo-100">
                                 <div>
                                     <span class="text-xs font-bold text-slate-600 block leading-tight">数量 / Qty</span>
                                 </div>
@@ -1016,12 +1016,12 @@
                 const isDessertLowStock = !isDessertSoldOut && dessertRemaining <= 3;
 
                 dessertContainer.innerHTML = `
-                    <div id="cardDessert" class="relative p-3.5 rounded-2xl border-2 ${isDessertSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200/80 bg-white'} transition-all space-y-3 shadow-sm">
-                        <span id="badgeDessertCheck" class="hidden absolute top-3 right-3 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center space-x-1">
+                    <div id="cardDessert" class="relative p-2.5 rounded-2xl border-2 ${isDessertSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200/80 bg-white'} transition-all space-y-2 shadow-sm">
+                        <span id="badgeDessertCheck" class="hidden absolute top-2.5 right-2.5 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center space-x-1">
                             <i class="fa-solid fa-check text-[9px]"></i><span>已选 Selected</span>
                         </span>
                         <label class="flex items-start justify-between ${isDessertSoldOut ? 'cursor-not-allowed' : 'cursor-pointer'}">
-                            <div class="flex items-center space-x-3">
+                            <div class="flex items-center space-x-2.5">
                                 <input type="checkbox" id="chkDessert" ${isDessertSoldOut ? 'disabled' : 'onchange="toggleCard(\'Dessert\')"'} class="w-5 h-5 text-rose-600 rounded-md border-slate-300 focus:ring-rose-500 mt-0.5">
                                 <div>
                                     <div id="txtDessertTitle" class="text-sm font-bold text-slate-800 pr-12">
@@ -1029,18 +1029,18 @@
                                         ${isDessertSoldOut ? '<span class="text-rose-500 text-xs font-semibold block sm:inline">(已售罄 Sold Out)</span>' : ''}
                                         ${isDessertLowStock ? `<span class="text-rose-600 text-[10px] font-bold ml-1 bg-rose-100 px-1.5 py-0.5 rounded-md">🔥 仅剩 ${dessertRemaining} 份 (${dessertRemaining} left)</span>` : ''}
                                     </div>
-                                    <div class="mt-1 flex items-center space-x-1.5">
+                                    <div class="mt-0.5 flex items-center space-x-1.5">
                                         <span id="txtDessertPrice" class="text-xs font-bold text-rose-600">RM ${Number(DESSERT_PRICE).toFixed(2)}</span>
                                         <span class="text-[10px] text-rose-500/80">/ 份 (portion)</span>
                                     </div>
-                                    <div class="mt-1">
+                                    <div class="mt-0.5">
                                         <span id="badgeDessertCount" class="text-[10px] bg-rose-100 text-rose-800 font-bold px-2 py-0.5 rounded-full inline-block">已订 ${DESSERT_ORDERED_QTY} / ${SAT_DESSERT_LIMIT} 份 (Booked ${DESSERT_ORDERED_QTY}/${SAT_DESSERT_LIMIT})</span>
                                     </div>
                                 </div>
                             </div>
                         </label>
 
-                        <div id="qtyDessertBox" class="hidden flex items-center justify-between pt-2.5 border-t border-rose-100">
+                        <div id="qtyDessertBox" class="hidden flex items-center justify-between pt-2 border-t border-rose-100">
                             <div>
                                 <span class="text-xs font-bold text-slate-600 block leading-tight">数量 / Qty</span>
                             </div>
@@ -1067,12 +1067,12 @@
             const badge = document.getElementById(`badgeFriCheck_${idx}`);
 
             if (chk.checked) {
-                card.className = "relative p-3.5 rounded-2xl border-2 border-amber-500 bg-amber-50/90 shadow-md transition-all space-y-3";
+                card.className = "relative p-2.5 rounded-2xl border-2 border-amber-500 bg-amber-50/90 shadow-md transition-all space-y-2";
                 qtyBox.classList.remove('hidden');
                 if (badge) badge.classList.remove('hidden');
                 updateFriButtonStates(idx);
             } else {
-                card.className = "relative p-3.5 rounded-2xl border-2 border-slate-200/80 bg-white transition-all space-y-3 shadow-sm";
+                card.className = "relative p-2.5 rounded-2xl border-2 border-slate-200/80 bg-white transition-all space-y-2 shadow-sm";
                 qtyBox.classList.add('hidden');
                 if (badge) badge.classList.add('hidden');
             }
@@ -1086,12 +1086,12 @@
             const badge = document.getElementById(`badgeSatCheck_${idx}`);
 
             if (chk.checked) {
-                card.className = "relative p-3.5 rounded-2xl border-2 border-indigo-500 bg-indigo-50/90 shadow-md transition-all space-y-3";
+                card.className = "relative p-2.5 rounded-2xl border-2 border-indigo-500 bg-indigo-50/90 shadow-md transition-all space-y-2";
                 qtyBox.classList.remove('hidden');
                 if (badge) badge.classList.remove('hidden');
                 updateSatButtonStates(idx);
             } else {
-                card.className = "relative p-3.5 rounded-2xl border-2 border-slate-200/80 bg-white transition-all space-y-3 shadow-sm";
+                card.className = "relative p-2.5 rounded-2xl border-2 border-slate-200/80 bg-white transition-all space-y-2 shadow-sm";
                 qtyBox.classList.add('hidden');
                 if (badge) badge.classList.add('hidden');
             }
@@ -1105,12 +1105,12 @@
             const badge = document.getElementById(`badge${type}Check`);
 
             if (chk.checked) {
-                card.className = `relative p-3.5 rounded-2xl border-2 border-rose-500 bg-rose-50/90 shadow-md transition-all space-y-3`;
+                card.className = `relative p-2.5 rounded-2xl border-2 border-rose-500 bg-rose-50/90 shadow-md transition-all space-y-2`;
                 qtyBox.classList.remove('hidden');
                 if (badge) badge.classList.remove('hidden');
                 updateDessertButtonStates();
             } else {
-                card.className = "relative p-3.5 rounded-2xl border-2 border-slate-200/80 bg-white transition-all space-y-3 shadow-sm";
+                card.className = "relative p-2.5 rounded-2xl border-2 border-slate-200/80 bg-white transition-all space-y-2 shadow-sm";
                 qtyBox.classList.add('hidden');
                 if (badge) badge.classList.add('hidden');
             }
