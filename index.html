@@ -235,7 +235,8 @@
                             </span>
                         </button>
                     </div>
-                    <input type="text" id="name" required placeholder="例如: Tan / Ah Beng (e.g. Tan)" autocomplete="off" oninput="saveCustomerName(this.value)"
+                    <!-- 🌟 优化：输入完名字失去焦点时，后台静默绑定 Token，提升整体流畅度 -->
+                    <input type="text" id="name" required placeholder="例如: Tan / Ah Beng (e.g. Tan)" autocomplete="off" oninput="saveCustomerName(this.value)" onblur="silentBindToken(this.value)"
                            class="w-full px-3 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
                 </div>
 
@@ -786,7 +787,7 @@
             return false;
         }
 
-        // 🌟 核心优化：页面加载时优先加载本地缓存配置，实现秒开，然后后台更新
+        // 🌟 核心优化：页面加载时优先加载本地缓存配置实现秒开，然后后台更新
         window.addEventListener('load', async () => {
             checkNotificationPrompt();
             checkIosPrompt();
@@ -863,7 +864,6 @@
                 const config = await res.json();
                 if (config && !config.error) {
                     applyConfigData(config);
-                    // 保存到本地缓存
                     localStorage.setItem('grc_cafe_menu_cache_data', JSON.stringify(config));
                 }
             } catch (err) {
@@ -1578,6 +1578,7 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 12000);
 
+                // 🌟 1. 严格等待 Google Apps Script 返回成功写入的响应（保证零漏单、不超卖）
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1589,7 +1590,7 @@
                 const result = await response.json();
 
                 if (result && result.success) {
-                    // 🌟 核心优化：将 Token 绑定改为后台异步执行，不阻塞跳转 WhatsApp
+                    // 🌟 2. 写入成功后，Token 绑定放入后台异步执行，瞬间实现跳转 WhatsApp
                     silentBindToken(name).catch(err => console.log("Background token bind error:", err));
 
                     setTimeout(() => {
