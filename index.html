@@ -786,6 +786,7 @@
             return false;
         }
 
+        // 🌟 核心优化：页面加载时优先加载本地缓存配置，实现秒开，然后后台更新
         window.addEventListener('load', async () => {
             checkNotificationPrompt();
             checkIosPrompt();
@@ -799,6 +800,20 @@
                 silentBindToken(currentName);
             }
 
+            // 1. 优先读取本地缓存配置渲染页面（实现秒开）
+            const cachedConfig = localStorage.getItem('grc_cafe_menu_cache_data');
+            if (cachedConfig) {
+                try {
+                    const config = JSON.parse(cachedConfig);
+                    applyConfigData(config);
+                    updateCarouselSlides();
+                    setupMenuUI();
+                } catch (e) {
+                    console.log("解析本地缓存配置失败", e);
+                }
+            }
+
+            // 2. 后台异步获取最新配置并静默更新
             await fetchRemoteConfig();
             updateCarouselSlides();
             setupMenuUI();
@@ -813,36 +828,43 @@
             }
         });
 
+        function applyConfigData(config) {
+            if (!config) return;
+            if (config.ENABLE_FRI_DINNER !== undefined) ENABLE_FRI_DINNER = parseBool(config.ENABLE_FRI_DINNER);
+            if (config.ENABLE_SAT_DINNER !== undefined) ENABLE_SAT_DINNER = parseBool(config.ENABLE_SAT_DINNER);
+            if (config.ENABLE_SAT_DESSERT !== undefined) ENABLE_SAT_DESSERT = parseBool(config.ENABLE_SAT_DESSERT);
+            
+            if (config.friDishes && Array.isArray(config.friDishes)) {
+                FRI_DISHES = config.friDishes.map(d => ({ ...d, price: Number(d.price) || 0 }));
+            }
+            if (config.friImages && Array.isArray(config.friImages)) {
+                FRI_IMAGES = config.friImages;
+            }
+            if (config.satDishes && Array.isArray(config.satDishes)) {
+                SAT_DISHES = config.satDishes.map(d => ({ ...d, price: Number(d.price) || 0 }));
+            }
+            if (config.satImages && Array.isArray(config.satImages)) {
+                SAT_IMAGES = config.satImages;
+            }
+            if (config.dessertImage) {
+                DESSERT_IMAGE = config.dessertImage;
+            }
+
+            if (config.satDessertName) SAT_DESSERT_NAME = config.satDessertName;
+            if (config.dessertPrice !== undefined) DESSERT_PRICE = Number(config.dessertPrice) || 0;
+            if (config.satDessertLimit) SAT_DESSERT_LIMIT = Number(config.satDessertLimit);
+            if (config.dessertOrderedQty !== undefined) DESSERT_ORDERED_QTY = Number(config.dessertOrderedQty);
+        }
+
         async function fetchRemoteConfig() {
             if (!GOOGLE_SCRIPT_URL) return;
             try {
                 const res = await fetch(GOOGLE_SCRIPT_URL);
                 const config = await res.json();
                 if (config && !config.error) {
-                    if (config.ENABLE_FRI_DINNER !== undefined) ENABLE_FRI_DINNER = parseBool(config.ENABLE_FRI_DINNER);
-                    if (config.ENABLE_SAT_DINNER !== undefined) ENABLE_SAT_DINNER = parseBool(config.ENABLE_SAT_DINNER);
-                    if (config.ENABLE_SAT_DESSERT !== undefined) ENABLE_SAT_DESSERT = parseBool(config.ENABLE_SAT_DESSERT);
-                    
-                    if (config.friDishes && Array.isArray(config.friDishes)) {
-                        FRI_DISHES = config.friDishes.map(d => ({ ...d, price: Number(d.price) || 0 }));
-                    }
-                    if (config.friImages && Array.isArray(config.friImages)) {
-                        FRI_IMAGES = config.friImages;
-                    }
-                    if (config.satDishes && Array.isArray(config.satDishes)) {
-                        SAT_DISHES = config.satDishes.map(d => ({ ...d, price: Number(d.price) || 0 }));
-                    }
-                    if (config.satImages && Array.isArray(config.satImages)) {
-                        SAT_IMAGES = config.satImages;
-                    }
-                    if (config.dessertImage) {
-                        DESSERT_IMAGE = config.dessertImage;
-                    }
-
-                    if (config.satDessertName) SAT_DESSERT_NAME = config.satDessertName;
-                    if (config.dessertPrice !== undefined) DESSERT_PRICE = Number(config.dessertPrice) || 0;
-                    if (config.satDessertLimit) SAT_DESSERT_LIMIT = Number(config.satDessertLimit);
-                    if (config.dessertOrderedQty !== undefined) DESSERT_ORDERED_QTY = Number(config.dessertOrderedQty);
+                    applyConfigData(config);
+                    // 保存到本地缓存
+                    localStorage.setItem('grc_cafe_menu_cache_data', JSON.stringify(config));
                 }
             } catch (err) {
                 console.log("无法连接后台 API，使用默认配置", err);
@@ -1567,7 +1589,8 @@
                 const result = await response.json();
 
                 if (result && result.success) {
-                    await silentBindToken(name);
+                    // 🌟 核心优化：将 Token 绑定改为后台异步执行，不阻塞跳转 WhatsApp
+                    silentBindToken(name).catch(err => console.log("Background token bind error:", err));
 
                     setTimeout(() => {
                         window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
