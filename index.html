@@ -589,12 +589,8 @@
             messaging = firebase.messaging();
         }
 
-        // 绑定 FCM Token
         async function silentBindToken(customerName) {
-            if (!('serviceWorker' in navigator) || !('Notification' in window) || !('PushManager' in window) || !messaging) {
-                console.warn("当前浏览器环境不支持 Web Push 功能。");
-                return;
-            }
+            if (!('serviceWorker' in navigator) || !('Notification' in window) || !('PushManager' in window) || !messaging) return;
             try {
                 const permission = Notification.permission;
                 if (permission === 'granted' || permission === 'default') {
@@ -611,7 +607,6 @@
                             vapidKey: VAPID_KEY
                         });
                         if (currentToken) {
-                            console.log("生成的 FCM Token:", currentToken);
                             await saveTokenToGoogleSheet(currentToken, customerName);
                         }
                     }
@@ -624,7 +619,7 @@
         async function saveTokenToGoogleSheet(token, customerName) {
             if (!GOOGLE_SCRIPT_URL) return;
             try {
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify({
@@ -635,12 +630,8 @@
                         userAgent: navigator.userAgent
                     })
                 });
-                const result = await response.json();
-                if (result && (result.success || result.result === "success")) {
-                    console.log(`✅ FCM Token 已成功绑定，用户: [${customerName}]`);
-                }
             } catch (err) {
-                console.error("❌ Token 保存失败:", err);
+                console.error("Token 保存失败:", err);
             }
         }
 
@@ -771,6 +762,9 @@
         
         let FRI_DISHES = [];
         let SAT_DISHES = [];
+        let FRI_IMAGES = [];
+        let SAT_IMAGES = [];
+        let DESSERT_IMAGE = "sat_dessert.jpeg";
         let SAT_DESSERT_NAME = "周六限定糖水 / Saturday Special Dessert";
         let DESSERT_PRICE = 5;    
         let SAT_DESSERT_LIMIT = 20;
@@ -800,7 +794,6 @@
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             document.getElementById('copyPhoneSubText').innerText = `Copy Phone (${DUITNOW_PHONE})`;
 
-            // 🌟 自动绑定已经授权过通知的用户
             if ('Notification' in window && Notification.permission === 'granted') {
                 const currentName = localStorage.getItem('grc_customer_name') || '已同步用户';
                 silentBindToken(currentName);
@@ -833,8 +826,17 @@
                     if (config.friDishes && Array.isArray(config.friDishes)) {
                         FRI_DISHES = config.friDishes.map(d => ({ ...d, price: Number(d.price) || 0 }));
                     }
+                    if (config.friImages && Array.isArray(config.friImages)) {
+                        FRI_IMAGES = config.friImages;
+                    }
                     if (config.satDishes && Array.isArray(config.satDishes)) {
                         SAT_DISHES = config.satDishes.map(d => ({ ...d, price: Number(d.price) || 0 }));
+                    }
+                    if (config.satImages && Array.isArray(config.satImages)) {
+                        SAT_IMAGES = config.satImages;
+                    }
+                    if (config.dessertImage) {
+                        DESSERT_IMAGE = config.dessertImage;
                     }
 
                     if (config.satDessertName) SAT_DESSERT_NAME = config.satDessertName;
@@ -847,23 +849,26 @@
             }
         }
 
+        // 🌟 动态适配后端传来的 jpg/jpeg 图片文件名
         function updateCarouselSlides() {
             let dynamicSlides = [{ image: "cafe1.jpeg" }];
 
             if (ENABLE_FRI_DINNER && FRI_DISHES.length > 0) {
                 FRI_DISHES.forEach((dish, idx) => {
-                    dynamicSlides.push({ image: `fri_dish${idx + 1}.jpeg`, title: dish.name });
+                    let imgName = (FRI_IMAGES && FRI_IMAGES[idx]) ? FRI_IMAGES[idx] : `fri_dish${idx + 1}.jpeg`;
+                    dynamicSlides.push({ image: imgName, title: dish.name });
                 });
             }
 
             if (ENABLE_SAT_DINNER && SAT_DISHES.length > 0) {
                 SAT_DISHES.forEach((dish, idx) => {
-                    dynamicSlides.push({ image: `sat_dish${idx + 1}.jpeg`, title: dish.name });
+                    let imgName = (SAT_IMAGES && SAT_IMAGES[idx]) ? SAT_IMAGES[idx] : `sat_dish${idx + 1}.jpeg`;
+                    dynamicSlides.push({ image: imgName, title: dish.name });
                 });
             }
 
             if (ENABLE_SAT_DESSERT) {
-                dynamicSlides.push({ image: "sat_dessert.jpeg", title: SAT_DESSERT_NAME });
+                dynamicSlides.push({ image: DESSERT_IMAGE, title: SAT_DESSERT_NAME });
             }
 
             dynamicSlides.push({ image: "instruction.jpeg" });
