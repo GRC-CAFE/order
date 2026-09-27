@@ -871,7 +871,7 @@
             }
         }
 
-        // 🌟 动态适配后端传来的 jpg/jpeg 图片文件名
+        // 🌟 动态适配后端传来的 jpg/jpeg 图片文件名（已去掉 instruction.jpeg）
         function updateCarouselSlides() {
             let dynamicSlides = [{ image: "cafe1.jpeg" }];
 
@@ -893,7 +893,6 @@
                 dynamicSlides.push({ image: DESSERT_IMAGE, title: SAT_DESSERT_NAME });
             }
 
-            dynamicSlides.push({ image: "instruction.jpeg" });
             dynamicSlides.push({ image: "pwa.jpeg" });
 
             SLIDES = dynamicSlides;
@@ -1570,42 +1569,7 @@
             selectedItems.forEach(item => { rawMessage += `• ${item}\n`; });
 
             rawMessage += `💰 *总计 Total*：RM ${total}\n` +
-                          `📝 *备注 Remarks*：${notes}\n` +
-                          `--------------------------------\n` +
-                          `已下单，请查收转账！Order submitted, payment receipt attached!`;
-
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 12000);
-
-                // 🌟 1. 严格等待 Google Apps Script 返回成功写入的响应（保证零漏单、不超卖）
-                const response = await fetch(GOOGLE_SCRIPT_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-                    body: JSON.stringify(payload),
-                    signal: controller.signal
-                });
-                clearTimeout(timeoutId);
-
-                const result = await response.json();
-
-                if (result && result.success) {
-                    // 🌟 2. 写入成功后，Token 绑定放入后台异步执行，瞬间实现跳转 WhatsApp
-                    silentBindToken(name).catch(err => console.log("Background token bind error:", err));
-
-                    setTimeout(() => {
-                        window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
-                        setTimeout(() => { window.location.reload(); }, 2500);
-                    }, 300);
-                } else {
-                    throw new Error(result.message || "服务器响应异常");
-                }
-            } catch (err) {
-                console.error("提交失败:", err);
-                if (overlay) overlay.classList.add('hidden');
-                btn.disabled = false;
-                showToast(`❌ 提交失败: ${err.message || '网络超时'}`, "error");
-            }
+                          `📝 *备注 Remarks*：${notes}\n`;
         }
     </script>
 </body>
