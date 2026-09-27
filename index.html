@@ -1561,7 +1561,7 @@
                 payload.dessertOrder = { checked: true, detail: SAT_DESSERT_NAME, qty: q, subtotal: q * Number(DESSERT_PRICE) };
             }
 
-            let rawMessage = `🛒 *【晚餐/糖水预订订单 Dinner & Dessert Order】*\n` +
+            let rawMessage = `🛒 *【晚餐/糖水预订 Dinner & Dessert Order】*\n` +
                              `--------------------------------\n` +
                              `👤 *名字 Name*：${name}\n` +
                              `🍱 *已选餐点 Items*：\n`;
@@ -1569,7 +1569,43 @@
             selectedItems.forEach(item => { rawMessage += `• ${item}\n`; });
 
             rawMessage += `💰 *总计 Total*：RM ${total}\n` +
-                          `📝 *备注 Remarks*：${notes}\n`;
+                          `📝 *备注 Remarks*：${notes}\n` +
+                          `--------------------------------\n` +
+                          `已下单，请查收转账！Order submitted, payment receipt attached!`;
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 12000);
+
+                // 🌟 1. 严格等待 Google Apps Script 返回成功响应 (保证零漏单、不超卖)
+                const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+
+                const result = await response.json();
+
+                if (result && result.success) {
+                    // 🌟 2. 写入成功后，Token 绑定放入后台异步执行，瞬间实现跳转 WhatsApp
+                    silentBindToken(name).catch(err => console.log("Background token bind error:", err));
+
+                    setTimeout(() => {
+                        window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
+                        setTimeout(() => { window.location.reload(); }, 2500);
+                    }, 300);
+                } else {
+                    if (overlay) overlay.classList.add('hidden');
+                    btn.disabled = false;
+                    showToast(`❌ 提交失败: ${result.message || '未知原因'}`, "error");
+                }
+            } catch (err) {
+                if (overlay) overlay.classList.add('hidden');
+                btn.disabled = false;
+                showToast("❌ 网络连接超时或失败，请重试！", "error");
+            }
         }
     </script>
 </body>
