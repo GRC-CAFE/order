@@ -235,6 +235,7 @@
                             </span>
                         </button>
                     </div>
+                    <!-- 🌟 优化：输入完名字失去焦点时，后台静默绑定 Token，提升整体流畅度 -->
                     <input type="text" id="name" required placeholder="例如: Tan / Ah Beng (e.g. Tan)" autocomplete="off" oninput="saveCustomerName(this.value)" onblur="silentBindToken(this.value)"
                            class="w-full px-3 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
                 </div>
@@ -786,7 +787,7 @@
             return false;
         }
 
-        // 🌟 核心优化：页面加载时优先加载本地缓存配置实现秒开，然后后台异步拉取最新数据刷新
+        // 🌟 核心优化：页面加载时优先加载本地缓存配置实现秒开，然后后台更新
         window.addEventListener('load', async () => {
             checkNotificationPrompt();
             checkIosPrompt();
@@ -813,7 +814,7 @@
                 }
             }
 
-            // 2. 后台异步获取最新远程配置（带 refresh=true 绕过缓存）并静默更新
+            // 2. 后台异步获取最新配置并静默更新
             await fetchRemoteConfig();
             updateCarouselSlides();
             setupMenuUI();
@@ -859,8 +860,7 @@
         async function fetchRemoteConfig() {
             if (!GOOGLE_SCRIPT_URL) return;
             try {
-                // 加上 refresh=true 和时间戳参数，强制获取最新数据
-                const res = await fetch(`${GOOGLE_SCRIPT_URL}?refresh=true&t=${Date.now()}`);
+                const res = await fetch(GOOGLE_SCRIPT_URL);
                 const config = await res.json();
                 if (config && !config.error) {
                     applyConfigData(config);
@@ -871,6 +871,7 @@
             }
         }
 
+        // 🌟 动态适配后端传来的 jpg/jpeg 图片文件名（已去掉 instruction.jpeg）
         function updateCarouselSlides() {
             let dynamicSlides = [{ image: "cafe1.jpeg" }];
 
@@ -1576,6 +1577,7 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 12000);
 
+                // 🌟 1. 严格等待 Google Apps Script 返回成功响应 (保证零漏单、不超卖)
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1587,6 +1589,7 @@
                 const result = await response.json();
 
                 if (result && result.success) {
+                    // 🌟 2. 写入成功后，Token 绑定放入后台异步执行，瞬间实现跳转 WhatsApp
                     silentBindToken(name).catch(err => console.log("Background token bind error:", err));
 
                     setTimeout(() => {
