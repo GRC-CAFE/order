@@ -235,7 +235,7 @@
                             </span>
                         </button>
                     </div>
-                    <!-- 🌟 优化：输入完名字失去焦点时，后台静默绑定 Token，提升整体流畅度 -->
+                    <!-- 输入完名字失去焦点时，后台静默绑定 Token -->
                     <input type="text" id="name" required placeholder="例如: Tan / Ah Beng (e.g. Tan)" autocomplete="off" oninput="saveCustomerName(this.value)" onblur="silentBindToken(this.value)"
                            class="w-full px-3 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
                 </div>
@@ -787,7 +787,7 @@
             return false;
         }
 
-        // 🌟 核心优化：页面加载时优先加载本地缓存配置实现秒开，然后后台更新
+        // 🌟 核心优化：每次打开网页不读本地缓存，直接向远程请求最新数据
         window.addEventListener('load', async () => {
             checkNotificationPrompt();
             checkIosPrompt();
@@ -801,23 +801,8 @@
                 silentBindToken(currentName);
             }
 
-            // 1. 优先读取本地缓存配置渲染页面（实现秒开）
-            const cachedConfig = localStorage.getItem('grc_cafe_menu_cache_data');
-            if (cachedConfig) {
-                try {
-                    const config = JSON.parse(cachedConfig);
-                    applyConfigData(config);
-                    updateCarouselSlides();
-                    setupMenuUI();
-                } catch (e) {
-                    console.log("解析本地缓存配置失败", e);
-                }
-            }
-
-            // 2. 后台异步获取最新配置并静默更新
+            // 直接实时拉取远程最新菜单与数量
             await fetchRemoteConfig();
-            updateCarouselSlides();
-            setupMenuUI();
             
             startCarousel();
             initSwipeEvents();
@@ -860,18 +845,20 @@
         async function fetchRemoteConfig() {
             if (!GOOGLE_SCRIPT_URL) return;
             try {
-                const res = await fetch(GOOGLE_SCRIPT_URL);
+                // 加上时间戳 ?t= 防止浏览器强缓存
+                const res = await fetch(`${GOOGLE_SCRIPT_URL}?t=${Date.now()}`);
                 const config = await res.json();
                 if (config && !config.error) {
                     applyConfigData(config);
-                    localStorage.setItem('grc_cafe_menu_cache_data', JSON.stringify(config));
+                    updateCarouselSlides();
+                    setupMenuUI();
                 }
             } catch (err) {
-                console.log("无法连接后台 API，使用默认配置", err);
+                console.log("无法连接后台 API", err);
+                showToast("❌ 无法连接服务器获取最新菜单", "error");
             }
         }
 
-        // 🌟 动态适配后端传来的 jpg/jpeg 图片文件名（已去掉 instruction.jpeg）
         function updateCarouselSlides() {
             let dynamicSlides = [{ image: "cafe1.jpeg" }];
 
@@ -1577,7 +1564,6 @@
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 12000);
 
-                // 🌟 1. 严格等待 Google Apps Script 返回成功响应 (保证零漏单、不超卖)
                 const response = await fetch(GOOGLE_SCRIPT_URL, {
                     method: 'POST',
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
@@ -1589,7 +1575,6 @@
                 const result = await response.json();
 
                 if (result && result.success) {
-                    // 🌟 2. 写入成功后，Token 绑定放入后台异步执行，瞬间实现跳转 WhatsApp
                     silentBindToken(name).catch(err => console.log("Background token bind error:", err));
 
                     setTimeout(() => {
