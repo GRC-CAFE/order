@@ -257,7 +257,7 @@
 
                         <div id="sectionSaturday" class="p-3.5 rounded-2xl border border-indigo-100 bg-indigo-50/30 space-y-3">
                             <div id="headerSat" class="text-xs font-bold text-indigo-900 bg-indigo-100 px-3 py-1.5 rounded-xl inline-flex flex-col shadow-sm">
-                                <span>🗓️ 星期六晚餐</span>
+                                <span>🗓️️ 星期六晚餐</span>
                                 <span class="text-[10px] font-normal text-indigo-700">Saturday Dinner</span>
                             </div>
                             <div id="satDishesList" class="space-y-2.5"></div>
@@ -787,7 +787,6 @@
             return false;
         }
 
-        // 🌟 核心优化：每次打开网页不读本地缓存，直接向远程请求最新数据
         window.addEventListener('load', async () => {
             checkNotificationPrompt();
             checkIosPrompt();
@@ -801,7 +800,6 @@
                 silentBindToken(currentName);
             }
 
-            // 直接实时拉取远程最新菜单与数量
             await fetchRemoteConfig();
             
             startCarousel();
@@ -845,7 +843,6 @@
         async function fetchRemoteConfig() {
             if (!GOOGLE_SCRIPT_URL) return;
             try {
-                // 加上时间戳 ?t= 防止浏览器强缓存
                 const res = await fetch(`${GOOGLE_SCRIPT_URL}?t=${Date.now()}`);
                 const config = await res.json();
                 if (config && !config.error) {
@@ -1548,18 +1545,6 @@
                 payload.dessertOrder = { checked: true, detail: SAT_DESSERT_NAME, qty: q, subtotal: q * Number(DESSERT_PRICE) };
             }
 
-            let rawMessage = `🛒 *【晚餐/糖水预订 Dinner & Dessert Order】*\n` +
-                             `--------------------------------\n` +
-                             `👤 *名字 Name*：${name}\n` +
-                             `🍱 *已选餐点 Items*：\n`;
-
-            selectedItems.forEach(item => { rawMessage += `• ${item}\n`; });
-
-            rawMessage += `💰 *总计 Total*：RM ${total}\n` +
-                          `📝 *备注 Remarks*：${notes}\n` +
-                          `--------------------------------\n` +
-                          `已下单，请查收转账！Order submitted, payment receipt attached!`;
-
             try {
                 const controller = new AbortController();
                 const timeoutId = setTimeout(() => controller.abort(), 12000);
@@ -1576,6 +1561,21 @@
 
                 if (result && result.success) {
                     silentBindToken(name).catch(err => console.log("Background token bind error:", err));
+
+                    // 获取后端返回的 orderId 并拼接到 WhatsApp 消息中
+                    const assignedOrderId = result.orderId || "";
+                    let rawMessage = `🛒 *【晚餐/糖水预订 Dinner & Dessert Order】*\n` +
+                                     `--------------------------------\n` +
+                                     (assignedOrderId ? `📌 *订单编号 Order ID*：${assignedOrderId}\n` : '') +
+                                     `👤 *名字 Name*：${name}\n` +
+                                     `🍱 *已选餐点 Items*：\n`;
+
+                    selectedItems.forEach(item => { rawMessage += `• ${item}\n`; });
+
+                    rawMessage += `💰 *总计 Total*：RM ${total}\n` +
+                                  `📝 *备注 Remarks*：${notes}\n` +
+                                  `--------------------------------\n` +
+                                  `已下单，请查收转账！Order submitted, payment receipt attached!`;
 
                     setTimeout(() => {
                         window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
