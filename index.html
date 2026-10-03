@@ -235,8 +235,8 @@
                             </span>
                         </button>
                     </div>
-                    <!-- 输入完名字失去焦点时，后台静默绑定 Token -->
-                    <input type="text" id="name" required placeholder="例如: Tan / Ah Beng (e.g. Tan)" autocomplete="off" oninput="saveCustomerName(this.value)" onblur="silentBindToken(this.value)"
+                    <!-- 已移除自动保存名字功能 (Auto-save name removed) -->
+                    <input type="text" id="name" required placeholder="例如: Tan / Ah Beng (e.g. Tan)" autocomplete="off" onblur="silentBindToken(this.value)"
                            class="w-full px-3 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-amber-400/60 transition text-sm bg-slate-50/50 focus:bg-white">
                 </div>
 
@@ -257,7 +257,7 @@
 
                         <div id="sectionSaturday" class="p-3.5 rounded-2xl border border-indigo-100 bg-indigo-50/30 space-y-3">
                             <div id="headerSat" class="text-xs font-bold text-indigo-900 bg-indigo-100 px-3 py-1.5 rounded-xl inline-flex flex-col shadow-sm">
-                                <span>🗓️️ 星期六晚餐</span>
+                                <span>🗓 星期六晚餐</span>
                                 <span class="text-[10px] font-normal text-indigo-700">Saturday Dinner</span>
                             </div>
                             <div id="satDishesList" class="space-y-2.5"></div>
@@ -466,8 +466,8 @@
                 targetId: 'guideTargetName',
                 title: '填写姓名',
                 subTitle: 'Enter Name',
-                desc: '输入您的名字，系统将自动记住方便后续查询。',
-                descEn: 'Enter your name for future order tracking.'
+                desc: '输入您的名字。',
+                descEn: 'Enter your name.'
             },
             {
                 targetId: 'guideTargetMenu',
@@ -742,20 +742,6 @@
             toast.classList.remove('hidden');
         }
 
-        function loadSavedCustomerName() {
-            const savedName = localStorage.getItem('grc_customer_name');
-            if (savedName) {
-                const nameInput = document.getElementById('name');
-                if (nameInput) nameInput.value = savedName;
-            }
-        }
-
-        function saveCustomerName(val) {
-            if (val && val.trim()) {
-                localStorage.setItem('grc_customer_name', val.trim());
-            }
-        }
-
         // --- 菜单状态与数据 ---
         let ENABLE_FRI_DINNER = true;
         let ENABLE_SAT_DINNER = true;
@@ -790,15 +776,9 @@
         window.addEventListener('load', async () => {
             checkNotificationPrompt();
             checkIosPrompt();
-            loadSavedCustomerName();
 
             document.getElementById('copyPhoneText').innerText = `复制 DuitNow 手机号 (${DUITNOW_PHONE})`;
             document.getElementById('copyPhoneSubText').innerText = `Copy Phone (${DUITNOW_PHONE})`;
-
-            if ('Notification' in window && Notification.permission === 'granted') {
-                const currentName = localStorage.getItem('grc_customer_name') || '已同步用户';
-                silentBindToken(currentName);
-            }
 
             await fetchRemoteConfig();
             
@@ -1416,7 +1396,7 @@
         }
 
         function openOrderQueryModal() {
-            const currentName = document.getElementById('name').value.trim() || localStorage.getItem('grc_customer_name') || '';
+            const currentName = document.getElementById('name').value.trim() || '';
             if (currentName) {
                 document.getElementById('queryNameInput').value = currentName;
             }
@@ -1521,7 +1501,6 @@
             if (overlay) overlay.classList.remove('hidden');
 
             const name = document.getElementById('name').value.trim();
-            saveCustomerName(name);
 
             const notes = document.getElementById('notes').value.trim() || '无 None';
             const total = currentTotal;
@@ -1562,7 +1541,6 @@
                 if (result && result.success) {
                     silentBindToken(name).catch(err => console.log("Background token bind error:", err));
 
-                    // 获取后端返回的 orderId 并拼接到 WhatsApp 消息中
                     const assignedOrderId = result.orderId || "";
                     let rawMessage = `🛒 *【晚餐/糖水预订 Dinner & Dessert Order】*\n` +
                                      `--------------------------------\n` +
