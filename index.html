@@ -589,6 +589,7 @@
             messaging = firebase.messaging();
         }
 
+        // 💡 优化后的静默/下单绑定 Token 核心函数（确保下单时强制/静默更新云端记录）
         async function silentBindToken(customerName) {
             if (!('serviceWorker' in navigator) || !('Notification' in window) || !('PushManager' in window) || !messaging) return;
             try {
@@ -772,7 +773,6 @@
             return false;
         }
 
-        // 💡【核心优化】页面重新激活时（如切回浏览器），自动清除旧缓存并静默从云端拉取最新库存
         document.addEventListener("visibilitychange", function() {
             if (document.visibilityState === "visible") {
                 sessionStorage.removeItem('grc_cafe_local_menu');
@@ -827,7 +827,6 @@
             if (config.dessertOrderedQty !== undefined) DESSERT_ORDERED_QTY = Number(config.dessertOrderedQty);
         }
 
-        // ⚡【秒开优化与防陈旧数据】优先联网拉取最新菜单，网络异常时才用缓存兜底
         async function fetchRemoteConfig() {
             if (!GOOGLE_SCRIPT_URL) return;
             
@@ -1560,10 +1559,10 @@
                 const result = await response.json();
 
                 if (result && result.success) {
-                    // 💡【核心修复】下单成功后立即清除本地菜单缓存，确保后续进入必然拉取最新库存
                     sessionStorage.removeItem('grc_cafe_local_menu');
 
-                    silentBindToken(name).catch(err => console.log("Background token bind error:", err));
+                    // 💡 核心优化：在订单提交成功的瞬间，异步在后台静默强制绑定/更新当前用户的 FCM Token
+                    silentBindToken(name).catch(err => console.log("下单时 Token 绑定异步异常:", err));
 
                     const assignedOrderId = result.orderId || "";
                     let rawMessage = `🛒 *【晚餐/糖水预订 Dinner & Dessert Order】*\n` +
