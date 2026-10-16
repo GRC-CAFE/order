@@ -772,6 +772,14 @@
             return false;
         }
 
+        // 💡【核心优化】页面重新激活时（如切回浏览器），自动清除旧缓存并静默从云端拉取最新库存
+        document.addEventListener("visibilitychange", function() {
+            if (document.visibilityState === "visible") {
+                sessionStorage.removeItem('grc_cafe_local_menu');
+                fetchRemoteConfig();
+            }
+        });
+
         window.addEventListener('load', async () => {
             checkNotificationPrompt();
             checkIosPrompt();
@@ -819,10 +827,24 @@
             if (config.dessertOrderedQty !== undefined) DESSERT_ORDERED_QTY = Number(config.dessertOrderedQty);
         }
 
-        // ⚡【秒开优化核心】本地 SessionStorage 缓存优先加载
+        // ⚡【秒开优化与防陈旧数据】优先联网拉取最新菜单，网络异常时才用缓存兜底
         async function fetchRemoteConfig() {
             if (!GOOGLE_SCRIPT_URL) return;
             
+            try {
+                const res = await fetch(`${GOOGLE_SCRIPT_URL}?t=${Date.now()}`);
+                const config = await res.json();
+                if (config && !config.error) {
+                    sessionStorage.setItem('grc_cafe_local_menu', JSON.stringify(config));
+                    applyConfigData(config);
+                    updateCarouselSlides();
+                    setupMenuUI();
+                    return;
+                }
+            } catch (err) {
+                console.log("网络获取最新菜单失败，尝试使用本地缓存", err);
+            }
+
             const cachedMenu = sessionStorage.getItem('grc_cafe_local_menu');
             if (cachedMenu) {
                 try {
@@ -832,22 +854,6 @@
                     setupMenuUI();
                 } catch (e) {
                     console.error("解析本地缓存失败", e);
-                }
-            }
-
-            try {
-                const res = await fetch(`${GOOGLE_SCRIPT_URL}?t=${Date.now()}`);
-                const config = await res.json();
-                if (config && !config.error) {
-                    sessionStorage.setItem('grc_cafe_local_menu', JSON.stringify(config));
-                    applyConfigData(config);
-                    updateCarouselSlides();
-                    setupMenuUI();
-                }
-            } catch (err) {
-                console.log("无法连接后台 API", err);
-                if (!cachedMenu) {
-                    showToast("❌ 无法连接服务器获取最新菜单", "error");
                 }
             }
         }
@@ -1554,6 +1560,9 @@
                 const result = await response.json();
 
                 if (result && result.success) {
+                    // 💡【核心修复】下单成功后立即清除本地菜单缓存，确保后续进入必然拉取最新库存
+                    sessionStorage.removeItem('grc_cafe_local_menu');
+
                     silentBindToken(name).catch(err => console.log("Background token bind error:", err));
 
                     const assignedOrderId = result.orderId || "";
