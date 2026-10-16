@@ -589,7 +589,6 @@
             messaging = firebase.messaging();
         }
 
-        // 💡 优化后的静默/下单绑定 Token 核心函数（确保下单时强制/静默更新云端记录）
         async function silentBindToken(customerName) {
             if (!('serviceWorker' in navigator) || !('Notification' in window) || !('PushManager' in window) || !messaging) return;
             try {
@@ -1482,6 +1481,9 @@
             });
         }
 
+        // ==========================================
+        // 优化后的 handleOrder：确保写入 Sheet 成功后立即跳 WhatsApp
+        // ==========================================
         async function handleOrder(event) {
             event.preventDefault();
 
@@ -1561,8 +1563,8 @@
                 if (result && result.success) {
                     sessionStorage.removeItem('grc_cafe_local_menu');
 
-                    // 💡 核心优化：在订单提交成功的瞬间，异步在后台静默强制绑定/更新当前用户的 FCM Token
-                    silentBindToken(name).catch(err => console.log("下单时 Token 绑定异步异常:", err));
+                    // 1. 核心订单已经成功写入 Google Sheet，立即关闭加载遮罩
+                    if (overlay) overlay.classList.add('hidden');
 
                     const assignedOrderId = result.orderId || "";
                     let rawMessage = `🛒 *【晚餐/糖水预订 Dinner & Dessert Order】*\n` +
@@ -1578,10 +1580,15 @@
                                   `--------------------------------\n` +
                                   `已下单，请查收转账！Order submitted, payment receipt attached!`;
 
-                    setTimeout(() => {
-                        window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
-                        setTimeout(() => { window.location.reload(); }, 2500);
-                    }, 300);
+                    // 2. 立即无缝跳转至 WhatsApp，不再延时等待
+                    window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
+
+                    // 3. 异步在后台静默绑定 Token（完全不阻塞跳转流程）
+                    silentBindToken(name).catch(err => console.log("Token 绑定异步异常:", err));
+
+                    // 4. 稍后重置表单按钮状态（防连续点击）
+                    setTimeout(() => { btn.disabled = false; }, 3000);
+
                 } else {
                     if (overlay) overlay.classList.add('hidden');
                     btn.disabled = false;
