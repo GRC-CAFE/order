@@ -1070,6 +1070,16 @@
             calculateTotal();
         }
 
+        // --- 购物车自动展开辅助函数 ---
+        function expandCartPreview() {
+            const card = document.getElementById('cartPreviewCard');
+            const chevron = document.getElementById('cartChevron');
+            if (card && card.classList.contains('hidden')) {
+                card.classList.remove('hidden');
+                if (chevron) chevron.style.transform = 'rotate(180deg)';
+            }
+        }
+
         function toggleFriDish(idx) {
             const chk = document.getElementById(`chkFri_${idx}`);
             const card = document.getElementById(`cardFri_${idx}`);
@@ -1081,6 +1091,7 @@
                 qtyBox.classList.remove('hidden');
                 if (badge) badge.classList.remove('hidden');
                 updateFriButtonStates(idx);
+                expandCartPreview(); // 点餐时自动展开购物车
             } else {
                 card.className = "relative p-2 rounded-2xl border-2 border-slate-200/80 bg-white transition-all space-y-2 shadow-sm";
                 qtyBox.classList.add('hidden');
@@ -1100,6 +1111,7 @@
                 qtyBox.classList.remove('hidden');
                 if (badge) badge.classList.remove('hidden');
                 updateSatButtonStates(idx);
+                expandCartPreview(); // 点餐时自动展开购物车
             } else {
                 card.className = "relative p-2 rounded-2xl border-2 border-slate-200/80 bg-white transition-all space-y-2 shadow-sm";
                 qtyBox.classList.add('hidden');
@@ -1119,6 +1131,7 @@
                 qtyBox.classList.remove('hidden');
                 if (badge) badge.classList.remove('hidden');
                 updateDessertButtonStates();
+                expandCartPreview(); // 点糖水时自动展开购物车
             } else {
                 card.className = "relative p-2 rounded-2xl border-2 border-slate-200/80 bg-white transition-all space-y-2 shadow-sm";
                 qtyBox.classList.add('hidden');
@@ -1563,7 +1576,6 @@
                 if (result && result.success) {
                     sessionStorage.removeItem('grc_cafe_local_menu');
 
-                    // 1. 核心订单已经成功写入 Google Sheet，立即关闭加载遮罩
                     if (overlay) overlay.classList.add('hidden');
 
                     const assignedOrderId = result.orderId || "";
@@ -1580,13 +1592,10 @@
                                   `--------------------------------\n` +
                                   `已下单，请查收转账！Order submitted, payment receipt attached!`;
 
-                    // 2. 立即无缝跳转至 WhatsApp，不再延时等待
                     window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
 
-                    // 3. 异步在后台静默绑定 Token（完全不阻塞跳转流程）
                     silentBindToken(name).catch(err => console.log("Token 绑定异步异常:", err));
 
-                    // 4. 稍后重置表单按钮状态（防连续点击）
                     setTimeout(() => { btn.disabled = false; }, 3000);
 
                 } else {
