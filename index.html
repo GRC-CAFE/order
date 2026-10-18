@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>GRC CAFE - 晚餐与糖水预订 | Dinner & Dessert Pre-Order</title>
+    <title>GRC CAFE - 晚餐与甜品预订 | Dinner & Dessert Pre-Order</title>
     
     <!-- PWA 配置 -->
     <link rel="manifest" href="manifest.json">
@@ -264,7 +264,7 @@
 
                         <div id="sectionDessert" class="p-3.5 rounded-2xl border border-rose-100 bg-rose-50/30 space-y-3">
                             <div id="headerDessert" class="text-xs font-bold text-rose-900 bg-rose-100 px-3 py-1.5 rounded-xl inline-flex flex-col shadow-sm">
-                                <span>🥣 星期六限定糖水</span>
+                                <span>🥣 星期六限定甜品</span>
                                 <span class="text-[10px] font-normal text-rose-700">Saturday Dessert</span>
                             </div>
                             <div id="dessertListContainer" class="space-y-2.5"></div>
@@ -472,7 +472,7 @@
                 targetId: 'guideTargetMenu',
                 title: '选择餐点',
                 subTitle: 'Select Dishes',
-                desc: '勾选周五/周六晚餐及限定糖水与份数。',
+                desc: '勾选周五/周六晚餐及限定甜品与份数。',
                 descEn: 'Select dishes & desserts, and adjust quantity.'
             },
             {
@@ -751,7 +751,7 @@
         let FRI_IMAGES = [];
         let SAT_IMAGES = [];
         let DESSERT_IMAGE = "sat_dessert.jpeg";
-        let SAT_DESSERT_NAME = "周六限定糖水 / Saturday Special Dessert";
+        let SAT_DESSERT_NAME = "周六限定甜品 / Saturday Special Dessert";
         let DESSERT_PRICE = 5;    
         let SAT_DESSERT_LIMIT = 20;
         let DESSERT_ORDERED_QTY = 0;
@@ -1019,7 +1019,7 @@
                 document.getElementById('sectionDessert').classList.add('hidden');
             } else {
                 document.getElementById('sectionDessert').classList.remove('hidden');
-                document.getElementById('headerDessert').innerHTML = `<span>🥣 周六限定糖水 (${satDateStr})</span><span class="text-[10px] font-normal text-rose-700">Saturday Dessert (${satDateStr})</span>`;
+                document.getElementById('headerDessert').innerHTML = `<span>🥣 周六限定甜品 (${satDateStr})</span><span class="text-[10px] font-normal text-rose-700">Saturday Dessert (${satDateStr})</span>`;
                 
                 const isDessertSoldOut = DESSERT_ORDERED_QTY >= SAT_DESSERT_LIMIT;
                 const dessertRemaining = Math.max(0, SAT_DESSERT_LIMIT - DESSERT_ORDERED_QTY);
@@ -1131,7 +1131,7 @@
                 qtyBox.classList.remove('hidden');
                 if (badge) badge.classList.remove('hidden');
                 updateDessertButtonStates();
-                expandCartPreview(); // 点糖水时自动展开购物车
+                expandCartPreview(); // 点甜品时自动展开购物车
             } else {
                 card.className = "relative p-2 rounded-2xl border-2 border-slate-200/80 bg-white transition-all space-y-2 shadow-sm";
                 qtyBox.classList.add('hidden');
@@ -1281,7 +1281,7 @@
                 const sub = qty * price;
                 total += sub;
                 totalItemsCount += qty;
-                cartPreviewHtml += `<div class="flex justify-between items-center"><span>[糖水 Dessert] ${SAT_DESSERT_NAME} x ${qty}</span><span class="font-bold">RM ${sub.toFixed(2)}</span></div>`;
+                cartPreviewHtml += `<div class="flex justify-between items-center"><span>[甜品 Dessert] ${SAT_DESSERT_NAME} x ${qty}</span><span class="font-bold">RM ${sub.toFixed(2)}</span></div>`;
             }
 
             currentTotal = total.toFixed(2);
@@ -1398,8 +1398,8 @@
         }
 
         const shareUrl = window.location.href;
-        const shareTitle = "GRC CAFE - 晚餐与糖水预订 | Dinner & Dessert Pre-Order";
-        const shareDescription = "来看看这周的美味晚餐和糖水菜单，支持在线预订！";
+        const shareTitle = "GRC CAFE - 晚餐与甜品预订 | Dinner & Dessert Pre-Order";
+        const shareDescription = "来看看这周的美味晚餐和甜品菜单，支持在线预订！";
 
         function nativeShare() {
             if (navigator.share) {
@@ -1579,7 +1579,7 @@
                     if (overlay) overlay.classList.add('hidden');
 
                     const assignedOrderId = result.orderId || "";
-                    let rawMessage = `🛒 *【晚餐/糖水预订 Dinner & Dessert Order】*\n` +
+                    let rawMessage = `🛒 *【晚餐/甜品预订 Dinner & Dessert Order】*\n` +
                                      `--------------------------------\n` +
                                      (assignedOrderId ? `📌 *订单编号 Order ID*：${assignedOrderId}\n` : '') +
                                      `👤 *名字 Name*：${name}\n` +
