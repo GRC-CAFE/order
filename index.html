@@ -130,7 +130,7 @@
                 <h2 class="text-2xl font-black text-emerald-700">下单成功！</h2>
                 <p class="text-xs text-slate-400">Order Successful</p>
                 <p class="text-sm text-slate-600 leading-relaxed pt-1">
-                    您的订单已成功保存至云端，即将为您跳转至 WhatsApp 发送订单并完成付款确认。
+                    您的订单已成功保存至云端，<span class="font-bold text-emerald-600">正在为您自动跳转至 WhatsApp...</span>
                 </p>
             </div>
             <div class="pt-2">
@@ -141,7 +141,7 @@
         </div>
     </div>
 
-    <!-- 新手引导（已调整为靠上显示并加大了字体） -->
+    <!-- 新手引导 -->
     <div id="appGuideOverlay" class="hidden fixed inset-0 z-[200] pointer-events-none flex flex-col justify-start pt-6 p-3 transition-opacity duration-300">
         <div class="pointer-events-auto flex justify-between items-center max-w-md mx-auto w-full pt-1">
             <div class="text-amber-400 font-bold text-xs tracking-wider flex items-center space-x-1.5 bg-amber-950/90 px-3 py-1.5 rounded-full border border-amber-500/40 shadow-lg">
@@ -1711,10 +1711,15 @@
                         } catch (e) {}
                     }
 
-                    // 弹出生动的全屏成功模态框
+                    // 弹出全屏成功模态框
                     document.getElementById('successModal').classList.remove('hidden');
 
                     silentBindToken(name).catch(err => console.log("Token 绑定异步异常:", err));
+
+                    // 🌟 延迟 1 秒后自动跳转至 WhatsApp
+                    setTimeout(() => {
+                        proceedToWhatsapp();
+                    }, 1000);
 
                     setTimeout(() => { btn.disabled = false; }, 3000);
 
