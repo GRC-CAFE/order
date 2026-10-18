@@ -66,6 +66,38 @@
             z-index: 102 !important;
             box-shadow: 0 0 0 9999px rgba(15, 23, 42, 0.85), 0 0 20px 5px rgba(16, 185, 129, 0.8) !important;
         }
+
+        /* 放大模式（长辈模式）全局样式 */
+        body.senior-mode {
+            font-size: 1.15rem !important;
+        }
+        body.senior-mode input[type="text"], 
+        body.senior-mode input[type="number"] {
+            font-size: 1.15rem !important;
+            padding: 0.85rem !important;
+        }
+        body.senior-mode .text-sm {
+            font-size: 1.1rem !important;
+            line-height: 1.5 !important;
+        }
+        body.senior-mode .text-xs {
+            font-size: 0.95rem !important;
+        }
+        body.senior-mode .text-[10px], 
+        body.senior-mode .text-[11px], 
+        body.senior-mode .text-[9px] {
+            font-size: 0.85rem !important;
+        }
+        body.senior-mode label {
+            font-size: 1.15rem !important;
+        }
+        body.senior-mode input[type="checkbox"] {
+            width: 1.75rem !important;
+            height: 1.75rem !important;
+        }
+        body.senior-mode button {
+            font-size: 1.05rem !important;
+        }
     </style>
 </head>
 <body class="bg-gradient-to-b from-amber-50/80 via-orange-50/30 to-amber-50/60 min-h-screen pb-40 select-none relative font-sans text-slate-800 antialiased">
@@ -83,6 +115,27 @@
         <div class="text-xs text-amber-200/80 text-center">
             <div>请稍候，请勿关闭页面</div>
             <div class="text-[10px] text-amber-200/60 font-normal">Please wait, do not close page</div>
+        </div>
+    </div>
+
+    <!-- 下单成功全屏模态框 -->
+    <div id="successModal" class="fixed inset-0 z-[400] bg-slate-900/80 backdrop-blur-md hidden flex flex-col items-center justify-center p-6 text-white text-center animate-fade-in">
+        <div class="bg-white text-slate-800 rounded-3xl p-8 max-w-sm w-full shadow-2xl space-y-5 border border-emerald-100 transform scale-100 transition-all">
+            <div class="w-24 h-24 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto text-5xl shadow-inner animate-bounce">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <div class="space-y-2">
+                <h2 class="text-2xl font-black text-emerald-700">下单成功！</h2>
+                <p class="text-xs text-slate-400">Order Successful</p>
+                <p class="text-sm text-slate-600 leading-relaxed pt-1">
+                    您的订单已成功保存至云端，即将为您跳转至 WhatsApp 发送订单并完成付款确认。
+                </p>
+            </div>
+            <div class="pt-2">
+                <button type="button" onclick="proceedToWhatsapp()" class="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition text-base">
+                    立即前往 WhatsApp <i class="fa-brands fa-whatsapp ml-1.5 text-lg"></i>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -206,18 +259,27 @@
     <!-- 主内容区域 -->
     <div id="mainContentContainer" class="max-w-md mx-auto px-2 -mt-0.5 relative z-10 space-y-5">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-amber-100/60 space-y-5">
-            <div class="flex justify-between items-center pb-4 border-b border-slate-100">
+            <div class="flex justify-between items-center pb-4 border-b border-slate-100 flex-wrap gap-2">
                 <div class="flex items-center space-x-2 bg-amber-50 border border-amber-200/60 px-3 py-1.5 rounded-xl">
                     <span class="text-xs font-medium text-slate-500">截单<span class="text-[10px] text-slate-400 font-normal">Cut-Off</span>:</span>
                     <span id="deadlineText" class="text-xs font-bold text-amber-900">周四/周五 8PM<span class="text-[10px] font-normal text-amber-700/80">(Thu/Fri 8PM)</span></span>
                 </div>
-                <button type="button" onclick="startAppGuide()" class="text-amber-800 bg-amber-100/80 hover:bg-amber-200 px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1 transition border border-amber-300 shadow-xs">
-                    <i class="fa-solid fa-circle-question"></i>
-                    <div class="flex flex-col text-left leading-tight">
-                        <span>使用指南</span>
-                        <span class="text-[9px] font-normal text-amber-700">Guide</span>
-                    </div>
-                </button>
+                
+                <div class="flex items-center space-x-2">
+                    <!-- 放大模式（长辈模式）切换按钮 -->
+                    <button type="button" onclick="toggleSeniorMode()" id="seniorModeBtn" class="text-amber-900 bg-amber-200 hover:bg-amber-300 px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1 transition border border-amber-400 shadow-xs">
+                        <i class="fa-solid fa-magnifying-glass-plus"></i>
+                        <span id="seniorModeText">放大模式</span>
+                    </button>
+
+                    <button type="button" onclick="startAppGuide()" class="text-amber-800 bg-amber-100/80 hover:bg-amber-200 px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1 transition border border-amber-300 shadow-xs">
+                        <i class="fa-solid fa-circle-question"></i>
+                        <div class="flex flex-col text-left leading-tight">
+                            <span>使用指南</span>
+                            <span class="text-[9px] font-normal text-amber-700">Guide</span>
+                        </div>
+                    </button>
+                </div>
             </div>
 
             <form id="orderForm" onsubmit="handleOrder(event)" class="space-y-4">
@@ -349,20 +411,20 @@
             </div>
 
             <div class="space-y-1.5 pt-0.5">
-                <button type="button" onclick="copyAmount()" id="copyAmountBtn" class="w-full bg-amber-50 hover:bg-amber-100/80 active:scale-[0.98] text-amber-900 text-xs font-bold py-1.5 px-2 rounded-lg border border-amber-200/60 flex flex-col items-center justify-center transition-all">
+                <button type="button" onclick="copyAmount()" id="copyAmountBtn" class="w-full bg-amber-50 hover:bg-amber-100/80 active:scale-[0.98] text-amber-900 text-xs font-bold py-2.5 px-3 rounded-xl border border-amber-200/60 flex flex-col items-center justify-center transition-all shadow-sm">
                     <div class="flex items-center space-x-1.5">
-                        <i class="fa-regular fa-copy text-xs"></i>
+                        <i class="fa-regular fa-copy text-sm"></i>
                         <span id="copyAmountText">复制转账金额</span>
                     </div>
-                    <span id="copyAmountSubText" class="text-[9px] font-normal text-amber-800/70">Copy Amount</span>
+                    <span id="copyAmountSubText" class="text-[10px] font-normal text-amber-800/70">Copy Amount</span>
                 </button>
 
-                <button type="button" onclick="copyPhone()" id="copyPhoneBtn" class="w-full bg-amber-50 hover:bg-amber-100/80 active:scale-[0.98] text-amber-900 text-xs font-bold py-1.5 px-2 rounded-lg border border-amber-200/60 flex flex-col items-center justify-center transition-all">
+                <button type="button" onclick="copyPhone()" id="copyPhoneBtn" class="w-full bg-amber-50 hover:bg-amber-100/80 active:scale-[0.98] text-amber-900 text-xs font-bold py-2.5 px-3 rounded-xl border border-amber-200/60 flex flex-col items-center justify-center transition-all shadow-sm">
                     <div class="flex items-center space-x-1.5">
-                        <i class="fa-regular fa-copy text-xs"></i>
+                        <i class="fa-regular fa-copy text-sm"></i>
                         <span id="copyPhoneText">复制 DuitNow 手机号 (0162207137)</span>
                     </div>
-                    <span id="copyPhoneSubText" class="text-[9px] font-normal text-amber-800/70">Copy Phone (0162207137)</span>
+                    <span id="copyPhoneSubText" class="text-[10px] font-normal text-amber-800/70">Copy Phone (0162207137)</span>
                 </button>
             </div>
         </div>
@@ -380,13 +442,13 @@
             </div>
 
             <div class="flex items-center justify-between space-x-2">
-                <button type="button" onclick="toggleCartPreview()" id="btnCartCount" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-3 py-2 rounded-xl text-xs flex items-center space-x-1.5 border border-amber-300/60 transition active:scale-95">
-                    <i class="fa-solid fa-shopping-basket text-amber-600"></i>
+                <button type="button" onclick="toggleCartPreview()" id="btnCartCount" class="bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold px-3.5 py-2.5 rounded-xl text-xs flex items-center space-x-1.5 border border-amber-300/60 transition active:scale-95 shadow-sm">
+                    <i class="fa-solid fa-shopping-basket text-amber-600 text-sm"></i>
                     <span id="cartBadgeCount">已选 0 项 / Selected 0</span>
                     <i id="cartChevron" class="fa-solid fa-chevron-up text-[10px] text-amber-700 transition-transform"></i>
                 </button>
 
-                <button type="button" onclick="scrollToDuitNow()" class="flex-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-[10px] font-bold py-1 px-2 rounded-xl flex flex-col items-center justify-center shadow-sm transition cursor-pointer">
+                <button type="button" onclick="scrollToDuitNow()" class="flex-1 bg-amber-500 hover:bg-amber-600 active:scale-95 text-white text-[10px] font-bold py-2 px-2 rounded-xl flex flex-col items-center justify-center shadow-sm transition cursor-pointer">
                     <div class="flex items-center space-x-1">
                         <i class="fa-solid fa-qrcode text-[11px]"></i>
                         <span>查看 DuitNow 付款二维码</span>
@@ -396,7 +458,7 @@
             </div>
 
             <button type="button" onclick="document.getElementById('orderForm').requestSubmit()" id="submitBtn" 
-                    class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 active:scale-[0.98] text-white font-bold py-2.5 rounded-xl shadow-md shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all">
+                    class="w-full bg-gradient-to-r from-emerald-500 to-green-600 hover:from-emerald-600 hover:to-green-700 active:scale-[0.98] text-white font-bold py-3 rounded-xl shadow-md shadow-emerald-600/20 flex items-center justify-center space-x-2 transition-all">
                 <i class="fa-brands fa-whatsapp text-white text-xl"></i>
                 <div class="flex flex-col text-left leading-tight">
                     <span class="text-sm font-bold">确认已付款</span>
@@ -457,6 +519,37 @@
         const MY_PHONE_NUMBER = "60162207137"; 
         const DUITNOW_PHONE = "0162207137";   
         const VAPID_KEY = "BJNZbNNFDkM5831pbQrjwoQ3sqpGNLJ3MEzA1EmUftHIfOLFIrRim9S4l_qLtWw4rqRQ3D5cJa8R5myRG5QFIeI";
+
+        let pendingWhatsappUrl = "";
+
+        // --- 放大模式（长辈模式）切换逻辑 ---
+        function toggleSeniorMode() {
+            const isSenior = document.body.classList.toggle('senior-mode');
+            const btnText = document.getElementById('seniorModeText');
+            const btn = document.getElementById('seniorModeBtn');
+            if (isSenior) {
+                btnText.innerText = "标准模式";
+                btn.className = "text-amber-950 bg-amber-400 hover:bg-amber-500 px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1 transition border border-amber-500 shadow-xs";
+                localStorage.setItem('grc_cafe_senior_mode', 'true');
+            } else {
+                btnText.innerText = "放大模式";
+                btn.className = "text-amber-900 bg-amber-200 hover:bg-amber-300 px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1 transition border border-amber-400 shadow-xs";
+                localStorage.removeItem('grc_cafe_senior_mode');
+            }
+        }
+
+        // 初始化加载时检查本地存储的长辈模式状态
+        window.addEventListener('DOMContentLoaded', () => {
+            if (localStorage.getItem('grc_cafe_senior_mode') === 'true') {
+                document.body.classList.add('senior-mode');
+                const btnText = document.getElementById('seniorModeText');
+                const btn = document.getElementById('seniorModeBtn');
+                if (btnText && btn) {
+                    btnText.innerText = "标准模式";
+                    btn.className = "text-amber-950 bg-amber-400 hover:bg-amber-500 px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1 transition border border-amber-500 shadow-xs";
+                }
+            }
+        });
 
         // --- 新手引导 ---
         let currentGuideStep = 0;
@@ -922,15 +1015,15 @@
                     const priceVal = Number(dish.price) || 0;
 
                     return `
-                        <div id="cardFri_${idx}" class="relative p-2 rounded-2xl border-2 ${isSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200/80 bg-white'} transition-all space-y-2 shadow-sm">
+                        <div id="cardFri_${idx}" class="relative p-2.5 rounded-2xl border-2 ${isSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200/80 bg-white'} transition-all space-y-2 shadow-sm">
                             <span id="badgeFriCheck_${idx}" class="hidden absolute top-2 right-2 bg-amber-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center space-x-1">
                                 <i class="fa-solid fa-check text-[9px]"></i><span>已选 Selected</span>
                             </span>
                             <label class="flex items-start justify-between ${isSoldOut ? 'cursor-not-allowed' : 'cursor-pointer'}">
-                                <div class="flex items-center space-x-2.5">
-                                    <input type="checkbox" id="chkFri_${idx}" ${isSoldOut ? 'disabled' : 'onchange="toggleFriDish(' + idx + ')"'} class="w-5 h-5 text-amber-600 rounded-md border-slate-300 focus:ring-amber-500 mt-0.5">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" id="chkFri_${idx}" ${isSoldOut ? 'disabled' : 'onchange="toggleFriDish(' + idx + ')"'} class="w-6 h-6 text-amber-600 rounded-md border-slate-300 focus:ring-amber-500 mt-0.5 shrink-0">
                                     <div>
-                                        <div class="text-sm font-bold text-slate-800 pr-12">
+                                        <div class="text-sm font-bold text-slate-800 pr-12 leading-snug">
                                             ${dish.name} 
                                             ${isSoldOut ? '<span class="text-rose-500 text-xs font-semibold block sm:inline">(已售罄 Sold Out)</span>' : ''}
                                             ${isLowStock ? `<span class="text-amber-700 text-[10px] font-bold ml-1 bg-amber-100 px-1.5 py-0.5 rounded-md">🔥 仅剩 ${remaining} 份 (${remaining} left)</span>` : ''}
@@ -950,9 +1043,9 @@
                                     <span class="text-xs font-bold text-slate-600 block leading-tight">数量 / Qty</span>
                                 </div>
                                 <div class="flex items-center space-x-3">
-                                    <button type="button" id="btnFriMinus_${idx}" onclick="adjustFriQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-base flex items-center justify-center border border-amber-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">-</button>
-                                    <input type="number" id="qtyFri_${idx}" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
-                                    <button type="button" id="btnFriPlus_${idx}" onclick="adjustFriQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-base flex items-center justify-center border border-amber-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">+</button>
+                                    <button type="button" id="btnFriMinus_${idx}" onclick="adjustFriQty(${idx}, -1)" class="w-9 h-9 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-lg flex items-center justify-center border border-amber-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">-</button>
+                                    <input type="number" id="qtyFri_${idx}" value="1" min="1" readonly class="w-12 text-center py-1 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
+                                    <button type="button" id="btnFriPlus_${idx}" onclick="adjustFriQty(${idx}, 1)" class="w-9 h-9 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-lg flex items-center justify-center border border-amber-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">+</button>
                                 </div>
                             </div>
                         </div>
@@ -976,15 +1069,15 @@
                     const priceVal = Number(dish.price) || 0;
 
                     return `
-                        <div id="cardSat_${idx}" class="relative p-2 rounded-2xl border-2 ${isSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200/80 bg-white'} transition-all space-y-2 shadow-sm">
+                        <div id="cardSat_${idx}" class="relative p-2.5 rounded-2xl border-2 ${isSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200/80 bg-white'} transition-all space-y-2 shadow-sm">
                             <span id="badgeSatCheck_${idx}" class="hidden absolute top-2 right-2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center space-x-1">
                                 <i class="fa-solid fa-check text-[9px]"></i><span>已选 Selected</span>
                             </span>
                             <label class="flex items-start justify-between ${isSoldOut ? 'cursor-not-allowed' : 'cursor-pointer'}">
-                                <div class="flex items-center space-x-2.5">
-                                    <input type="checkbox" id="chkSat_${idx}" ${isSoldOut ? 'disabled' : 'onchange="toggleSatDish(' + idx + ')"'} class="w-5 h-5 text-indigo-600 rounded-md border-slate-300 focus:ring-indigo-500 mt-0.5">
+                                <div class="flex items-center space-x-3">
+                                    <input type="checkbox" id="chkSat_${idx}" ${isSoldOut ? 'disabled' : 'onchange="toggleSatDish(' + idx + ')"'} class="w-6 h-6 text-indigo-600 rounded-md border-slate-300 focus:ring-indigo-500 mt-0.5 shrink-0">
                                     <div>
-                                        <div class="text-sm font-bold text-slate-800 pr-12">
+                                        <div class="text-sm font-bold text-slate-800 pr-12 leading-snug">
                                             ${dish.name} 
                                             ${isSoldOut ? '<span class="text-rose-500 text-xs font-semibold block sm:inline">(已售罄 Sold Out)</span>' : ''}
                                             ${isLowStock ? `<span class="text-indigo-700 text-[10px] font-bold ml-1 bg-indigo-100 px-1.5 py-0.5 rounded-md">🔥 仅剩 ${remaining} 份 (${remaining} left)</span>` : ''}
@@ -1004,9 +1097,9 @@
                                     <span class="text-xs font-bold text-slate-600 block leading-tight">数量 / Qty</span>
                                 </div>
                                 <div class="flex items-center space-x-3">
-                                    <button type="button" id="btnSatMinus_${idx}" onclick="adjustSatQty(${idx}, -1)" class="w-8 h-8 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold text-base flex items-center justify-center border border-indigo-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">-</button>
-                                    <input type="number" id="qtySat_${idx}" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
-                                    <button type="button" id="btnSatPlus_${idx}" onclick="adjustSatQty(${idx}, 1)" class="w-8 h-8 rounded-lg bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold text-base flex items-center justify-center border border-indigo-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">+</button>
+                                    <button type="button" id="btnSatMinus_${idx}" onclick="adjustSatQty(${idx}, -1)" class="w-9 h-9 rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold text-lg flex items-center justify-center border border-indigo-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">-</button>
+                                    <input type="number" id="qtySat_${idx}" value="1" min="1" readonly class="w-12 text-center py-1 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
+                                    <button type="button" id="btnSatPlus_${idx}" onclick="adjustSatQty(${idx}, 1)" class="w-9 h-9 rounded-xl bg-indigo-100 hover:bg-indigo-200 text-indigo-900 font-bold text-lg flex items-center justify-center border border-indigo-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">+</button>
                                 </div>
                             </div>
                         </div>
@@ -1026,15 +1119,15 @@
                 const isDessertLowStock = !isDessertSoldOut && dessertRemaining <= 3;
 
                 dessertContainer.innerHTML = `
-                    <div id="cardDessert" class="relative p-2 rounded-2xl border-2 ${isDessertSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200/80 bg-white'} transition-all space-y-2 shadow-sm">
+                    <div id="cardDessert" class="relative p-2.5 rounded-2xl border-2 ${isDessertSoldOut ? 'border-slate-300 bg-slate-100 opacity-75' : 'border-slate-200/80 bg-white'} transition-all space-y-2 shadow-sm">
                         <span id="badgeDessertCheck" class="hidden absolute top-2 right-2 bg-rose-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md flex items-center space-x-1">
                             <i class="fa-solid fa-check text-[9px]"></i><span>已选 Selected</span>
                         </span>
                         <label class="flex items-start justify-between ${isDessertSoldOut ? 'cursor-not-allowed' : 'cursor-pointer'}">
-                            <div class="flex items-center space-x-2.5">
-                                <input type="checkbox" id="chkDessert" ${isDessertSoldOut ? 'disabled' : 'onchange="toggleCard(\'Dessert\')"'} class="w-5 h-5 text-rose-600 rounded-md border-slate-300 focus:ring-rose-500 mt-0.5">
+                            <div class="flex items-center space-x-3">
+                                <input type="checkbox" id="chkDessert" ${isDessertSoldOut ? 'disabled' : 'onchange="toggleCard(\'Dessert\')"'} class="w-6 h-6 text-rose-600 rounded-md border-slate-300 focus:ring-rose-500 mt-0.5 shrink-0">
                                 <div>
-                                    <div id="txtDessertTitle" class="text-sm font-bold text-slate-800 pr-12">
+                                    <div id="txtDessertTitle" class="text-sm font-bold text-slate-800 pr-12 leading-snug">
                                         ${SAT_DESSERT_NAME} 
                                         ${isDessertSoldOut ? '<span class="text-rose-500 text-xs font-semibold block sm:inline">(已售罄 Sold Out)</span>' : ''}
                                         ${isDessertLowStock ? `<span class="text-rose-600 text-[10px] font-bold ml-1 bg-rose-100 px-1.5 py-0.5 rounded-md">🔥 仅剩 ${dessertRemaining} 份 (${dessertRemaining} left)</span>` : ''}
@@ -1055,9 +1148,9 @@
                                 <span class="text-xs font-bold text-slate-600 block leading-tight">数量 / Qty</span>
                             </div>
                             <div class="flex items-center space-x-3">
-                                <button type="button" id="btnDessertMinus" onclick="adjustQty('Dessert', -1)" class="w-8 h-8 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-900 font-bold text-base flex items-center justify-center border border-rose-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">-</button>
-                                <input type="number" id="qtyDessert" value="1" min="1" readonly class="w-12 text-center py-0.5 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
-                                <button type="button" id="btnDessertPlus" onclick="adjustQty('Dessert', 1)" class="w-8 h-8 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-900 font-bold text-base flex items-center justify-center border border-rose-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">+</button>
+                                <button type="button" id="btnDessertMinus" onclick="adjustQty('Dessert', -1)" class="w-9 h-9 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-900 font-bold text-lg flex items-center justify-center border border-rose-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">-</button>
+                                <input type="number" id="qtyDessert" value="1" min="1" readonly class="w-12 text-center py-1 font-bold text-sm border border-slate-200 rounded-lg bg-white shadow-inner text-slate-800">
+                                <button type="button" id="btnDessertPlus" onclick="adjustQty('Dessert', 1)" class="w-9 h-9 rounded-xl bg-rose-100 hover:bg-rose-200 text-rose-900 font-bold text-lg flex items-center justify-center border border-rose-300/60 shadow-sm active:scale-95 transition disabled:opacity-40">+</button>
                             </div>
                         </div>
                     </div>
@@ -1070,7 +1163,6 @@
             calculateTotal();
         }
 
-        // --- 购物车自动展开辅助函数 ---
         function expandCartPreview() {
             const card = document.getElementById('cartPreviewCard');
             const chevron = document.getElementById('cartChevron');
@@ -1087,13 +1179,13 @@
             const badge = document.getElementById(`badgeFriCheck_${idx}`);
 
             if (chk.checked) {
-                card.className = "relative p-2 rounded-2xl border-2 border-amber-500 bg-amber-50/90 shadow-md transition-all space-y-2";
+                card.className = "relative p-2.5 rounded-2xl border-2 border-amber-500 bg-amber-50/90 shadow-md transition-all space-y-2";
                 qtyBox.classList.remove('hidden');
                 if (badge) badge.classList.remove('hidden');
                 updateFriButtonStates(idx);
-                expandCartPreview(); // 点餐时自动展开购物车
+                expandCartPreview();
             } else {
-                card.className = "relative p-2 rounded-2xl border-2 border-slate-200/80 bg-white transition-all space-y-2 shadow-sm";
+                card.className = "relative p-2.5 rounded-2xl border-2 border-slate-200/80 bg-white transition-all space-y-2 shadow-sm";
                 qtyBox.classList.add('hidden');
                 if (badge) badge.classList.add('hidden');
             }
@@ -1107,13 +1199,13 @@
             const badge = document.getElementById(`badgeSatCheck_${idx}`);
 
             if (chk.checked) {
-                card.className = "relative p-2 rounded-2xl border-2 border-indigo-500 bg-indigo-50/90 shadow-md transition-all space-y-2";
+                card.className = "relative p-2.5 rounded-2xl border-2 border-indigo-500 bg-indigo-50/90 shadow-md transition-all space-y-2";
                 qtyBox.classList.remove('hidden');
                 if (badge) badge.classList.remove('hidden');
                 updateSatButtonStates(idx);
-                expandCartPreview(); // 点餐时自动展开购物车
+                expandCartPreview();
             } else {
-                card.className = "relative p-2 rounded-2xl border-2 border-slate-200/80 bg-white transition-all space-y-2 shadow-sm";
+                card.className = "relative p-2.5 rounded-2xl border-2 border-slate-200/80 bg-white transition-all space-y-2 shadow-sm";
                 qtyBox.classList.add('hidden');
                 if (badge) badge.classList.add('hidden');
             }
@@ -1127,13 +1219,13 @@
             const badge = document.getElementById(`badge${type}Check`);
 
             if (chk.checked) {
-                card.className = `relative p-2 rounded-2xl border-2 border-rose-500 bg-rose-50/90 shadow-md transition-all space-y-2`;
+                card.className = `relative p-2.5 rounded-2xl border-2 border-rose-500 bg-rose-50/90 shadow-md transition-all space-y-2`;
                 qtyBox.classList.remove('hidden');
                 if (badge) badge.classList.remove('hidden');
                 updateDessertButtonStates();
-                expandCartPreview(); // 点甜品时自动展开购物车
+                expandCartPreview();
             } else {
-                card.className = "relative p-2 rounded-2xl border-2 border-slate-200/80 bg-white transition-all space-y-2 shadow-sm";
+                card.className = "relative p-2.5 rounded-2xl border-2 border-slate-200/80 bg-white transition-all space-y-2 shadow-sm";
                 qtyBox.classList.add('hidden');
                 if (badge) badge.classList.add('hidden');
             }
@@ -1494,9 +1586,13 @@
             });
         }
 
-        // ==========================================
-        // 优化后的 handleOrder：确保写入 Sheet 成功后立即跳 WhatsApp
-        // ==========================================
+        function proceedToWhatsapp() {
+            document.getElementById('successModal').classList.add('hidden');
+            if (pendingWhatsappUrl) {
+                window.location.href = pendingWhatsappUrl;
+            }
+        }
+
         async function handleOrder(event) {
             event.preventDefault();
 
@@ -1592,7 +1688,17 @@
                                   `--------------------------------\n` +
                                   `已下单，请查收转账！Order submitted, payment receipt attached!`;
 
-                    window.location.href = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
+                    pendingWhatsappUrl = `https://wa.me/${MY_PHONE_NUMBER}?text=${encodeURIComponent(rawMessage)}`;
+
+                    // 触发震动反馈（如果设备支持）
+                    if (navigator.vibrate) {
+                        try {
+                            navigator.vibrate([100, 50, 100]);
+                        } catch (e) {}
+                    }
+
+                    // 弹出生动的全屏成功模态框
+                    document.getElementById('successModal').classList.remove('hidden');
 
                     silentBindToken(name).catch(err => console.log("Token 绑定异步异常:", err));
 
