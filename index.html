@@ -260,24 +260,34 @@
     <div id="mainContentContainer" class="max-w-md mx-auto px-2 -mt-0.5 relative z-10 space-y-5">
         <div class="bg-white rounded-2xl shadow-lg p-6 border border-amber-100/60 space-y-5">
             <div class="flex justify-between items-center pb-4 border-b border-slate-100 flex-wrap gap-2">
-                <div class="flex items-center space-x-2 bg-amber-50 border border-amber-200/60 px-3 py-1.5 rounded-xl">
-                    <span class="text-xs font-medium text-slate-500">截单<span class="text-[10px] text-slate-400 font-normal">Cut-Off</span>:</span>
-                    <span id="deadlineText" class="text-xs font-bold text-amber-900">周四/周五 8PM<span class="text-[10px] font-normal text-amber-700/80">(Thu/Fri 8PM)</span></span>
+                <!-- 模块 1：截单时间 -->
+                <div class="flex items-center space-x-2 bg-amber-50 border border-amber-200/60 px-3 py-1.5 rounded-xl shadow-xs">
+                    <span class="text-xs font-medium text-slate-500 flex flex-col leading-tight">
+                        <span>截单</span>
+                        <span class="text-[9px] text-slate-400 font-normal">Cut-Off</span>
+                    </span>
+                    <span id="deadlineText" class="text-xs font-bold text-amber-900 flex flex-col leading-tight">
+                        <span>周四/周五 8PM</span>
+                        <span class="text-[9px] font-normal text-amber-700/80">(Thu/Fri 8PM)</span>
+                    </span>
                 </div>
                 
                 <div class="flex items-center space-x-2">
-                    <!-- 放大模式（长辈模式）切换按钮 -->
-                    <button type="button" onclick="toggleSeniorMode()" id="seniorModeBtn" class="text-amber-900 bg-amber-200 hover:bg-amber-300 px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1 transition border border-amber-400 shadow-xs">
-                        <i class="fa-solid fa-magnifying-glass-plus"></i>
-                        <span id="seniorModeText">放大模式</span>
-						<span class="text-[9px] font-normal text-amber-700">Enlarge</span>
+                    <!-- 模块 2：放大模式（长辈模式）切换按钮 -->
+                    <button type="button" onclick="toggleSeniorMode()" id="seniorModeBtn" class="text-amber-900 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1.5 transition border border-amber-200/60 shadow-xs">
+                        <i class="fa-solid fa-magnifying-glass-plus text-amber-700"></i>
+                        <div class="flex flex-col text-left leading-tight">
+                            <span id="seniorModeText">放大模式</span>
+                            <span class="text-[9px] font-normal text-amber-700/80">Enlarge</span>
+                        </div>
                     </button>
 
-                    <button type="button" onclick="startAppGuide()" class="text-amber-800 bg-amber-100/80 hover:bg-amber-200 px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1 transition border border-amber-300 shadow-xs">
-                        <i class="fa-solid fa-circle-question"></i>
+                    <!-- 模块 3：使用指南按钮 -->
+                    <button type="button" onclick="startAppGuide()" class="text-amber-900 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1.5 transition border border-amber-200/60 shadow-xs">
+                        <i class="fa-solid fa-circle-question text-amber-700"></i>
                         <div class="flex flex-col text-left leading-tight">
                             <span>使用指南</span>
-                            <span class="text-[9px] font-normal text-amber-700">Guide</span>
+                            <span class="text-[9px] font-normal text-amber-700/80">Guide</span>
                         </div>
                     </button>
                 </div>
@@ -530,11 +540,11 @@
             const btn = document.getElementById('seniorModeBtn');
             if (isSenior) {
                 btnText.innerText = "标准模式";
-                btn.className = "text-amber-950 bg-amber-400 hover:bg-amber-500 px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1 transition border border-amber-500 shadow-xs";
+                btn.className = "text-amber-950 bg-amber-300 hover:bg-amber-400 px-3 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1.5 transition border border-amber-400 shadow-xs";
                 localStorage.setItem('grc_cafe_senior_mode', 'true');
             } else {
                 btnText.innerText = "放大模式";
-                btn.className = "text-amber-900 bg-amber-200 hover:bg-amber-300 px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1 transition border border-amber-400 shadow-xs";
+                btn.className = "text-amber-900 bg-amber-50 hover:bg-amber-100 px-3 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1.5 transition border border-amber-200/60 shadow-xs";
                 localStorage.removeItem('grc_cafe_senior_mode');
             }
         }
@@ -547,7 +557,7 @@
                 const btn = document.getElementById('seniorModeBtn');
                 if (btnText && btn) {
                     btnText.innerText = "标准模式";
-                    btn.className = "text-amber-950 bg-amber-400 hover:bg-amber-500 px-2.5 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1 transition border border-amber-500 shadow-xs";
+                    btn.className = "text-amber-950 bg-amber-300 hover:bg-amber-400 px-3 py-1.5 rounded-xl font-bold text-xs flex items-center space-x-1.5 transition border border-amber-400 shadow-xs";
                 }
             }
         });
